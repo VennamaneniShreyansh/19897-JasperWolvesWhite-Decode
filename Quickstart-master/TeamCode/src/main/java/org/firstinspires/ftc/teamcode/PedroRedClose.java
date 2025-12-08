@@ -15,9 +15,9 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-@Autonomous(name = "Pedro Auto Blue MFITBILTPDSPOTBATBW", group = "Autonomous")
+@Autonomous(name = "Pedro Auto Red MFITBILTPDSPOTBATBW", group = "Autonomous")
 @Configurable // Panels
-public class PedroAutonomous extends OpMode {
+public class PedroRedClose extends OpMode {
 
     private TelemetryManager panelsTelemetry; // Panels Telemetry instance
     public Follower follower; // Pedro Pathing follower instance
@@ -96,6 +96,12 @@ public class PedroAutonomous extends OpMode {
         }
     }
 
+    public static Pose mirror(Pose p) {
+        double newX = 144 - p.getX();               // Mirror X across midline
+        double newY = p.getY();                     // Y stays the same
+        double newHeading = Math.toRadians(180) - p.getHeading();
+        return new Pose(newX, newY, newHeading);
+    }
 
     private void startIntake() {
         double INTAKE_POWER = 1;
@@ -230,6 +236,7 @@ public class PedroAutonomous extends OpMode {
         }
     }
     public static class Paths {
+
         public PathChain ToShoot;
         public PathChain ToFirstSet;
         public PathChain IntakeFirstSet;
@@ -238,33 +245,33 @@ public class PedroAutonomous extends OpMode {
         public PathChain IntakeSecondSet;
         public PathChain ToShoot3;
         public PathChain ToThirdSet;
-        public PathChain IntakeSetThree;
+        public PathChain IntakeSetThird;
 
         public Paths(Follower follower) {
             ToShoot = follower
                     .pathBuilder()
                     .addPath(
-                            new BezierLine(new Pose(21.46, 122.73), new Pose(53.800, 90.000))
+                            new BezierLine(new Pose(122.537, 122.732), new Pose(91.000, 90.000))
                     )
-                    .setLinearHeadingInterpolation(Math.toRadians(324), Math.toRadians(327))
+                    .setLinearHeadingInterpolation(Math.toRadians(216), Math.toRadians(222))
                     .build();
 
             ToFirstSet = follower
                     .pathBuilder()
                     .addPath(
                             new BezierCurve(
-                                    new Pose(53.800, 90.000),
-                                    new Pose(55.415, 83.707),
-                                    new Pose(45.000, 84.000)
+                                    new Pose(91.000, 90.000),
+                                    new Pose(88.585, 83.707),
+                                    new Pose(99.000, 84.000)
                             )
                     )
-                    .setLinearHeadingInterpolation(Math.toRadians(327), Math.toRadians(180))
+                    .setLinearHeadingInterpolation(Math.toRadians(222), Math.toRadians(0))
                     .build();
 
             IntakeFirstSet = follower
                     .pathBuilder()
                     .addPath(
-                            new BezierLine(new Pose(45.000, 84.000), new Pose(19.500, 84.000))
+                            new BezierLine(new Pose(99.000, 84.000), new Pose(124.500, 84.000))
                     )
                     .setTangentHeadingInterpolation()
                     .build();
@@ -272,27 +279,27 @@ public class PedroAutonomous extends OpMode {
             ToShoot2 = follower
                     .pathBuilder()
                     .addPath(
-                            new BezierLine(new Pose(19.500, 84.000), new Pose(53.800, 90.000))
+                            new BezierLine(new Pose(124.500, 84.000), new Pose(91.000, 90.000))
                     )
-                    .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(327))
+                    .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(222))
                     .build();
 
             ToSecondSet = follower
                     .pathBuilder()
                     .addPath(
                             new BezierCurve(
-                                    new Pose(53.800, 90.000),
-                                    new Pose(59.000, 71.500),
-                                    new Pose(50.000, 60.000)
+                                    new Pose(91.000, 90.000),
+                                    new Pose(85.000, 71.500),
+                                    new Pose(94.000, 60.000)
                             )
                     )
-                    .setLinearHeadingInterpolation(Math.toRadians(324), Math.toRadians(180))
+                    .setLinearHeadingInterpolation(Math.toRadians(222), Math.toRadians(0))
                     .build();
 
             IntakeSecondSet = follower
                     .pathBuilder()
                     .addPath(
-                            new BezierLine(new Pose(50.000, 60.000), new Pose(24.000, 60.000))
+                            new BezierLine(new Pose(94.000, 60.000), new Pose(120.000, 60.000))
                     )
                     .setTangentHeadingInterpolation()
                     .build();
@@ -300,28 +307,30 @@ public class PedroAutonomous extends OpMode {
             ToShoot3 = follower
                     .pathBuilder()
                     .addPath(
-                            new BezierLine(new Pose(24.000, 60.000), new Pose(53.800, 90.000))
+                            new BezierLine(new Pose(120.000, 60.000), new Pose(91.000, 90.000))
                     )
-                    .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(327))
+                    .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(222))
                     .build();
 
             ToThirdSet = follower
                     .pathBuilder()
                     .addPath(
-                            new BezierLine(new Pose(53.800, 90.000), new Pose(50.000, 35.500))
+                            new BezierLine(new Pose(91.000, 90.000), new Pose(94.000, 35.500))
                     )
-                    .setLinearHeadingInterpolation(Math.toRadians(324), Math.toRadians(180))
+                    .setLinearHeadingInterpolation(Math.toRadians(216), Math.toRadians(0))
                     .build();
 
-            IntakeSetThree = follower
+            IntakeSetThird = follower
                     .pathBuilder()
                     .addPath(
-                            new BezierLine(new Pose(50.000, 35.500), new Pose(15.000, 36.000))
+                            new BezierLine(new Pose(94.000, 35.500), new Pose(129.000, 36.000))
                     )
                     .setTangentHeadingInterpolation()
                     .build();
         }
     }
+
+
 
     public int autonomousPathUpdate() {
 
@@ -464,7 +473,7 @@ public class PedroAutonomous extends OpMode {
                     closeServo();
                     startIntake();
                     stopOuttake();
-                    follower.followPath(paths.IntakeSetThree);
+                    follower.followPath(paths.IntakeSetThird);
                     pathState = 10;
                 }
                 break;
