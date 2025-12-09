@@ -23,6 +23,10 @@ public class PedroAutonomousFar extends OpMode {
     private DcMotorEx outtakeLeft, outtakeRight;
     private DcMotor intakeMotor;
     private Servo servo;
+    private DcMotor frontLeft;
+    private DcMotor frontRight;
+    private DcMotor backLeft;
+    private DcMotor backRight;
 
     private static final double TICKS_PER_REV = 28;
     private static final double TARGET_RPM_LOW = 3450;
@@ -43,6 +47,14 @@ public class PedroAutonomousFar extends OpMode {
         outtakeLeft = hardwareMap.get(DcMotorEx.class, "outtakeLeft");
         outtakeRight = hardwareMap.get(DcMotorEx.class, "outtakeRight");
         servo = hardwareMap.get(Servo.class, "servo");
+
+        frontLeft = hardwareMap.get(DcMotor.class, "frontLeft");
+        frontRight = hardwareMap.get(DcMotor.class, "frontRight");
+        backLeft = hardwareMap.get(DcMotor.class, "backLeft");
+        backRight = hardwareMap.get(DcMotor.class, "backRight");
+
+        frontLeft.setDirection(DcMotor.Direction.REVERSE);
+        backLeft.setDirection(DcMotor.Direction.REVERSE);
 
         // PIDF
         double kP = 20, kI = 0, kD = 1.0;
@@ -188,7 +200,17 @@ public class PedroAutonomousFar extends OpMode {
             case 2: // Done
                 stopIntake();
                 stopOuttake();
+                pathState = 3;
                 break;
+
+            case 3:
+                moveForward();
+                stateTimer = System.currentTimeMillis();
+                pathState = 4;
+            case 4:
+                if (System.currentTimeMillis() - stateTimer >= 2000) {
+                   stopMotors();
+                }
 
             default:
                 stopIntake();
@@ -197,6 +219,28 @@ public class PedroAutonomousFar extends OpMode {
         }
 
         return pathState;
+    }
+
+    private void moveForward() {
+        frontLeft.setPower(-.6);
+
+        backLeft.setPower(-.6);
+
+        frontRight.setPower(-.6);
+
+        backRight.setPower(-.6);
+    }
+
+
+
+    private void stopMotors() {
+        frontLeft.setPower(0);
+
+        backLeft.setPower(0);
+
+        frontRight.setPower(0);
+
+        backRight.setPower(0);
     }
 
 }
