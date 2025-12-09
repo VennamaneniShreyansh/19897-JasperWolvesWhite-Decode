@@ -175,7 +175,7 @@ public class PedroAutonomousFarWithPathsB extends OpMode {
                     .addPath(
                             new BezierLine(new Pose(56.000, 8.000), new Pose(56.000, 25.000))
                     )
-                    .setConstantHeadingInterpolation(Math.toRadians(90))
+                    .setLinearHeadingInterpolation(Math.toRadians(111), Math.toRadians(270))
                     .build();
 
             Path2 = follower
@@ -188,6 +188,7 @@ public class PedroAutonomousFarWithPathsB extends OpMode {
                             )
                     )
                     .setTangentHeadingInterpolation()
+                    .setReversed()
                     .build();
 
             Path3 = follower
@@ -195,7 +196,7 @@ public class PedroAutonomousFarWithPathsB extends OpMode {
                     .addPath(
                             new BezierLine(new Pose(17.000, 36.000), new Pose(58.000, 12.000))
                     )
-                    .setLinearHeadingInterpolation(Math.toRadians(-180), Math.toRadians(111))
+                    .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(111))
                     .build();
 
             Path4 = follower
@@ -203,7 +204,7 @@ public class PedroAutonomousFarWithPathsB extends OpMode {
                     .addPath(
                             new BezierLine(new Pose(58.000, 12.000), new Pose(58.000, 49.000))
                     )
-                    .setLinearHeadingInterpolation(Math.toRadians(111), Math.toRadians(90))
+                    .setLinearHeadingInterpolation(Math.toRadians(111), Math.toRadians(270))
                     .build();
 
             Path5 = follower
@@ -216,6 +217,7 @@ public class PedroAutonomousFarWithPathsB extends OpMode {
                             )
                     )
                     .setTangentHeadingInterpolation()
+                    .setReversed()
                     .build();
 
             Path6 = follower
@@ -223,7 +225,7 @@ public class PedroAutonomousFarWithPathsB extends OpMode {
                     .addPath(
                             new BezierLine(new Pose(17.000, 60.000), new Pose(58.000, 12.000))
                     )
-                    .setLinearHeadingInterpolation(Math.toRadians(-180), Math.toRadians(111))
+                    .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(111))
                     .build();
         }
     }
