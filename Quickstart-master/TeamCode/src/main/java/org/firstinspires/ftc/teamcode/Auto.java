@@ -24,6 +24,7 @@ public class Auto extends OpMode {
     private int pathState;
     private DcMotorEx outtakeLeft, outtakeRight;
     private DcMotor intakeMotor;
+    private DcMotor turretMotor;
     private Paths paths;
 
     private static final double TICKS_PER_REV = 28;
@@ -42,6 +43,10 @@ public class Auto extends OpMode {
         intakeMotor = hardwareMap.get(DcMotor.class, "intake");
         outtakeLeft = hardwareMap.get(DcMotorEx.class, "outtakeLeft");
         outtakeRight = hardwareMap.get(DcMotorEx.class, "outtakeRight");
+        turretMotor = hardwareMap.get(DcMotor.class, "turret");
+        turretMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        turretMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        turretMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         // PIDF
         double kP = 20, kI = 0, kD = 1.0;
@@ -138,6 +143,18 @@ public class Auto extends OpMode {
                 stopOuttake();
                 break;
         }
+    }
+
+    public int angleToTicks(double degrees) {
+        return (int)(degrees * TurretConstants.TICKS_PER_DEGREE);
+    }
+
+    public void setTurretAngle(double degrees) {
+        int targetTicks = angleToTicks(degrees);
+
+        turretMotor.setTargetPosition(targetTicks);
+        turretMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        turretMotor.setPower(0.5);
     }
 
     public static class Paths {
@@ -247,6 +264,7 @@ public class Auto extends OpMode {
         switch (pathState) {
             case 0:
                 if (!follower.isBusy()) {
+                    setTurretAngle(324);
                     startOuttake();
                     follower.followPath(paths.Path1);
                     pathState = 1;
@@ -281,6 +299,7 @@ public class Auto extends OpMode {
             case 3:
                 if (!follower.isBusy()) {
                     stopIntake();
+                    setTurretAngle(315);
                     startOuttake();
                     follower.followPath(paths.Path3);
                     pathState = 4;
@@ -315,6 +334,7 @@ public class Auto extends OpMode {
             case 6:
                 if (!follower.isBusy()) {
                     stopIntake();
+                    setTurretAngle(315);
                     startOuttake();
                     follower.followPath(paths.Path5);
                     pathState = 7;
@@ -368,6 +388,7 @@ public class Auto extends OpMode {
 
             case 11:
                 if (!follower.isBusy()) {
+                    setTurretAngle(309);
                     startOuttake();
                     follower.followPath(paths.Path9);
                     pathState = 12;
