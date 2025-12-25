@@ -1,68 +1,73 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
-import com.qualcomm.robotcore.hardware.DcMotor;
+import com.pedropathing.follower.Follower;
+import com.pedropathing.geometry.BezierPoint;
+import com.pedropathing.geometry.Pose;
+import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import org.firstinspires.ftc.teamcode.helper.Alliance;
+import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
+
 public class Drivetrain {
-
-    private final DcMotor fl, fr, bl, br;
-
-    // Tunables
-    public static double DRIVE_SPEED = 0.95;
-    public static double STRAFE_MULTIPLIER = 1.1;
-    public static double ROTATION_MULTIPLIER = 0.6;
-    public static boolean IS_BRAKING = true;
-
-    public Drivetrain(HardwareMap hw) {
-        fl = hw.get(DcMotor.class, "fl");
-        fr = hw.get(DcMotor.class, "fr");
-        bl = hw.get(DcMotor.class, "bl");
-        br = hw.get(DcMotor.class, "br");
-
-        fl.setDirection(DcMotor.Direction.REVERSE);
-        bl.setDirection(DcMotor.Direction.REVERSE);
-
-        setBrake(IS_BRAKING);
+    private Follower follower;
+    private final Alliance alliance;
+    public boolean hold = false, fieldCentric = true;
+    public Drivetrain(HardwareMap hardwareMap, Alliance a, Pose start) {
+        follower = Constants.createFollower(hardwareMap);
+        follower.setStartingPose(start);
+        this.alliance = a;
     }
 
-    public void drive(double y, double x, double rx) {
-        x *= STRAFE_MULTIPLIER;
-        rx *= ROTATION_MULTIPLIER;
-
-        double flPower = y + x + rx;
-        double frPower = y - x - rx;
-        double blPower = y - x + rx;
-        double brPower = y + x - rx;
-
-        fl.setPower(clamp(flPower) * DRIVE_SPEED);
-        fr.setPower(clamp(frPower) * DRIVE_SPEED);
-        bl.setPower(clamp(blPower) * DRIVE_SPEED);
-        br.setPower(clamp(brPower) * DRIVE_SPEED);
+    public void startDrive() {
+        follower.startTeleopDrive();
     }
 
-    public void stop() {
-        setPowers(0, 0, 0, 0);
+    public void periodic() {
+        follower.update();
     }
 
-    private void setPowers(double flP, double frP, double blP, double brP) {
-        fl.setPower(flP);
-        fr.setPower(frP);
-        bl.setPower(blP);
-        br.setPower(brP);
+    public void drive(Gamepad gamepad) {
+        if (!hold)
+            if (fieldCentric)
+                follower.setTeleOpDrive(-gamepad.left_stick_y, -gamepad.left_stick_x, -gamepad.right_stick_x, false, alliance == Alliance.BLUE ? Math.toRadians(180) : 0);
+            else
+                follower.setTeleOpDrive(-gamepad.left_stick_y, -gamepad.left_stick_x, -gamepad.right_stick_x, true);
     }
 
-    private void setBrake(boolean brake) {
-        DcMotor.ZeroPowerBehavior mode =
-                brake ? DcMotor.ZeroPowerBehavior.BRAKE
-                        : DcMotor.ZeroPowerBehavior.FLOAT;
-
-        fl.setZeroPowerBehavior(mode);
-        fr.setZeroPowerBehavior(mode);
-        bl.setZeroPowerBehavior(mode);
-        br.setZeroPowerBehavior(mode);
+    public void holdCurrent() {
+        follower.holdPoint(new BezierPoint(follower.getPose()), follower.getHeading(), true);
+        hold = true;
     }
 
-    private double clamp(double v) {
-        return Math.max(-1.0, Math.min(1.0, v));
+    public void releaseHold() {
+        hold = false;
     }
+
+    public void teleToggleCentric() {
+        fieldCentric = !fieldCentric;
+    }
+
+    public void cornerReset() {
+        if (alliance.equals(Alliance.BLUE))
+            follower.setPose(new Pose(8.5, 8.5, Math.toRadians(90)).mirror()); // Blue park
+        else
+            follower.setPose(new Pose(8.5, 8.5, Math.toRadians(90)));
+    }
+
+
+    public void setStart(Pose start) {
+        follower.setStartingPose(start);
+    }
+
+    public Pose getPose() {
+        return follower.getPose();
+    }
+
+
+    public double getT() {
+        return follower.getCurrentTValue();
+    }
+
+    public Follower getFollower() { return follower;}
 }

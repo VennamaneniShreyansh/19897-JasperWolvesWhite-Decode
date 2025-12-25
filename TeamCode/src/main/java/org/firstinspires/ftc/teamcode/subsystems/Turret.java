@@ -11,31 +11,40 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 @Configurable
 public class Turret {
     public static double error = 0, power = 0, manualPower = 0;
-    public static double rpt = 0.0029919;
+
+    // output / input = 100 / 40 = 2.5 = Gear ratio
+    // ticksPerTurretRev = motorTicksPerRev × gearRatio
+    // ticksPerTurretRev = 384.5 × 2.5
+    // ticksPerTurretRev = 961.25 ticks, so this = 360 degrees turret rotation
+    // rpt = (2π) / ticksPerTurretRev
+    // rpt = 6.283185307 / 961.25
+    // rpt ~ 0.00653 radians per tick
+    public static double rpt = 0.00653;
 
     public final DcMotorEx m;
-    private PIDFController p, s; // pidf controller for turret
-    public static double t = 0;
+    private PIDFController primaryPID, secondaryPID; // pidf controller for turret
+    public static double target = 0;
     public static double pidfSwitch = 30; // target for turret
+    // p is primary and s is secondary
     public static double kp = 0.003, kf = 0.0, kd = 0.000, sp = .005, sf = 0, sd = 0.0001;
 
     public static boolean on = true, manual = false;
 
     public Turret(HardwareMap hardwareMap) {
-        m = hardwareMap.get(DcMotorEx.class, "t");
+        m = hardwareMap.get(DcMotorEx.class, "turret");
         m.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         m.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
-        p = new PIDFController(new PIDFCoefficients(kp, 0, kd, kf));
-        s = new PIDFController(new PIDFCoefficients(sp, 0, sd, sf));
+        primaryPID = new PIDFController(new PIDFCoefficients(kp, 0, kd, kf));
+        secondaryPID = new PIDFController(new PIDFCoefficients(sp, 0, sd, sf));
     }
 
     private void setTurretTarget(double ticks) {
-        t = ticks;
+        target = Math.max(-240, Math.min(268, ticks));;
     }
 
     public double getTurretTarget() {
-        return t;
+        return target;
     }
 
     public double getTurret() {
@@ -48,16 +57,19 @@ public class Turret {
                 m.setPower(manualPower);
                 return;
             }
-            p.setCoefficients(new PIDFCoefficients(kp, 0, kd, kf));
-            s.setCoefficients(new PIDFCoefficients(sp, 0, sd, sf));
+            // allows for tuning while robot runs
+            primaryPID.setCoefficients(new PIDFCoefficients(kp, 0, kd, kf));
+            secondaryPID.setCoefficients(new PIDFCoefficients(sp, 0, sd, sf));
+            // difference between the current position and the target positon
             error = getTurretTarget() - getTurret();
+            // Decides which PID to use secondary or primary based on pidfSwitch
             if (Math.abs(error) > pidfSwitch) {
-                p.updateError(error);
-                p.updateFeedForwardInput(Math.signum(error));
-                power = p.run();
+                primaryPID.updateError(error);
+                primaryPID.updateFeedForwardInput(Math.signum(error));
+                power = primaryPID.run();
             } else {
-                s.updateError(error);
-                power = s.run();
+                secondaryPID.updateError(error);
+                power = secondaryPID.run();
             }
 
             m.setPower(power);
@@ -86,6 +98,8 @@ public class Turret {
     public double getYaw() {
         return normalizeAngle(getTurret() * rpt);
     }
+
+
 
     public void setYaw(double radians) {
         radians = normalizeAngle(radians);

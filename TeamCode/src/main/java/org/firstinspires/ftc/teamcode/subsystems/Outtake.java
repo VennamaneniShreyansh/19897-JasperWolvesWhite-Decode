@@ -9,9 +9,12 @@ public class Outtake {
 
     private final DcMotorEx left, right;
 
-    public static double HIGH_RPM = 4000;
+    public static double HIGH_RPM = 4500;
     public static double LOW_RPM  = 3000;
     public static double TICKS_PER_REV = 28;
+
+    public static double kP = 20, kI = 0, kD = 1.0;
+    public static double kF = 32767.0 / (6000 * TICKS_PER_REV);
 
     public double targetRPM = 0;
     public boolean enabled = false;
@@ -23,8 +26,7 @@ public class Outtake {
         left.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
         right.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
 
-        double kP = 20, kI = 0, kD = 1.0;
-        double kF = 32767.0 / (6000 * TICKS_PER_REV);
+
 
         left.setVelocityPIDFCoefficients(kP, kI, kD, kF);
         right.setVelocityPIDFCoefficients(kP, kI, kD, kF);

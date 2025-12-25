@@ -15,4 +15,8 @@ public class Data {
     public static Pose getAutoEndPose() {
         return autoEndPose;
     }
+    public static void setAutoPose(Pose pose) {
+        autoEndPose = pose;
+        hasAutoData = true;
+    }
 }
