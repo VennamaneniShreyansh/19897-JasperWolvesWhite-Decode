@@ -59,6 +59,18 @@ public class Robot {
 //        }
     }
 
+    public double getDistanceFromTarget() {
+        return shootTarget.distanceFrom(drivetrain.getPose());
+    }
+
+    public void adjustSpeedAutomatically(double distInches) {
+        double rpm = 0;
+        double hoodPos = 0;
+
+        outtake.setTargetRPM(rpm);
+        hood.setPos(hoodPos);
+    }
+
 
     public void periodic() {
         hub.clearBulkCache();
@@ -99,6 +111,10 @@ public class Robot {
 
     public boolean shooterReady() {
         return outtake.atTarget();
+    }
+
+    public void resetDrivePos() {
+        drivetrain.cornerReset();
     }
 
 

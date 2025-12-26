@@ -35,6 +35,11 @@ public class Hood {
         right.setPosition(clamp(rightPos));
     }
 
+    public void setPos(double pos) {
+        left.setPosition(clamp(pos));
+        right.setPosition(clamp(1-pos));
+    }
+
     public double getLeftPosition() {
         return left.getPosition();
     }

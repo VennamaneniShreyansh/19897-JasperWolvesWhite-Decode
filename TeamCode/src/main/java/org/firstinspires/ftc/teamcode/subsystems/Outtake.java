@@ -46,6 +46,8 @@ public class Outtake {
     public void shootHigh() { setTargetRPM(HIGH_RPM); }
     public void shootLow()  { setTargetRPM(LOW_RPM); }
 
+
+
     public void stop() {
         enabled = false;
         targetRPM = 0;
@@ -55,7 +57,7 @@ public class Outtake {
         stableStartTime = 0;
     }
 
-    private void setTargetRPM(double rpm) {
+    public void setTargetRPM(double rpm) {
         targetRPM = rpm;
         enabled = true;
 

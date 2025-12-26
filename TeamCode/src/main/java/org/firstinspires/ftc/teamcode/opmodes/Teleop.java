@@ -15,6 +15,9 @@ public class Teleop extends OpMode {
     private boolean lastA = false;
     private boolean lastB = false;
     private boolean lastX = false;
+    private boolean lastY = false;
+    private boolean autoRPM = false;
+
     private boolean autoAim = false;
 
     @Override
@@ -32,14 +35,21 @@ public class Teleop extends OpMode {
     public void loop() {
         robot.drive(gamepad1);
 
+        if (gamepad1.y) {
+            robot.resetDrivePos();
+        }
+
         if (gamepad2.left_bumper) robot.intakeIn();
         else if (gamepad2.left_trigger > 0.2) robot.intakeOut();
         else robot.intakeOff();
 
 
-        if (gamepad2.right_bumper) robot.shootHigh();
-        else if (gamepad2.right_trigger > 0.2) robot.shootLow();
-        else robot.stopShooter();
+        if (!autoRPM) {
+            if (gamepad2.right_bumper) robot.shootHigh();
+            else if (gamepad2.right_trigger > 0.2) robot.shootLow();
+            else robot.stopShooter();
+        } else robot.adjustSpeedAutomatically(robot.getDistanceFromTarget());
+
 
         if (gamepad2.x && !lastX) autoAim = !autoAim;
         lastX = gamepad2.x;
@@ -51,7 +61,7 @@ public class Teleop extends OpMode {
 
         if (Math.abs(gamepad2.left_stick_x) > 0.2) {
             autoAim = false;
-            robot.manualTurret(gamepad2.left_stick_x*.5);
+            robot.manualTurret(gamepad2.left_stick_x*.2);
         }
         if (gamepad2.start) {
             robot.turret.off();
@@ -64,6 +74,13 @@ public class Teleop extends OpMode {
 
         if (gamepad2.b && !lastB) robot.gate.toggle();
         lastB = gamepad2.b;
+
+        if (gamepad2.y && !lastY) {
+            autoRPM = !autoRPM;
+            if (!autoRPM) robot.stopShooter();
+        }
+        lastY = gamepad2.y;
+
 
         if (gamepad2.dpad_up) robot.hood.moveUp();
         else if (gamepad2.dpad_down) robot.hood.moveDown();
@@ -91,6 +108,8 @@ public class Teleop extends OpMode {
         telemetry.addData("RPM Right", robot.outtake.getRPMLeft());
         telemetry.addData("Left Ticks", robot.outtake.getTickLeft());
         telemetry.addData("Right Ticks", robot.outtake.getTickRight());
+        telemetry.addData("Auto RPM", autoRPM);
+
 
         // Intake
         telemetry.addData("Intake Power", (gamepad2.left_bumper ? "In" : (gamepad2.left_trigger > 0.2 ? "Out" : "Off")));
@@ -103,6 +122,9 @@ public class Teleop extends OpMode {
         telemetry.addData("Robot X", robot.getPose().getX());
         telemetry.addData("Robot Y", robot.getPose().getY());
         telemetry.addData("Robot Heading (rad)", robot.getPose().getHeading());
+
+        telemetry.addData("Distance to goal", "%.1f in", robot.getDistanceFromTarget());
+
 
         // Misc
         telemetry.addData("Auto Aim", autoAim);
