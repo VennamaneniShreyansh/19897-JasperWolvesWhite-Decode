@@ -63,7 +63,8 @@ public class Robot {
     public void periodic() {
         hub.clearBulkCache();
         drivetrain.periodic();
-        turret.periodic();
+//        turret.periodic();
+        turret.updateWithVisionAssist(outtake.isEnabled());
         outtake.periodic();
     }
 

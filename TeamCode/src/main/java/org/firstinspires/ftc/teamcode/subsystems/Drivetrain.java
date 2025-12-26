@@ -50,7 +50,7 @@ public class Drivetrain {
     }
 
     public void cornerReset() {
-        if (alliance.equals(Alliance.BLUE))
+        if (alliance.isBlue())
             follower.setPose(new Pose(8.5, 8.5, Math.toRadians(90)).mirror()); // Blue park
         else
             follower.setPose(new Pose(8.5, 8.5, Math.toRadians(90)));

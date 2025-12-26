@@ -46,6 +46,16 @@ public class PedroAutonomousBlueClose extends OpMode {
     }
 
     @Override
+    public void start() {
+        robot.turret.setTurretTarget(150);
+        robot.turret.automatic();
+
+        robot.hood.set(.05, .95);
+    }
+
+
+
+    @Override
     public void loop() {
         follower.update();
         pathState = autonomousPathUpdate();
@@ -160,6 +170,7 @@ public class PedroAutonomousBlueClose extends OpMode {
                 if (!follower.isBusy()) {
                     // Stop intake after final collection
                     robot.intakeOff();
+                    robot.turret.setTurretTarget(0);
                     Data.setAutoPose(follower.getPose());
                 }
                 break;
@@ -196,7 +207,7 @@ public class PedroAutonomousBlueClose extends OpMode {
                             new BezierCurve(
                                     new Pose(53.000, 90.000),
                                     new Pose(45.500, 84.500),
-                                    new Pose(19.500, 84.000)
+                                    new Pose(24.500, 84.000) // 19
                             )
                     )
                     .setConstantHeadingInterpolation(Math.toRadians(180))

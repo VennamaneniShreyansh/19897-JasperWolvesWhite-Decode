@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.opmodes;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.subsystems.Robot;
 import org.firstinspires.ftc.teamcode.helper.Alliance;
 
@@ -24,31 +25,21 @@ public class Teleop extends OpMode {
     @Override
     public void start() {
         robot.gate.closeGate();
+        robot.hood.low();
     }
 
     @Override
     public void loop() {
         robot.drive(gamepad1);
 
-//        if (gamepad1.right_bumper) robot.drivetrain.holdCurrent();
-//        if (gamepad1.left_bumper) robot.drivetrain.releaseHold();
-//        if (gamepad1.y) robot.drivetrain.teleToggleCentric();
+        if (gamepad2.left_bumper) robot.intakeIn();
+        else if (gamepad2.left_trigger > 0.2) robot.intakeOut();
+        else robot.intakeOff();
 
-        if (gamepad2.left_bumper) {
-            robot.intakeIn();
-        } else if (gamepad2.left_trigger > 0.2) {
-            robot.intakeOut();
-        } else {
-            robot.intakeOff();
-        }
 
-        if (gamepad2.right_bumper) {
-            robot.shootHigh();
-        } else if (gamepad2.right_trigger > 0.2) {
-            robot.shootLow();
-        } else {
-            robot.stopShooter();
-        }
+        if (gamepad2.right_bumper) robot.shootHigh();
+        else if (gamepad2.right_trigger > 0.2) robot.shootLow();
+        else robot.stopShooter();
 
         if (gamepad2.x && !lastX) autoAim = !autoAim;
         lastX = gamepad2.x;
@@ -80,7 +71,11 @@ public class Teleop extends OpMode {
         if (gamepad2.left_stick_y < -0.3) robot.hood.moveUp();
 
         robot.periodic();
+        updateTelemetry();
+    }
 
+
+    public void updateTelemetry() {
         telemetry.addData("Turret Ticks", robot.turret.getTurret());
         telemetry.addData("Turret Target", robot.turret.getTurretTarget());
         telemetry.addData("Turret Yaw (rad)", robot.turret.getYaw());
