@@ -30,9 +30,9 @@ public class Teleop extends OpMode {
     public void loop() {
         robot.drive(gamepad1);
 
-        if (gamepad1.right_bumper) robot.drivetrain.holdCurrent();
-        if (gamepad1.left_bumper) robot.drivetrain.releaseHold();
-        if (gamepad1.y) robot.drivetrain.teleToggleCentric();
+//        if (gamepad1.right_bumper) robot.drivetrain.holdCurrent();
+//        if (gamepad1.left_bumper) robot.drivetrain.releaseHold();
+//        if (gamepad1.y) robot.drivetrain.teleToggleCentric();
 
         if (gamepad2.left_bumper) {
             robot.intakeIn();
@@ -49,9 +49,6 @@ public class Teleop extends OpMode {
         } else {
             robot.stopShooter();
         }
-        if (gamepad2.right_bumper || gamepad2.right_trigger > 0.2) {
-            autoAim = true;
-        }
 
         if (gamepad2.x && !lastX) autoAim = !autoAim;
         lastX = gamepad2.x;
@@ -63,7 +60,7 @@ public class Teleop extends OpMode {
 
         if (Math.abs(gamepad2.left_stick_x) > 0.2) {
             autoAim = false;
-            robot.manualTurret(gamepad2.left_stick_x);
+            robot.manualTurret(gamepad2.left_stick_x*.5);
         }
         if (gamepad2.start) {
             robot.turret.off();
@@ -95,10 +92,13 @@ public class Teleop extends OpMode {
 
         // Shooter / Outtake
         telemetry.addData("Shooter Ready", robot.shooterReady());
+        telemetry.addData("RPM Left", robot.outtake.getRPMLeft());
+        telemetry.addData("RPM Right", robot.outtake.getRPMLeft());
+        telemetry.addData("Left Ticks", robot.outtake.getTickLeft());
+        telemetry.addData("Right Ticks", robot.outtake.getTickRight());
 
         // Intake
         telemetry.addData("Intake Power", (gamepad2.left_bumper ? "In" : (gamepad2.left_trigger > 0.2 ? "Out" : "Off")));
-
 
         // Hood
         telemetry.addData("Right Servo Position", robot.hood.getRightPosition());

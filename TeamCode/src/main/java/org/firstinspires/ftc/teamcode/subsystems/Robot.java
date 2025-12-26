@@ -22,7 +22,7 @@ public class Robot {
     private final LynxModule hub;
 
     public static Pose defaultPose = new Pose(8.5, 8.5, Math.toRadians(90)).mirror(); // Blue allience park zone
-    public static Pose shootTarget = new Pose(10, 138, 0);
+    public static Pose shootTarget = new Pose(11, 137.5, 0);
 
     public Robot(HardwareMap hw, Alliance alliance) {
         this.alliance = alliance;

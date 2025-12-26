@@ -25,7 +25,7 @@ public class Gate {
     }
 
     public void toggle() {
-        if (servo.getPosition() == open)
+        if (Math.abs(servo.getPosition()-open) < .04)
             closeGate();
         else
             openGate();

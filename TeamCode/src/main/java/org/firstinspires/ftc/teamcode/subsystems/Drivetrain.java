@@ -12,15 +12,16 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 public class Drivetrain {
     private Follower follower;
     private final Alliance alliance;
-    public boolean hold = false, fieldCentric = true;
+    public boolean hold = false, fieldCentric = false;
     public Drivetrain(HardwareMap hardwareMap, Alliance a, Pose start) {
         follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(start);
+
         this.alliance = a;
     }
 
     public void startDrive() {
-        follower.startTeleopDrive();
+        follower.startTeleopDrive(true);
     }
 
     public void periodic() {

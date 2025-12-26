@@ -24,9 +24,9 @@ public class Turret {
     public final DcMotorEx m;
     private PIDFController primaryPID, secondaryPID; // pidf controller for turret
     public static double target = 0;
-    public static double pidfSwitch = 30; // target for turret
+    public static double pidfSwitch = 5; // target for turret
     // p is primary and s is secondary
-    public static double kp = 0.003, kf = 0.0, kd = 0.000, sp = .005, sf = 0, sd = 0.0001;
+    public static double kp = 0.004, kf = 0.0001, kd = 0.000, sp = .0055, sf = 0, sd = 0.0001;
 
     public static boolean on = true, manual = false;
 
@@ -40,7 +40,8 @@ public class Turret {
     }
 
     private void setTurretTarget(double ticks) {
-        target = Math.max(-240, Math.min(268, ticks));;
+//        target = Math.max(-240, Math.min(268, ticks));
+        target = Math.max(-240, Math.min(300, ticks));;
     }
 
     public double getTurretTarget() {

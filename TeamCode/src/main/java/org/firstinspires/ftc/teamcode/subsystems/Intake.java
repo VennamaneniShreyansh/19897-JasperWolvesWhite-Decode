@@ -9,8 +9,8 @@ public class Intake {
     private final DcMotorEx i;
 
     public static double OFF = 0;
-    public static double IN = 1;
-    public static double OUT = -1;
+    public static double IN = -1;
+    public static double OUT = 1;
 
     public Intake(HardwareMap hardwareMap) {
         i = hardwareMap.get(DcMotorEx.class, "intake");

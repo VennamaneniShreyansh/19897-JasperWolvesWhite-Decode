@@ -10,9 +10,13 @@ import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
 
+import org.firstinspires.ftc.teamcode.helper.Alliance;
 import org.firstinspires.ftc.teamcode.helper.Data;
+import org.firstinspires.ftc.teamcode.helper.ThreeBallShooter;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
+import org.firstinspires.ftc.teamcode.subsystems.Robot;
 
 @Autonomous(name = "Blue Auto 9 Artifact Close", group = "Autonomous")
 @Configurable // Panels
@@ -22,6 +26,8 @@ public class PedroAutonomousBlueClose extends OpMode {
     public Follower follower; // Pedro Pathing follower instance
     private int pathState; // Current autonomous path state (state machine)
     private Paths paths; // Paths defined in the Paths class
+    private ThreeBallShooter threeBallShooter;
+    private Robot robot;
 
     @Override
     public void init() {
@@ -30,7 +36,10 @@ public class PedroAutonomousBlueClose extends OpMode {
         follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(new Pose(33.75, 135.5, Math.toRadians(180)));
 
-        paths = new Paths(follower); // Build paths
+        paths = new Paths(follower);
+
+        robot = new Robot(hardwareMap, Alliance.BLUE);
+        threeBallShooter = new ThreeBallShooter(robot.intake, robot.outtake);
 
         panelsTelemetry.debug("Status", "Initialized");
         panelsTelemetry.update(telemetry);
@@ -38,17 +47,130 @@ public class PedroAutonomousBlueClose extends OpMode {
 
     @Override
     public void loop() {
-        follower.update(); // Update Pedro Pathing
-        pathState = autonomousPathUpdate(); // Update autonomous state machine
+        follower.update();
+        pathState = autonomousPathUpdate();
         Data.setAutoPose(follower.getPose());
+        robot.periodic();
 
-        // Log values to Panels and Driver Station
         panelsTelemetry.debug("Path State", pathState);
         panelsTelemetry.debug("X", follower.getPose().getX());
         panelsTelemetry.debug("Y", follower.getPose().getY());
         panelsTelemetry.debug("Heading", follower.getPose().getHeading());
         panelsTelemetry.update(telemetry);
     }
+
+    public int autonomousPathUpdate() {
+        switch (pathState) {
+
+            case 0:
+                // Close Gate + Start Outtake, then move to shoot position
+                if (!follower.isBusy()) {
+                    robot.gate.closeGate();
+                    robot.shootLow();
+                    follower.followPath(paths.ToShoot);
+                    pathState = 1;
+                }
+                break;
+
+            case 1:
+                // SHOOT 3 BALLS
+                if (!follower.isBusy()) {
+                    if (!threeBallShooter.isActive() && !threeBallShooter.isDone()) {
+                        threeBallShooter.start();
+                    }
+                    if (threeBallShooter.isActive()) {
+                        threeBallShooter.update();
+                    }
+                    if (threeBallShooter.isDone()) {
+                        // After shooting, close gate + start intake to collect next set
+                        robot.gate.closeGate();
+                        robot.intakeIn();
+                        follower.followPath(paths.IntakeFirstSet);
+                        pathState = 2;
+                    }
+                } else {
+                    threeBallShooter.update();
+                }
+                break;
+
+            case 2:
+                if (!follower.isBusy()) {
+                    // Stop intake + open gate to prepare for next shooting
+                    robot.intakeOff();
+                    robot.gate.openGate();
+                    follower.followPath(paths.ToShoot2);
+                    pathState = 3;
+                }
+                break;
+
+            case 3:
+                // SHOOT 3 BALLS AGAIN
+                if (!follower.isBusy()) {
+                    if (!threeBallShooter.isActive() && !threeBallShooter.isDone()) {
+                        threeBallShooter.start();
+                    }
+                    if (threeBallShooter.isActive()) {
+                        threeBallShooter.update();
+                    }
+                    if (threeBallShooter.isDone()) {
+                        // Close gate + start intake for next pickup
+                        robot.gate.closeGate();
+                        robot.intakeIn();
+                        follower.followPath(paths.IntakeSecondSet);
+                        pathState = 4;
+                    }
+                } else {
+                    threeBallShooter.update();
+                }
+                break;
+
+            case 4:
+                if (!follower.isBusy()) {
+                    // Stop intake + open gate, prepare to shoot again
+                    robot.intakeOff();
+                    robot.gate.openGate();
+                    follower.followPath(paths.ToShoot3);
+                    pathState = 5;
+                }
+                break;
+
+            case 5:
+                // FINAL SHOOT
+                if (!follower.isBusy()) {
+                    if (!threeBallShooter.isActive() && !threeBallShooter.isDone()) {
+                        threeBallShooter.start();
+                    }
+                    if (threeBallShooter.isActive()) {
+                        threeBallShooter.update();
+                    }
+                    if (threeBallShooter.isDone()) {
+                        // Close gate + stop outtake + start intake to clear final set
+                        robot.gate.closeGate();
+                        robot.stopShooter();
+                        robot.intakeIn();
+                        follower.followPath(paths.IntakeThirdSet);
+                        pathState = 6;
+                    }
+                } else {
+                    threeBallShooter.update();
+                }
+                break;
+
+            case 6:
+                if (!follower.isBusy()) {
+                    // Stop intake after final collection
+                    robot.intakeOff();
+                    Data.setAutoPose(follower.getPose());
+                }
+                break;
+
+            default:
+                pathState = 6;
+                break;
+        }
+        return pathState;
+    }
+
 
     public static class Paths {
 
@@ -122,70 +244,5 @@ public class PedroAutonomousBlueClose extends OpMode {
                     .setConstantHeadingInterpolation(Math.toRadians(180))
                     .build();
         }
-    }
-
-    public int autonomousPathUpdate() {
-        switch (pathState) {
-
-            case 0:
-                // Start first path: ToShoot
-                if (!follower.isBusy()) {
-                    follower.followPath(paths.ToShoot);
-                    pathState = 1; // now wait for it to finish
-                }
-                break;
-
-            case 1:
-                // Wait for ToShoot to complete, then go intake first set
-                if (!follower.isBusy()) {
-                    follower.followPath(paths.IntakeFirstSet);
-                    pathState = 2;
-                }
-                break;
-
-            case 2:
-                // Wait for IntakeFirstSet, then go back to shoot
-                if (!follower.isBusy()) {
-                    follower.followPath(paths.ToShoot2);
-                    pathState = 3;
-                }
-                break;
-
-            case 3:
-                // Wait for ToShoot2, then intake second set
-                if (!follower.isBusy()) {
-                    follower.followPath(paths.IntakeSecondSet);
-                    pathState = 4;
-                }
-                break;
-
-            case 4:
-                // Wait for IntakeSecondSet, then go back to shoot
-                if (!follower.isBusy()) {
-                    follower.followPath(paths.ToShoot3);
-                    pathState = 5;
-                }
-                break;
-
-            case 5:
-                // Wait for ToShoot3, then intake third set
-                if (!follower.isBusy()) {
-                    follower.followPath(paths.IntakeThirdSet);
-                    pathState = 6;
-                }
-                break;
-
-            case 6:
-                Data.setAutoPose(follower.getPose());
-//                Data.turretYaw = follower.getPose().getHeading();
-                break;
-
-            default:
-                // Safety fallback
-                pathState = 6;
-                break;
-        }
-
-        return pathState;
     }
 }

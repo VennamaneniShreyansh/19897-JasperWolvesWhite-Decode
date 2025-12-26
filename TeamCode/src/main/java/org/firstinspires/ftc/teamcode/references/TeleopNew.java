@@ -1,9 +1,10 @@
-package org.firstinspires.ftc.teamcode.opmodes;
+package org.firstinspires.ftc.teamcode.references;
 
 import static java.lang.Math.tan;
 
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -11,6 +12,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
 
 @TeleOp(name = "Teleop New", group = "TeleOp")
+@Disabled
 public class TeleopNew extends OpMode {
 
     private DcMotorEx outtakeLeft, outtakeRight;
@@ -238,45 +240,49 @@ public class TeleopNew extends OpMode {
     }
 
     private void controlOuttake() {
-        double targetRPM = gamepad2.right_bumper ? TARGET_RPM_HIGH : (gamepad2.right_trigger > 0.1 ? TARGET_RPM_LOW : 0);
-
-        double targetTicks = targetRPM * TICKS_PER_REV / 60.0;
-
-        if (targetTicks != lastTargetTicks) {
-            outtakeLeft.setVelocity(-targetTicks);
-            outtakeRight.setVelocity(targetTicks);
-
-            lastTargetTicks = targetTicks;
-            stableStartTime = 0;
-            rumbleTriggered = false;
-        }
-
-        if (targetRPM == 0) {
-            outtakeLeft.setVelocity(0);
-            outtakeRight.setVelocity(0);
-            lastTargetTicks = 0;
-            stableStartTime = 0;
-            rumbleTriggered = false;
-            return;
-        }
-
-        double leftRPM  = Math.abs(rpm(outtakeLeft));
-        double rightRPM = Math.abs(rpm(outtakeRight));
-
-        boolean inRange = Math.abs(leftRPM - targetRPM) < 60 &&
-                Math.abs(rightRPM - targetRPM) < 60;
-
-        if (inRange) {
-            if (stableStartTime == 0)
-                stableStartTime = System.currentTimeMillis();
-
-            if (!rumbleTriggered && System.currentTimeMillis() - stableStartTime > 50) {
-                gamepad1.rumble(400);
-                rumbleTriggered = true;
-            }
-        } else {
-            stableStartTime = 0;
-            rumbleTriggered = false;
+//        double targetRPM = gamepad2.right_bumper ? TARGET_RPM_HIGH : (gamepad2.right_trigger > 0.1 ? TARGET_RPM_LOW : 0);
+//
+//        double targetTicks = targetRPM * TICKS_PER_REV / 60.0;
+//
+//        if (targetTicks != lastTargetTicks) {
+//            outtakeLeft.setVelocity(-targetTicks);
+//            outtakeRight.setVelocity(targetTicks);
+//
+//            lastTargetTicks = targetTicks;
+//            stableStartTime = 0;
+//            rumbleTriggered = false;
+//        }
+//
+//        if (targetRPM == 0) {
+//            outtakeLeft.setVelocity(0);
+//            outtakeRight.setVelocity(0);
+//            lastTargetTicks = 0;
+//            stableStartTime = 0;
+//            rumbleTriggered = false;
+//            return;
+//        }
+//
+//        double leftRPM  = Math.abs(rpm(outtakeLeft));
+//        double rightRPM = Math.abs(rpm(outtakeRight));
+//
+//        boolean inRange = Math.abs(leftRPM - targetRPM) < 60 &&
+//                Math.abs(rightRPM - targetRPM) < 60;
+//
+//        if (inRange) {
+//            if (stableStartTime == 0)
+//                stableStartTime = System.currentTimeMillis();
+//
+//            if (!rumbleTriggered && System.currentTimeMillis() - stableStartTime > 50) {
+//                gamepad1.rumble(400);
+//                rumbleTriggered = true;
+//            }
+//        } else {
+//            stableStartTime = 0;
+//            rumbleTriggered = false;
+//        }
+        if (gamepad2.right_bumper) {
+            outtakeLeft.setPower(-1);
+            outtakeLeft.setPower(1);
         }
     }
 
