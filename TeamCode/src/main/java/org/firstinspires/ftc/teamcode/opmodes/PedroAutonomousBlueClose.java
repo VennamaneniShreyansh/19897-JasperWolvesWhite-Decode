@@ -10,250 +10,228 @@ import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.hardware.DcMotor;
-
 import org.firstinspires.ftc.teamcode.helper.Alliance;
 import org.firstinspires.ftc.teamcode.helper.Data;
 import org.firstinspires.ftc.teamcode.helper.ThreeBallShooter;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.subsystems.Robot;
 
-@Autonomous(name = "Blue Auto 9 Artifact Close", group = "Autonomous")
-@Configurable // Panels
+@Autonomous(name = "BA Close 9 Artifact", group = "Autonomous")
+@Configurable
 public class PedroAutonomousBlueClose extends OpMode {
 
-    private TelemetryManager panelsTelemetry; // Panels Telemetry instance
-    public Follower follower; // Pedro Pathing follower instance
-    private int pathState; // Current autonomous path state (state machine)
-    private Paths paths; // Paths defined in the Paths class
+    private TelemetryManager panelsTelemetry;
+    public Follower follower;
+    private int pathState;
+    private Paths paths;
     private ThreeBallShooter threeBallShooter;
     private Robot robot;
+    private long shootStartTime = 0;
+    private long settleStartTime = 0;
+    private static final long SETTLE_MS = 250;
+
 
     @Override
     public void init() {
         panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();
-
         follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(new Pose(33.75, 135.5, Math.toRadians(180)));
-
         paths = new Paths(follower);
-
         robot = new Robot(hardwareMap, Alliance.BLUE);
         threeBallShooter = new ThreeBallShooter(robot.intake, robot.outtake);
 
+        robot.outtake.periodic();
+        Data.setAutoPose(follower.getPose());
+
         panelsTelemetry.debug("Status", "Initialized");
         panelsTelemetry.update(telemetry);
+        pathState = 0;
     }
 
     @Override
     public void start() {
-        robot.turret.setTurretTarget(150);
+        robot.turret.setTurretTarget(-130);
         robot.turret.automatic();
-
         robot.hood.set(.05, .95);
+        robot.outtake.periodic();
     }
-
-
 
     @Override
     public void loop() {
         follower.update();
+
+        robot.outtake.periodic();
+        robot.autoPeriodic();
+        threeBallShooter.update();
+
         pathState = autonomousPathUpdate();
-        Data.setAutoPose(follower.getPose());
-        robot.periodic();
 
         panelsTelemetry.debug("Path State", pathState);
+        panelsTelemetry.debug("Shooter Stage", threeBallShooter.stage);
+        panelsTelemetry.debug("Outtake RPM L", robot.outtake.getRPMLeft());
+        panelsTelemetry.debug("Outtake RPM R", robot.outtake.getRPMRight());
+        panelsTelemetry.debug("Outtake Target", robot.outtake.targetRPM);
+        panelsTelemetry.debug("At Target", robot.outtake.atTarget());
         panelsTelemetry.debug("X", follower.getPose().getX());
         panelsTelemetry.debug("Y", follower.getPose().getY());
-        panelsTelemetry.debug("Heading", follower.getPose().getHeading());
         panelsTelemetry.update(telemetry);
     }
 
     public int autonomousPathUpdate() {
         switch (pathState) {
 
-            case 0:
-                // Close Gate + Start Outtake, then move to shoot position
+            case 0: // Go to First Shoot
+                robot.outtake.shootLow();
                 if (!follower.isBusy()) {
                     robot.gate.closeGate();
-                    robot.shootLow();
                     follower.followPath(paths.ToShoot);
+                    robot.gate.openGate();
                     pathState = 1;
+                    settleStartTime = 0;
                 }
                 break;
 
-            case 1:
-                // SHOOT 3 BALLS
+            case 1: // Shoot 3
                 if (!follower.isBusy()) {
-                    if (!threeBallShooter.isActive() && !threeBallShooter.isDone()) {
-                        threeBallShooter.start();
+
+                    if (settleStartTime == 0) {
+                        settleStartTime = System.currentTimeMillis();
                     }
-                    if (threeBallShooter.isActive()) {
-                        threeBallShooter.update();
+
+                    if (System.currentTimeMillis() - settleStartTime >= SETTLE_MS) {
+
+                        if (shootStartTime == 0) {
+                            threeBallShooter.start();
+                            shootStartTime = System.currentTimeMillis();
+                        }
+
+                        if (threeBallShooter.isDone()) {
+                            shootStartTime = 0;
+                            settleStartTime = 0;
+                            robot.gate.closeGate();
+                            robot.intakeIn();
+                            follower.setMaxPowerScaling(.75);
+                            follower.followPath(paths.IntakeFirstSet);
+                            pathState = 2;
+                        }
                     }
-                    if (threeBallShooter.isDone()) {
-                        // After shooting, close gate + start intake to collect next set
-                        robot.gate.closeGate();
-                        robot.intakeIn();
-                        follower.followPath(paths.IntakeFirstSet);
-                        pathState = 2;
-                    }
-                } else {
-                    threeBallShooter.update();
                 }
                 break;
 
-            case 2:
+            case 2: // From intake to Shoot 2
                 if (!follower.isBusy()) {
-                    // Stop intake + open gate to prepare for next shooting
                     robot.intakeOff();
                     robot.gate.openGate();
                     follower.followPath(paths.ToShoot2);
+                    follower.setMaxPowerScaling(1);
                     pathState = 3;
+                    settleStartTime = 0;
                 }
                 break;
 
-            case 3:
-                // SHOOT 3 BALLS AGAIN
+            case 3: // Shoot 2nd 3
                 if (!follower.isBusy()) {
-                    if (!threeBallShooter.isActive() && !threeBallShooter.isDone()) {
-                        threeBallShooter.start();
+
+                    if (settleStartTime == 0) {
+                        settleStartTime = System.currentTimeMillis();
                     }
-                    if (threeBallShooter.isActive()) {
-                        threeBallShooter.update();
+
+                    if (System.currentTimeMillis() - settleStartTime >= SETTLE_MS) {
+
+                        if (shootStartTime == 0) {
+                            threeBallShooter.start();
+                            shootStartTime = System.currentTimeMillis();
+                        }
+
+                        if (threeBallShooter.isDone()) {
+                            shootStartTime = 0;
+                            settleStartTime = 0;
+                            robot.gate.closeGate();
+                            robot.intakeIn();
+                            follower.followPath(paths.IntakeSecondSet);
+                            pathState = 4;
+                        }
                     }
-                    if (threeBallShooter.isDone()) {
-                        // Close gate + start intake for next pickup
-                        robot.gate.closeGate();
-                        robot.intakeIn();
-                        follower.followPath(paths.IntakeSecondSet);
-                        pathState = 4;
-                    }
-                } else {
-                    threeBallShooter.update();
                 }
                 break;
 
-            case 4:
+            case 4: // Intake to shoot
                 if (!follower.isBusy()) {
-                    // Stop intake + open gate, prepare to shoot again
                     robot.intakeOff();
                     robot.gate.openGate();
                     follower.followPath(paths.ToShoot3);
                     pathState = 5;
+                    settleStartTime = 0;
                 }
                 break;
 
-            case 5:
-                // FINAL SHOOT
+            case 5: // Shoot last 3
                 if (!follower.isBusy()) {
-                    if (!threeBallShooter.isActive() && !threeBallShooter.isDone()) {
-                        threeBallShooter.start();
+
+                    if (settleStartTime == 0) {
+                        settleStartTime = System.currentTimeMillis();
                     }
-                    if (threeBallShooter.isActive()) {
-                        threeBallShooter.update();
+
+                    if (System.currentTimeMillis() - settleStartTime >= SETTLE_MS) {
+
+                        if (shootStartTime == 0) {
+                            threeBallShooter.start();
+                            shootStartTime = System.currentTimeMillis();
+                        }
+
+                        if (threeBallShooter.isDone()) {
+                            shootStartTime = 0;
+                            settleStartTime = 0;
+                            robot.gate.closeGate();
+                            robot.stopShooter();
+                            robot.intakeIn();
+                            follower.followPath(paths.IntakeThirdSet);
+                            pathState = 6;
+                        }
                     }
-                    if (threeBallShooter.isDone()) {
-                        // Close gate + stop outtake + start intake to clear final set
-                        robot.gate.closeGate();
-                        robot.stopShooter();
-                        robot.intakeIn();
-                        follower.followPath(paths.IntakeThirdSet);
-                        pathState = 6;
-                    }
-                } else {
-                    threeBallShooter.update();
                 }
                 break;
 
-            case 6:
+            case 6: // End
                 if (!follower.isBusy()) {
-                    // Stop intake after final collection
                     robot.intakeOff();
                     robot.turret.setTurretTarget(0);
                     Data.setAutoPose(follower.getPose());
+                    requestOpModeStop();
                 }
                 break;
-
-            default:
-                pathState = 6;
-                break;
         }
+
         return pathState;
     }
 
-
     public static class Paths {
-
-        public PathChain ToShoot;
-        public PathChain IntakeFirstSet;
-        public PathChain ToShoot2;
-        public PathChain IntakeSecondSet;
-        public PathChain ToShoot3;
-        public PathChain IntakeThirdSet;
+        public PathChain ToShoot, IntakeFirstSet, ToShoot2, IntakeSecondSet, ToShoot3, IntakeThirdSet;
 
         public Paths(Follower follower) {
-            ToShoot = follower
-                    .pathBuilder()
-                    .addPath(
-                            new BezierLine(new Pose(33.756, 135.220), new Pose(53.000, 90.000))
-                    )
-                    .setConstantHeadingInterpolation(Math.toRadians(180))
-                    .build();
+            ToShoot = follower.pathBuilder()
+                    .addPath(new BezierLine(new Pose(33.756, 135.220), new Pose(53.000, 90.000)))
+                    .setConstantHeadingInterpolation(Math.toRadians(180)).build();
 
-            IntakeFirstSet = follower
-                    .pathBuilder()
-                    .addPath(
-                            new BezierCurve(
-                                    new Pose(53.000, 90.000),
-                                    new Pose(45.500, 84.500),
-                                    new Pose(24.500, 84.000) // 19
-                            )
-                    )
-                    .setConstantHeadingInterpolation(Math.toRadians(180))
-                    .build();
+            IntakeFirstSet = follower.pathBuilder()
+                    .addPath(new BezierCurve(new Pose(53.000, 90.000), new Pose(45.500, 84.500), new Pose(25.000, 84.000)))
+                    .setConstantHeadingInterpolation(Math.toRadians(180)).build();
 
-            ToShoot2 = follower
-                    .pathBuilder()
-                    .addPath(
-                            new BezierLine(new Pose(19.500, 84.000), new Pose(53.000, 90.000))
-                    )
-                    .setConstantHeadingInterpolation(Math.toRadians(180))
-                    .build();
+            ToShoot2 = follower.pathBuilder()
+                    .addPath(new BezierLine(new Pose(19.500, 84.000), new Pose(53.000, 90.000)))
+                    .setConstantHeadingInterpolation(Math.toRadians(180)).build();
 
-            IntakeSecondSet = follower
-                    .pathBuilder()
-                    .addPath(
-                            new BezierCurve(
-                                    new Pose(53.000, 90.000),
-                                    new Pose(52.000, 73.000),
-                                    new Pose(60.000, 59.500),
-                                    new Pose(19.000, 60.000)
-                            )
-                    )
-                    .setConstantHeadingInterpolation(Math.toRadians(180))
-                    .build();
+            IntakeSecondSet = follower.pathBuilder()
+                    .addPath(new BezierCurve(new Pose(53.000, 90.000), new Pose(52.000, 73.000), new Pose(60.000, 59.500), new Pose(22.000, 60.000)))
+                    .setConstantHeadingInterpolation(Math.toRadians(180)).build();
 
-            ToShoot3 = follower
-                    .pathBuilder()
-                    .addPath(
-                            new BezierLine(new Pose(19.000, 60.000), new Pose(53.000, 90.000))
-                    )
-                    .setConstantHeadingInterpolation(Math.toRadians(180))
-                    .build();
+            ToShoot3 = follower.pathBuilder()
+                    .addPath(new BezierLine(new Pose(19.000, 60.000), new Pose(53.000, 90.000)))
+                    .setConstantHeadingInterpolation(Math.toRadians(180)).build();
 
-            IntakeThirdSet = follower
-                    .pathBuilder()
-                    .addPath(
-                            new BezierCurve(
-                                    new Pose(53.000, 90.000),
-                                    new Pose(61.500, 30.500),
-                                    new Pose(44.500, 35.500),
-                                    new Pose(17.500, 36.000)
-                            )
-                    )
-                    .setConstantHeadingInterpolation(Math.toRadians(180))
-                    .build();
+            IntakeThirdSet = follower.pathBuilder()
+                    .addPath(new BezierCurve(new Pose(53.000, 90.000), new Pose(61.500, 30.500), new Pose(44.500, 35.500), new Pose(25.00, 36.000)))
+                    .setConstantHeadingInterpolation(Math.toRadians(180)).build();
         }
     }
 }

@@ -11,15 +11,15 @@ public class Outtake {
     private final DcMotorEx left, right;
 
     public static double HIGH_RPM = 4700;
-    public static double LOW_RPM  = 3750;
+    public static double LOW_RPM  = 4024;
     public static double TICKS_PER_REV = 28;
 
-    public static double kP = 1.2;    // Start 1.0–2.0
+    public static double kP = 0.19;    // Start 1.0–2.0
     public static double kI = 0.0;    // Generally 0 for velocity
-    public static double kD = 0.4;    // For damping oscillation
-    public static double kF = 0.018;  // Feedforward-> tune first
+    public static double kD = 0.04;    // For damping oscillation
+    public static double kF = 14.25;  // Feedforward-> tune first
 
-    private double targetRPM = 0;
+    public double targetRPM = 0;
     private double lastTargetTicks = 0;
     private boolean enabled = false;
     private long stableStartTime = 0;

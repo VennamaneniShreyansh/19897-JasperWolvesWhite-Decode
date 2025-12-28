@@ -33,10 +33,8 @@ public class Drivetrain {
             if (fieldCentric)
                 follower.setTeleOpDrive(-gamepad.left_stick_y, -gamepad.left_stick_x, -gamepad.right_stick_x, false, alliance == Alliance.BLUE ? Math.toRadians(180) : 0);
             else
-                follower.setTeleOpDrive(-gamepad.left_stick_y, -gamepad.left_stick_x, -gamepad.right_stick_x, true);
+                follower.setTeleOpDrive(-gamepad.left_stick_y, -gamepad.left_stick_x, -gamepad.right_stick_x*.7, true);
     }
-
-
 
     public void holdCurrent() {
         follower.holdPoint(new BezierPoint(follower.getPose()), follower.getHeading(), true);

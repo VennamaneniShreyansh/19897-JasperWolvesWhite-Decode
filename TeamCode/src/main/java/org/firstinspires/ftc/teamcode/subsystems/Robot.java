@@ -52,11 +52,12 @@ public class Robot {
         hub.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
 
         drivetrain.startDrive();
+    }
 
-        // Restore turret yaw if we have it
-//        if (Data.hasAutoData) {
-//            turret.setYaw(Data.turretYaw);
-//        }
+    public void autoPeriodic() {
+        hub.clearBulkCache();
+        turret.updateWithVisionAssist(true);
+        outtake.periodic();
     }
 
     public double getDistanceFromTarget() {
@@ -64,19 +65,40 @@ public class Robot {
     }
 
     public void adjustSpeedAutomatically(double distInches) {
-        double rpm = 0;
-        double hoodPos = 0;
+        // y = 0.1436x^2 - 5.08065x + 3679.19483
+        double rpm =
+                0.1436 * distInches * distInches
+                        - 5.08065 * distInches
+                        + 3679.19483;
+
+        // y = 0.21568 * sin(0.0433515x - 2.54881) + 0.236258
+//        double leftPos =
+//                0.21568 * Math.sin(0.0433515 * distInches - 2.54881)
+//                        + 0.236258;
+        double leftPos = (0.00403668*distInches)-0.00964995;
+
+        // y = 0.216576 * sin(0.043305x + 0.595078) + 0.762743
+//        double rightPos =
+//                0.216576 * Math.sin(0.043305 * distInches + 0.595078)
+//                        + 0.762743;
+
+        double rightPos = (-0.00405751*distInches)+1.00987;
+
+        rpm = Math.max(0, rpm);
+        leftPos  = Math.max(0.0, Math.min(1.0, leftPos));
+        rightPos = Math.max(0.0, Math.min(1.0, rightPos));
 
         outtake.setTargetRPM(rpm);
-        hood.setPos(hoodPos);
+        hood.set(leftPos, rightPos);
     }
+
 
 
     public void periodic() {
         hub.clearBulkCache();
         drivetrain.periodic();
-//        turret.periodic();
-        turret.updateWithVisionAssist(outtake.isEnabled());
+        turret.periodic();
+//        turret.updateWithVisionAssist(outtake.isEnabled());
         outtake.periodic();
     }
 
@@ -116,7 +138,6 @@ public class Robot {
     public void resetDrivePos() {
         drivetrain.cornerReset();
     }
-
 
     public void intakeIn()  { intake.spinIn(); }
     public void intakeOut() { intake.spinOut(); }

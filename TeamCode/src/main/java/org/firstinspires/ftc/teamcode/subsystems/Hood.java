@@ -11,6 +11,9 @@ public class Hood {
     private final Servo left;
     private final Servo right;
 
+    // .6494 r
+    // .35 l
+
     public static double LOW_LEFT = 0.0;
     public static double LOW_RIGHT = 1.0;
 

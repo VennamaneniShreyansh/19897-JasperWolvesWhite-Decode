@@ -162,20 +162,21 @@ public class Turret {
     private PIDFController primaryPID, secondaryPID;
     public static double target = 0;
     public static double pidfSwitch = 5;
-    public static double kp = 0.004, kf = 0.0001, kd = 0.000, sp = .0055, sf = 0, sd = 0.0001;
+    public static double kp = 0.004, kf = 0.0001, kd = 0.000, sp = .008, sf = 0, sd = 0.0001;
 
     public static boolean on = true, manual = false;
 
     // Limelight support
     private Limelight3A limelight;
     private boolean visionEnabled = false;
-    public static double vision_kP = 0.015;  // fine-tune for your setup
-    public static double visionDeadband = 1.0;  // degrees
+    public static double vision_kP = 0.4;   // scales target movement
+    public static double visionDeadband = 0.7; // degrees
+
 
     public Turret(HardwareMap hardwareMap) {
         m = hardwareMap.get(DcMotorEx.class, "turret");
         m.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        m.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        m.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         try {
             limelight = hardwareMap.get(Limelight3A.class, "limelight");
@@ -191,8 +192,9 @@ public class Turret {
     }
 
     public void setTurretTarget(double ticks) {
-        target = Math.max(-240, Math.min(300, ticks));
+        target = Math.max(-230, Math.min(240, ticks));
     }
+
 
     public double getTurretTarget() { return target; }
     public double getTurret() { return m.getCurrentPosition(); }
@@ -202,7 +204,6 @@ public class Turret {
 
         if (manual) { m.setPower(manualPower); return; }
 
-        // ---- Standard PID control ----
         primaryPID.setCoefficients(new PIDFCoefficients(kp, 0, kd, kf));
         secondaryPID.setCoefficients(new PIDFCoefficients(sp, 0, sd, sf));
 
@@ -220,12 +221,15 @@ public class Turret {
     }
 
     public void updateWithVisionAssist(boolean outtakeRunning) {
-        // run normal turret PID first
-        periodic();
+        if (manual) {
+            periodic();
+            return;
+        }
 
         if (outtakeRunning && visionEnabled) {
             limelightAimAssist();
         }
+        periodic();
     }
 
     private void limelightAimAssist() {
@@ -234,20 +238,36 @@ public class Turret {
         LLResult result = limelight.getLatestResult();
         if (result == null || !result.isValid()) return;
 
-        double tx = result.getTx();  // horizontal offset in degrees
-        if (Math.abs(tx) < visionDeadband) return;  // ignore minor noise
+        double txDeg = result.getTx(); // degrees
+        if (Math.abs(txDeg) < visionDeadband) return;
 
-        double correction = -vision_kP * tx;  // small adjustment
-        correction = Math.max(-0.4, Math.min(0.4, correction));  // clamp
+        double txRad = Math.toRadians(txDeg);
+        double tickCorrection = txRad / rpt;
 
-        m.setPower(power + correction);
+        double newTarget = getTurretTarget() - tickCorrection * vision_kP;
+
+        // soft limits
+        if (newTarget > -230 && newTarget < 240) {
+            setTurretTarget(newTarget);
+        }
     }
+
+
 
     public void manual(double power) {
         manual = true;
-        manualPower = power;
+
+        if (Math.abs(power) < 0.05) {
+            manualPower = 0;
+            m.setPower(0);
+        } else {
+            manualPower = power;
+        }
     }
-    public void automatic() { manual = false; }
+
+    public void automatic() {
+        manual = false;
+    }
     public void on() { on = true; }
     public void off() { on = false; }
 

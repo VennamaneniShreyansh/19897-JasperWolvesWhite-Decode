@@ -18,7 +18,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 @Autonomous(name = "AutoV3", group = "Autonomous")
 @Configurable
-@Disabled
+//@Disabled
 public class Auto extends OpMode {
 
     private TelemetryManager panelsTelemetry;

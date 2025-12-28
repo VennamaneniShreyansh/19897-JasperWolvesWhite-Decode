@@ -2,8 +2,6 @@ package org.firstinspires.ftc.teamcode.opmodes;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.subsystems.Robot;
 import org.firstinspires.ftc.teamcode.helper.Alliance;
 
@@ -18,7 +16,7 @@ public class Teleop extends OpMode {
     private boolean lastY = false;
     private boolean autoRPM = false;
 
-    private boolean autoAim = false;
+    private boolean autoAim = true;
 
     @Override
     public void init() {
@@ -35,14 +33,13 @@ public class Teleop extends OpMode {
     public void loop() {
         robot.drive(gamepad1);
 
-        if (gamepad1.y) {
-            robot.resetDrivePos();
-        }
+//        if (gamepad1.y) {
+//            robot.resetDrivePos();
+//        }
 
         if (gamepad2.left_bumper) robot.intakeIn();
         else if (gamepad2.left_trigger > 0.2) robot.intakeOut();
         else robot.intakeOff();
-
 
         if (!autoRPM) {
             if (gamepad2.right_bumper) robot.shootHigh();
@@ -56,13 +53,15 @@ public class Teleop extends OpMode {
 
         if (autoAim) {
             robot.autoAim();
-            robot.autoTurret();
         }
 
         if (Math.abs(gamepad2.left_stick_x) > 0.2) {
             autoAim = false;
-            robot.manualTurret(gamepad2.left_stick_x*.2);
+            robot.manualTurret(gamepad2.left_stick_x * 0.2);
+        } else {
+            robot.autoTurret();
         }
+
         if (gamepad2.start) {
             robot.turret.off();
             robot.turret.resetTurret();
@@ -87,7 +86,10 @@ public class Teleop extends OpMode {
         if (gamepad2.left_stick_y > 0.3) robot.hood.moveDown();
         if (gamepad2.left_stick_y < -0.3) robot.hood.moveUp();
 
+        boolean allowVision = autoAim || robot.shooterReady();
+        robot.turret.updateWithVisionAssist(allowVision);
         robot.periodic();
+
         updateTelemetry();
     }
 
@@ -96,11 +98,11 @@ public class Teleop extends OpMode {
         telemetry.addData("Turret Ticks", robot.turret.getTurret());
         telemetry.addData("Turret Target", robot.turret.getTurretTarget());
         telemetry.addData("Turret Yaw (rad)", robot.turret.getYaw());
-        telemetry.addData("Turret Error", robot.turret.getError());
         telemetry.addData("Turret Power", robot.turret.power);
         telemetry.addData("Turret Mode", robot.turret.manual ? "Manual" : "Auto");
         telemetry.addData("Turret Degrees", Math.toDegrees(robot.turret.getYaw()));
-        telemetry.addData("Ticks → Degrees", String.format("%.0f°", robot.turret.getTurret() * 0.374)); // 1° = 2.67 ticks
+        telemetry.addData("Ticks to Degrees", String.format("%.0f°", robot.turret.getTurret() * 0.374)); // 1° = 2.67 ticks
+        telemetry.addData("Auto Aim", autoAim);
 
         // Shooter / Outtake
         telemetry.addData("Shooter Ready", robot.shooterReady());
@@ -109,7 +111,6 @@ public class Teleop extends OpMode {
         telemetry.addData("Left Ticks", robot.outtake.getTickLeft());
         telemetry.addData("Right Ticks", robot.outtake.getTickRight());
         telemetry.addData("Auto RPM", autoRPM);
-
 
         // Intake
         telemetry.addData("Intake Power", (gamepad2.left_bumper ? "In" : (gamepad2.left_trigger > 0.2 ? "Out" : "Off")));
@@ -122,13 +123,7 @@ public class Teleop extends OpMode {
         telemetry.addData("Robot X", robot.getPose().getX());
         telemetry.addData("Robot Y", robot.getPose().getY());
         telemetry.addData("Robot Heading (rad)", robot.getPose().getHeading());
-
         telemetry.addData("Distance to goal", "%.1f in", robot.getDistanceFromTarget());
-
-
-        // Misc
-        telemetry.addData("Auto Aim", autoAim);
-
         telemetry.update();
     }
 }
