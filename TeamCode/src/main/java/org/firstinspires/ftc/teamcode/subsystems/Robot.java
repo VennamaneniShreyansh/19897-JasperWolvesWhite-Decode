@@ -71,18 +71,18 @@ public class Robot {
                         - 5.08065 * distInches
                         + 3679.19483;
 
-        // y = 0.21568 * sin(0.0433515x - 2.54881) + 0.236258
-//        double leftPos =
-//                0.21568 * Math.sin(0.0433515 * distInches - 2.54881)
-//                        + 0.236258;
-        double leftPos = (0.00403668*distInches)-0.00964995;
+//         y = 0.21568 * sin(0.0433515x - 2.54881) + 0.236258
+        double leftPos =
+                0.21568 * Math.sin(0.0433515 * distInches - 2.54881)
+                        + 0.236258;
+//        double leftPos = (0.00403668*distInches)-0.00964995;
 
         // y = 0.216576 * sin(0.043305x + 0.595078) + 0.762743
-//        double rightPos =
-//                0.216576 * Math.sin(0.043305 * distInches + 0.595078)
-//                        + 0.762743;
+        double rightPos =
+                0.216576 * Math.sin(0.043305 * distInches + 0.595078)
+                        + 0.762743;
 
-        double rightPos = (-0.00405751*distInches)+1.00987;
+//        double rightPos = (-0.00405751*distInches)+1.00987;
 
         rpm = Math.max(0, rpm);
         leftPos  = Math.max(0.0, Math.min(1.0, leftPos));
@@ -94,12 +94,18 @@ public class Robot {
 
 
 
-    public void periodic() {
+    public void periodic(boolean allowVision) {
         hub.clearBulkCache();
         drivetrain.periodic();
         turret.periodic();
-//        turret.updateWithVisionAssist(outtake.isEnabled());
-        outtake.periodic();
+        turret.updateWithVisionAssist(allowVision);
+//        outtake.periodic();
+    }
+
+    public void setUpRapidFire() {
+        outtake.setTargetRPM(4250);
+        hood.set(.1, .9);
+
     }
 
 

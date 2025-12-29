@@ -9,7 +9,6 @@ import org.firstinspires.ftc.teamcode.helper.Alliance;
 public class Teleop extends OpMode {
 
     private Robot robot;
-
     private boolean lastA = false;
     private boolean lastB = false;
     private boolean lastX = false;
@@ -33,12 +32,13 @@ public class Teleop extends OpMode {
     public void loop() {
         robot.drive(gamepad1);
 
-//        if (gamepad1.y) {
-//            robot.resetDrivePos();
-//        }
+        if (gamepad1.y) {
+            robot.resetDrivePos();
+        }
 
         if (gamepad2.left_bumper) robot.intakeIn();
         else if (gamepad2.left_trigger > 0.2) robot.intakeOut();
+        else if (gamepad2.left_bumper && gamepad2.a) robot.intake.slowSpinIn();
         else robot.intakeOff();
 
         if (!autoRPM) {
@@ -68,7 +68,9 @@ public class Teleop extends OpMode {
             robot.turret.on();
         }
 
-        if (gamepad2.a && !lastA) robot.feeder.toggle();
+        if (gamepad2.a) {
+            robot.setUpRapidFire();
+        }
         lastA = gamepad2.a;
 
         if (gamepad2.b && !lastB) robot.gate.toggle();
@@ -87,8 +89,9 @@ public class Teleop extends OpMode {
         if (gamepad2.left_stick_y < -0.3) robot.hood.moveUp();
 
         boolean allowVision = autoAim || robot.shooterReady();
-        robot.turret.updateWithVisionAssist(allowVision);
-        robot.periodic();
+
+//        robot.turret.updateWithVisionAssist(allowVision);
+        robot.periodic(allowVision);
 
         updateTelemetry();
     }

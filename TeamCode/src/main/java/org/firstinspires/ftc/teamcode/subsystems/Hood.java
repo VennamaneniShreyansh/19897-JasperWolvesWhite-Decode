@@ -14,6 +14,9 @@ public class Hood {
     // .6494 r
     // .35 l
 
+    // .95
+    // .05
+
     public static double LOW_LEFT = 0.0;
     public static double LOW_RIGHT = 1.0;
 

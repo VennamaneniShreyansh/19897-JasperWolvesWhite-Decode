@@ -11,6 +11,7 @@ public class Intake {
     public static double OFF = 0;
     public static double IN = -1;
     public static double OUT = 1;
+    public static double SLOW_IN = .9;
 
     public Intake(HardwareMap hardwareMap) {
         i = hardwareMap.get(DcMotorEx.class, "intake");
@@ -23,6 +24,10 @@ public class Intake {
 
     public void spinIn()  {
         set(IN);
+    }
+
+    public void slowSpinIn() {
+        set(SLOW_IN);
     }
     public void spinOut() {
         set(OUT);

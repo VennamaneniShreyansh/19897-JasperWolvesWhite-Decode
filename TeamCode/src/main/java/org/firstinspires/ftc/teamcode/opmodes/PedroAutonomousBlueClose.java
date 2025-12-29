@@ -50,7 +50,6 @@ public class PedroAutonomousBlueClose extends OpMode {
 
     @Override
     public void start() {
-        robot.turret.setTurretTarget(-130);
         robot.turret.automatic();
         robot.hood.set(.05, .95);
         robot.outtake.periodic();
