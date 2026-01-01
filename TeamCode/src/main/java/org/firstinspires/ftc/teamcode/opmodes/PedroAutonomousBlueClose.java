@@ -28,6 +28,7 @@ public class PedroAutonomousBlueClose extends OpMode {
     private Robot robot;
     private long shootStartTime = 0;
     private long settleStartTime = 0;
+    private long stopCheckTime = 0;
     private static final long SETTLE_MS = 250;
 
 
@@ -112,6 +113,7 @@ public class PedroAutonomousBlueClose extends OpMode {
                             robot.intakeIn();
                             follower.setMaxPowerScaling(.75);
                             follower.followPath(paths.IntakeFirstSet);
+                            stopCheckTime = System.currentTimeMillis();
                             pathState = 2;
                         }
                     }
@@ -120,18 +122,20 @@ public class PedroAutonomousBlueClose extends OpMode {
 
             case 2: // From intake to Shoot 2
                 if (!follower.isBusy()) {
-                    robot.intakeOff();
-                    robot.turret.setTurretTarget(-130);
-                    robot.gate.openGate();
-                    follower.followPath(paths.ToShoot2);
-                    follower.setMaxPowerScaling(1);
-                    pathState = 3;
-                    settleStartTime = 0;
+                    if (System.currentTimeMillis() - stopCheckTime >= 500) {
+                        robot.intakeOff();
+                        robot.turret.setTurretTarget(-130);
+                        follower.followPath(paths.ToShoot2);
+                        follower.setMaxPowerScaling(1);
+                        pathState = 3;
+                        settleStartTime = 0;
+                    }
                 }
                 break;
 
             case 3: // Shoot 2nd 3
                 if (!follower.isBusy()) {
+                    robot.gate.openGate();
 
                     if (settleStartTime == 0) {
                         settleStartTime = System.currentTimeMillis();
@@ -150,6 +154,7 @@ public class PedroAutonomousBlueClose extends OpMode {
                             robot.gate.closeGate();
                             robot.intakeIn();
                             follower.followPath(paths.IntakeSecondSet);
+                            stopCheckTime = System.currentTimeMillis();
                             pathState = 4;
                         }
                     }
@@ -157,18 +162,19 @@ public class PedroAutonomousBlueClose extends OpMode {
                 break;
 
             case 4: // Intake to shoot
-                if (!follower.isBusy()) {
+                if (System.currentTimeMillis() - stopCheckTime >= 500) {
                     robot.intakeOff();
                     robot.turret.setTurretTarget(-130);
-                    robot.gate.openGate();
-                    follower.followPath(paths.ToShoot3);
-                    pathState = 5;
+                    follower.followPath(paths.ToShoot2);
+                    follower.setMaxPowerScaling(1);
+                    pathState = 3;
                     settleStartTime = 0;
                 }
                 break;
 
             case 5: // Shoot last 3
                 if (!follower.isBusy()) {
+                    robot.gate.openGate();
 
                     if (settleStartTime == 0) {
                         settleStartTime = System.currentTimeMillis();
@@ -188,6 +194,7 @@ public class PedroAutonomousBlueClose extends OpMode {
                             robot.stopShooter();
                             robot.intakeIn();
                             follower.followPath(paths.IntakeThirdSet);
+                            stopCheckTime = System.currentTimeMillis();
                             pathState = 6;
                         }
                     }
@@ -196,10 +203,12 @@ public class PedroAutonomousBlueClose extends OpMode {
 
             case 6: // End
                 if (!follower.isBusy()) {
-                    robot.intakeOff();
-                    robot.turret.setTurretTarget(0);
-                    Data.setAutoPose(follower.getPose());
-                    requestOpModeStop();
+                    if (System.currentTimeMillis() - stopCheckTime >= 500) {
+                        robot.intakeOff();
+                        robot.turret.setTurretTarget(0);
+                        Data.setAutoPose(follower.getPose());
+                        requestOpModeStop();
+                    }
                 }
                 break;
         }
@@ -224,11 +233,11 @@ public class PedroAutonomousBlueClose extends OpMode {
                     .setConstantHeadingInterpolation(Math.toRadians(180)).build();
 
             IntakeSecondSet = follower.pathBuilder()
-                    .addPath(new BezierCurve(new Pose(53.000, 90.000), new Pose(52.000, 73.000), new Pose(60.000, 59.500), new Pose(22.000, 60.000)))
+                    .addPath(new BezierCurve(new Pose(53.000, 90.000), new Pose(52.000, 73.000), new Pose(60.000, 59.500), new Pose(28.000, 60.000)))
                     .setConstantHeadingInterpolation(Math.toRadians(180)).build();
 
             ToShoot3 = follower.pathBuilder()
-                    .addPath(new BezierLine(new Pose(22.000, 60.000), new Pose(53.000, 90.000)))
+                    .addPath(new BezierLine(new Pose(28.000, 60.000), new Pose(53.000, 90.000)))
                     .setConstantHeadingInterpolation(Math.toRadians(180)).build();
 
             IntakeThirdSet = follower.pathBuilder()
