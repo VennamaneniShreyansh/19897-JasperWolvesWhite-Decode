@@ -11,7 +11,7 @@ public class Outtake {
     private final DcMotorEx left, right;
 
     public static double HIGH_RPM = 4700;
-    public static double LOW_RPM  = 4024;
+    public static double LOW_RPM  = 4324;
     public static double TICKS_PER_REV = 28;
 
     public static double kP = 0.19;    // Start 1.0–2.0

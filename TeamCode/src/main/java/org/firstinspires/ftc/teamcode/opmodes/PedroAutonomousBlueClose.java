@@ -50,7 +50,6 @@ public class PedroAutonomousBlueClose extends OpMode {
 
     @Override
     public void start() {
-        robot.turret.automatic();
         robot.hood.set(.05, .95);
         robot.outtake.periodic();
     }
@@ -80,7 +79,9 @@ public class PedroAutonomousBlueClose extends OpMode {
         switch (pathState) {
 
             case 0: // Go to First Shoot
+                robot.turret.setTurretTarget(-130);
                 robot.outtake.shootLow();
+                //robot.turret.manual(0.7);
                 if (!follower.isBusy()) {
                     robot.gate.closeGate();
                     follower.followPath(paths.ToShoot);
@@ -120,6 +121,7 @@ public class PedroAutonomousBlueClose extends OpMode {
             case 2: // From intake to Shoot 2
                 if (!follower.isBusy()) {
                     robot.intakeOff();
+                    robot.turret.setTurretTarget(-130);
                     robot.gate.openGate();
                     follower.followPath(paths.ToShoot2);
                     follower.setMaxPowerScaling(1);
@@ -157,6 +159,7 @@ public class PedroAutonomousBlueClose extends OpMode {
             case 4: // Intake to shoot
                 if (!follower.isBusy()) {
                     robot.intakeOff();
+                    robot.turret.setTurretTarget(-130);
                     robot.gate.openGate();
                     follower.followPath(paths.ToShoot3);
                     pathState = 5;
@@ -213,11 +216,11 @@ public class PedroAutonomousBlueClose extends OpMode {
                     .setConstantHeadingInterpolation(Math.toRadians(180)).build();
 
             IntakeFirstSet = follower.pathBuilder()
-                    .addPath(new BezierCurve(new Pose(53.000, 90.000), new Pose(45.500, 84.500), new Pose(25.000, 84.000)))
+                    .addPath(new BezierCurve(new Pose(53.000, 90.000), new Pose(45.500, 84.500), new Pose(23.000, 84.000)))
                     .setConstantHeadingInterpolation(Math.toRadians(180)).build();
 
             ToShoot2 = follower.pathBuilder()
-                    .addPath(new BezierLine(new Pose(19.500, 84.000), new Pose(53.000, 90.000)))
+                    .addPath(new BezierLine(new Pose(23.000, 84.000), new Pose(53.000, 90.000)))
                     .setConstantHeadingInterpolation(Math.toRadians(180)).build();
 
             IntakeSecondSet = follower.pathBuilder()
@@ -225,7 +228,7 @@ public class PedroAutonomousBlueClose extends OpMode {
                     .setConstantHeadingInterpolation(Math.toRadians(180)).build();
 
             ToShoot3 = follower.pathBuilder()
-                    .addPath(new BezierLine(new Pose(19.000, 60.000), new Pose(53.000, 90.000)))
+                    .addPath(new BezierLine(new Pose(22.000, 60.000), new Pose(53.000, 90.000)))
                     .setConstantHeadingInterpolation(Math.toRadians(180)).build();
 
             IntakeThirdSet = follower.pathBuilder()
