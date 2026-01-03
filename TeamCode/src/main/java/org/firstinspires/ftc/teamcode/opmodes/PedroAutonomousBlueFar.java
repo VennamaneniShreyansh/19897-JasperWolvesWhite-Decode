@@ -29,7 +29,7 @@ public class PedroAutonomousBlueFar extends OpMode {
     private long shootStartTime = 0;
     private long settleStartTime = 0;
     private long stopCheckTime = 0;
-    private static final long SETTLE_MS = 250;
+    private static final long SETTLE_MS = 500;
 
 
     @Override
@@ -115,10 +115,9 @@ public class PedroAutonomousBlueFar extends OpMode {
                     }
 
                     if (System.currentTimeMillis() - stopCheckTime >= 300) {
-                        follower.setMaxPowerScaling(.1);
+                        follower.setMaxPowerScaling(.25);
                         follower.followPath(paths.Path2);
                         robot.intakeOff();
-                        follower.setMaxPowerScaling(1);
                         pathState = 2;
                         stopCheckTime = 0;
                         settleStartTime = 0;
@@ -146,6 +145,7 @@ public class PedroAutonomousBlueFar extends OpMode {
                             settleStartTime = 0;
                             robot.gate.closeGate();
                             robot.intakeIn();
+                            follower.setMaxPowerScaling(1);
                             follower.followPath(paths.Path3);
                             stopCheckTime = System.currentTimeMillis();
                             pathState = 3;
@@ -162,8 +162,8 @@ public class PedroAutonomousBlueFar extends OpMode {
 
                     if (System.currentTimeMillis() - stopCheckTime >= 200) {
                         robot.intakeOff();
+                        follower.setMaxPowerScaling(0.75);
                         follower.followPath(paths.Path4);
-                        follower.setMaxPowerScaling(1);
                         pathState = 4;
                         stopCheckTime = 0;
                         settleStartTime = 0;
