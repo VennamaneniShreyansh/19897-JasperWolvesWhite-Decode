@@ -7,7 +7,7 @@ public class ThreeBallShooter {
     private final Outtake outtake;
     private static final int SPINUP_MS = 1500;    // 1.5s spinup
     private static final int INTAKE_ON_MS = 124;  // 0.3s feed
-    private static final int LAST_INTAKE_ON_MS = 300;
+    private static final int LAST_INTAKE_ON_MS = 500;
     private static final int INTAKE_OFF_MS = 600; // 0.5s pause
     private static final int MAX_BALLS = 3;
 

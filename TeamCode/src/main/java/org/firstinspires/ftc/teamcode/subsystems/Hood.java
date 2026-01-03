@@ -20,8 +20,8 @@ public class Hood {
     public static double LOW_LEFT = 0.0;
     public static double LOW_RIGHT = 1.0;
 
-    public static double HIGH_LEFT = 1.0;
-    public static double HIGH_RIGHT = 0.0;
+    public static double HIGH_LEFT = 0.1;
+    public static double HIGH_RIGHT = 0.9;
 
     public static double upIncrement = .05;
     public static double downIncrement = .05;

@@ -28,6 +28,7 @@ public class PedroAutonomousBlueFar extends OpMode {
     private Robot robot;
     private long shootStartTime = 0;
     private long settleStartTime = 0;
+    private long stopCheckTime = 0;
     private static final long SETTLE_MS = 250;
 
 
@@ -35,7 +36,7 @@ public class PedroAutonomousBlueFar extends OpMode {
     public void init() {
         panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();
         follower = Constants.createFollower(hardwareMap);
-        follower.setStartingPose(new Pose(33.75, 135.5, Math.toRadians(180)));
+        follower.setStartingPose(new Pose(56, 8, Math.toRadians(180)));
         paths = new Paths(follower);
         robot = new Robot(hardwareMap, Alliance.BLUE);
         threeBallShooter = new ThreeBallShooter(robot.intake, robot.outtake);
@@ -50,7 +51,6 @@ public class PedroAutonomousBlueFar extends OpMode {
 
     @Override
     public void start() {
-        robot.turret.automatic();
         robot.hood.set(.05, .95);
         robot.outtake.periodic();
     }
@@ -78,9 +78,10 @@ public class PedroAutonomousBlueFar extends OpMode {
 
     public int autonomousPathUpdate() {
         switch (pathState) {
-
-            case 0: // Go to First Shoot
-                robot.outtake.shootLow();
+            case 0: // Shoot 3
+                robot.turret.setTurretTarget(-170);
+                robot.outtake.shootHigh();
+                robot.gate.openGate();
                 if (!follower.isBusy()) {
 
                     if (settleStartTime == 0) {
@@ -101,25 +102,33 @@ public class PedroAutonomousBlueFar extends OpMode {
                             robot.intakeIn();
                             follower.setMaxPowerScaling(.75);
                             follower.followPath(paths.Path1);
-                            pathState = 2;
+                            pathState = 1;
                         }
                     }
                 }
                 break;
 
-            case 1: // Shoot 3
+            case 1: // From intake to Shoot 2
                 if (!follower.isBusy()) {
-                    robot.intakeOff();
-                    robot.gate.openGate();
-                    follower.followPath(paths.Path2);
-                    follower.setMaxPowerScaling(1);
-                    pathState = 3;
-                    settleStartTime = 0;
+                    if (stopCheckTime == 0) {
+                        stopCheckTime = System.currentTimeMillis();
+                    }
+
+                    if (System.currentTimeMillis() - stopCheckTime >= 300) {
+                        follower.setMaxPowerScaling(.1);
+                        follower.followPath(paths.Path2);
+                        robot.intakeOff();
+                        follower.setMaxPowerScaling(1);
+                        pathState = 2;
+                        stopCheckTime = 0;
+                        settleStartTime = 0;
+                    }
                 }
                 break;
 
-            case 2: // From intake to Shoot 2
+            case 2: // Shoot 2nd 3
                 if (!follower.isBusy()) {
+                    robot.gate.openGate();
 
                     if (settleStartTime == 0) {
                         settleStartTime = System.currentTimeMillis();
@@ -138,7 +147,8 @@ public class PedroAutonomousBlueFar extends OpMode {
                             robot.gate.closeGate();
                             robot.intakeIn();
                             follower.followPath(paths.Path3);
-                            pathState = 4;
+                            stopCheckTime = System.currentTimeMillis();
+                            pathState = 3;
                         }
                     }
                 }
@@ -146,16 +156,24 @@ public class PedroAutonomousBlueFar extends OpMode {
 
             case 3: // Intake to shoot
                 if (!follower.isBusy()) {
-                    robot.intakeOff();
-                    robot.gate.openGate();
-                    follower.followPath(paths.Path4);
-                    pathState = 5;
-                    settleStartTime = 0;
+                    if (stopCheckTime == 0) {
+                        stopCheckTime = System.currentTimeMillis();
+                    }
+
+                    if (System.currentTimeMillis() - stopCheckTime >= 200) {
+                        robot.intakeOff();
+                        follower.followPath(paths.Path4);
+                        follower.setMaxPowerScaling(1);
+                        pathState = 4;
+                        stopCheckTime = 0;
+                        settleStartTime = 0;
+                    }
                 }
                 break;
 
             case 4: // Shoot last 3
                 if (!follower.isBusy()) {
+                    robot.gate.openGate();
 
                     if (settleStartTime == 0) {
                         settleStartTime = System.currentTimeMillis();
@@ -173,18 +191,12 @@ public class PedroAutonomousBlueFar extends OpMode {
                             settleStartTime = 0;
                             robot.gate.closeGate();
                             robot.stopShooter();
-                            pathState = 6;
+                            robot.turret.setTurretTarget(0);
+                            Data.setAutoPose(follower.getPose());
+                            requestOpModeStop();
+                            stopCheckTime = 0;
                         }
                     }
-                }
-                break;
-
-            case 6: // End
-                if (!follower.isBusy()) {
-                    robot.intakeOff();
-                    robot.turret.setTurretTarget(0);
-                    Data.setAutoPose(follower.getPose());
-                    requestOpModeStop();
                 }
                 break;
         }
@@ -193,63 +205,43 @@ public class PedroAutonomousBlueFar extends OpMode {
     }
 
     public static class Paths {
-
-        public PathChain Path1;
-        public PathChain Path2;
-        public PathChain Path3;
-        public PathChain Path4;
+        public PathChain Path1, Path2, Path3, Path4;
 
         public Paths(Follower follower) {
-            Path1 = follower
-                    .pathBuilder()
-                    .addPath(
-                            new BezierCurve(
+            Path1 = follower.pathBuilder().addPath(
+                            new BezierLine(
                                     new Pose(56.000, 8.000),
-                                    new Pose(56.300, 36.100),
-                                    new Pose(28.500, 10.200),
-                                    new Pose(15.000, 10.000)
+                                    new Pose(3.000, 8.000)
                             )
-                    )
-                    .setTangentHeadingInterpolation()
+                    ).setConstantHeadingInterpolation(Math.toRadians(180))
                     .build();
 
-            Path2 = follower
-                    .pathBuilder()
-                    .addPath(
-                            new BezierCurve(
-                                    new Pose(15.000, 10.000),
-                                    new Pose(28.500, 10.200),
-                                    new Pose(56.300, 36.100),
+            Path2 = follower.pathBuilder().addPath(
+                            new BezierLine(
+                                    new Pose(3.000, 8.000),
                                     new Pose(56.000, 8.000)
                             )
-                    )
-                    .setTangentHeadingInterpolation()
-                    .setReversed()
+                    ).setConstantHeadingInterpolation(Math.toRadians(180))
                     .build();
 
-            Path3 = follower
-                    .pathBuilder()
-                    .addPath(
+            Path3 = follower.pathBuilder().addPath(
                             new BezierCurve(
                                     new Pose(56.000, 8.000),
-                                    new Pose(56.000, 36.000),
-                                    new Pose(21.000, 36.000)
+                                    new Pose(56.673, 33.681),
+                                    new Pose(43.543, 36.186),
+                                    new Pose(18.900, 35.700)
                             )
-                    )
-                    .setTangentHeadingInterpolation()
+                    ).setConstantHeadingInterpolation(Math.toRadians(180))
                     .build();
 
-            Path4 = follower
-                    .pathBuilder()
-                    .addPath(
+            Path4 = follower.pathBuilder().addPath(
                             new BezierCurve(
-                                    new Pose(21.000, 36.000),
-                                    new Pose(56.000, 36.000),
+                                    new Pose(18.900, 35.700),
+                                    new Pose(43.543, 36.186),
+                                    new Pose(56.673, 33.681),
                                     new Pose(56.000, 8.000)
                             )
-                    )
-                    .setTangentHeadingInterpolation()
-                    .setReversed()
+                    ).setConstantHeadingInterpolation(Math.toRadians(180))
                     .build();
         }
     }
