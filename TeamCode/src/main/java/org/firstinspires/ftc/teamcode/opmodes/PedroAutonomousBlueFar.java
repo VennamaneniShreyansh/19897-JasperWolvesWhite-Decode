@@ -8,6 +8,7 @@ import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
+import com.pedropathing.paths.PathConstraints;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import org.firstinspires.ftc.teamcode.helper.Alliance;
@@ -29,7 +30,8 @@ public class PedroAutonomousBlueFar extends OpMode {
     private long shootStartTime = 0;
     private long settleStartTime = 0;
     private long stopCheckTime = 0;
-    private static final long SETTLE_MS = 500;
+    private static final long SETTLE_MS = 2000;
+    private static final long SMALL_SETTLE_MS = 250;
 
 
     @Override
@@ -79,11 +81,10 @@ public class PedroAutonomousBlueFar extends OpMode {
     public int autonomousPathUpdate() {
         switch (pathState) {
             case 0: // Shoot 3
-                robot.turret.setTurretTarget(-170);
+                robot.turret.setTurretTarget(-190);
                 robot.outtake.shootHigh();
                 robot.gate.openGate();
                 if (!follower.isBusy()) {
-
                     if (settleStartTime == 0) {
                         settleStartTime = System.currentTimeMillis();
                     }
@@ -115,9 +116,8 @@ public class PedroAutonomousBlueFar extends OpMode {
                     }
 
                     if (System.currentTimeMillis() - stopCheckTime >= 300) {
-                        follower.setMaxPowerScaling(.25);
+                        follower.setMaxPower(.5);
                         follower.followPath(paths.Path2);
-                        robot.intakeOff();
                         pathState = 2;
                         stopCheckTime = 0;
                         settleStartTime = 0;
@@ -125,10 +125,24 @@ public class PedroAutonomousBlueFar extends OpMode {
                 }
                 break;
 
-            case 2: // Shoot 2nd 3
+            case 2:
                 if (!follower.isBusy()) {
-                    robot.gate.openGate();
+                    if (settleStartTime == 0) {
+                        settleStartTime = System.currentTimeMillis();
+                        robot.intakeOff();
+                    }
 
+                    if (System.currentTimeMillis() - settleStartTime >= SMALL_SETTLE_MS) {
+                        robot.outtake.shootHigh();
+                        robot.gate.openGate();
+                        settleStartTime = 0;
+                        pathState = 3;
+                    }
+                }
+                break;
+
+            case 3: // Shoot 2nd 3
+                if (!follower.isBusy()) {
                     if (settleStartTime == 0) {
                         settleStartTime = System.currentTimeMillis();
                     }
@@ -145,16 +159,16 @@ public class PedroAutonomousBlueFar extends OpMode {
                             settleStartTime = 0;
                             robot.gate.closeGate();
                             robot.intakeIn();
-                            follower.setMaxPowerScaling(1);
+                            follower.setMaxPower(1);
                             follower.followPath(paths.Path3);
                             stopCheckTime = System.currentTimeMillis();
-                            pathState = 3;
+                            pathState = 4;
                         }
                     }
                 }
                 break;
 
-            case 3: // Intake to shoot
+            case 4: // Intake to shoot
                 if (!follower.isBusy()) {
                     if (stopCheckTime == 0) {
                         stopCheckTime = System.currentTimeMillis();
@@ -162,19 +176,20 @@ public class PedroAutonomousBlueFar extends OpMode {
 
                     if (System.currentTimeMillis() - stopCheckTime >= 200) {
                         robot.intakeOff();
-                        follower.setMaxPowerScaling(0.75);
                         follower.followPath(paths.Path4);
-                        pathState = 4;
-                        stopCheckTime = 0;
-                        settleStartTime = 0;
+                        if (System.currentTimeMillis() - stopCheckTime >= 450) {
+                            robot.outtake.shootHigh();
+                            robot.gate.openGate();
+                            pathState = 5;
+                            stopCheckTime = 0;
+                            settleStartTime = 0;
+                        }
                     }
                 }
                 break;
 
-            case 4: // Shoot last 3
+            case 5: // Shoot last 3
                 if (!follower.isBusy()) {
-                    robot.gate.openGate();
-
                     if (settleStartTime == 0) {
                         settleStartTime = System.currentTimeMillis();
                     }
@@ -219,7 +234,7 @@ public class PedroAutonomousBlueFar extends OpMode {
             Path2 = follower.pathBuilder().addPath(
                             new BezierLine(
                                     new Pose(3.000, 8.000),
-                                    new Pose(56.000, 8.000)
+                                    new Pose(60.000, 8.000)
                             )
                     ).setConstantHeadingInterpolation(Math.toRadians(180))
                     .build();
@@ -239,7 +254,7 @@ public class PedroAutonomousBlueFar extends OpMode {
                                     new Pose(18.900, 35.700),
                                     new Pose(43.543, 36.186),
                                     new Pose(56.673, 33.681),
-                                    new Pose(56.000, 8.000)
+                                    new Pose(56.000, 12.000)
                             )
                     ).setConstantHeadingInterpolation(Math.toRadians(180))
                     .build();
