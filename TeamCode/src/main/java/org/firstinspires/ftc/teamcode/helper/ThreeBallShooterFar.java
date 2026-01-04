@@ -2,7 +2,7 @@ package org.firstinspires.ftc.teamcode.helper;
 
 import org.firstinspires.ftc.teamcode.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.subsystems.Outtake;
-public class ThreeBallShooter {
+public class ThreeBallShooterFar {
     private final Intake intake;
     private final Outtake outtake;
     private static final int SPINUP_MS = 1500;    // 1.5s spinup
@@ -17,7 +17,7 @@ public class ThreeBallShooter {
     public int stage = 0;
     public long stageStartTime = 0;
 
-    public ThreeBallShooter(Intake intake, Outtake outtake) {
+    public ThreeBallShooterFar(Intake intake, Outtake outtake) {
         this.intake = intake;
         this.outtake = outtake;
     }
@@ -28,7 +28,7 @@ public class ThreeBallShooter {
         ballsShot = 0;
         stage = 0;
         stageStartTime = System.currentTimeMillis();
-        outtake.shootLow(); // Start flywheel
+        outtake.shootHigh(); // Start flywheel
     }
 
     public boolean isActive() { return shootingActive && !shootingDone; }
@@ -68,7 +68,7 @@ public class ThreeBallShooter {
                         shootingActive = false;
                         shootingDone = true;
                         intake.spinOff();
-                        outtake.shootLow();
+                        outtake.shootHigh();
                     } else {
                         stage = 1;
                         stageStartTime = now;

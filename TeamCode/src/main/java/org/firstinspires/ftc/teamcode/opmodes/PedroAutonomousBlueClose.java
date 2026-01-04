@@ -12,7 +12,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import org.firstinspires.ftc.teamcode.helper.Alliance;
 import org.firstinspires.ftc.teamcode.helper.Data;
-import org.firstinspires.ftc.teamcode.helper.ThreeBallShooter;
+import org.firstinspires.ftc.teamcode.helper.ThreeBallShooterClose;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.subsystems.Robot;
 
@@ -24,7 +24,7 @@ public class PedroAutonomousBlueClose extends OpMode {
     public Follower follower;
     private int pathState;
     private Paths paths;
-    private ThreeBallShooter threeBallShooter;
+    private ThreeBallShooterClose threeBallShooter;
     private Robot robot;
     private long shootStartTime = 0;
     private long settleStartTime = 0;
@@ -39,7 +39,7 @@ public class PedroAutonomousBlueClose extends OpMode {
         follower.setStartingPose(new Pose(33.75, 135.5, Math.toRadians(180)));
         paths = new Paths(follower);
         robot = new Robot(hardwareMap, Alliance.BLUE);
-        threeBallShooter = new ThreeBallShooter(robot.intake, robot.outtake);
+        threeBallShooter = new ThreeBallShooterClose(robot.intake, robot.outtake);
 
         robot.outtake.periodic();
         Data.setAutoPose(follower.getPose());

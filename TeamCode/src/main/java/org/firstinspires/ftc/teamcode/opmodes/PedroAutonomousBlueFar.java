@@ -13,7 +13,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import org.firstinspires.ftc.teamcode.helper.Alliance;
 import org.firstinspires.ftc.teamcode.helper.Data;
-import org.firstinspires.ftc.teamcode.helper.ThreeBallShooter;
+import org.firstinspires.ftc.teamcode.helper.ThreeBallShooterFar;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.subsystems.Robot;
 
@@ -25,7 +25,7 @@ public class PedroAutonomousBlueFar extends OpMode {
     public Follower follower;
     private int pathState;
     private Paths paths;
-    private ThreeBallShooter threeBallShooter;
+    private ThreeBallShooterFar threeBallShooter;
     private Robot robot;
     private long shootStartTime = 0;
     private long settleStartTime = 0;
@@ -41,7 +41,7 @@ public class PedroAutonomousBlueFar extends OpMode {
         follower.setStartingPose(new Pose(56, 8, Math.toRadians(180)));
         paths = new Paths(follower);
         robot = new Robot(hardwareMap, Alliance.BLUE);
-        threeBallShooter = new ThreeBallShooter(robot.intake, robot.outtake);
+        threeBallShooter = new ThreeBallShooterFar(robot.intake, robot.outtake);
 
         robot.outtake.periodic();
         Data.setAutoPose(follower.getPose());
