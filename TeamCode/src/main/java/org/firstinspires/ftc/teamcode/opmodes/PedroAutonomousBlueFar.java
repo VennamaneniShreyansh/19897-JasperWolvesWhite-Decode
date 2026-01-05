@@ -81,7 +81,7 @@ public class PedroAutonomousBlueFar extends OpMode {
     public int autonomousPathUpdate() {
         switch (pathState) {
             case 0: // Shoot 3
-                robot.turret.setTurretTarget(-190);
+                robot.turret.setTurretTarget(-187);
                 robot.outtake.shootHigh();
                 robot.gate.openGate();
                 if (!follower.isBusy()) {
@@ -115,7 +115,7 @@ public class PedroAutonomousBlueFar extends OpMode {
                         stopCheckTime = System.currentTimeMillis();
                     }
 
-                    if (System.currentTimeMillis() - stopCheckTime >= 300) {
+                    if (System.currentTimeMillis() - stopCheckTime >= 500) {
                         follower.setMaxPower(.5);
                         follower.followPath(paths.Path2);
                         pathState = 2;
@@ -174,7 +174,7 @@ public class PedroAutonomousBlueFar extends OpMode {
                         stopCheckTime = System.currentTimeMillis();
                     }
 
-                    if (System.currentTimeMillis() - stopCheckTime >= 200) {
+                    if (System.currentTimeMillis() - stopCheckTime >= 500) {
                         robot.intakeOff();
                         follower.followPath(paths.Path4);
                         if (System.currentTimeMillis() - stopCheckTime >= 450) {
@@ -226,15 +226,15 @@ public class PedroAutonomousBlueFar extends OpMode {
             Path1 = follower.pathBuilder().addPath(
                             new BezierLine(
                                     new Pose(56.000, 8.000),
-                                    new Pose(3.000, 8.000)
+                                    new Pose(8.000, 8.000)
                             )
                     ).setConstantHeadingInterpolation(Math.toRadians(180))
                     .build();
 
             Path2 = follower.pathBuilder().addPath(
                             new BezierLine(
-                                    new Pose(3.000, 8.000),
-                                    new Pose(60.000, 8.000)
+                                    new Pose(8.000, 8.000),
+                                    new Pose(53.000, 8.000)
                             )
                     ).setConstantHeadingInterpolation(Math.toRadians(180))
                     .build();
@@ -244,20 +244,28 @@ public class PedroAutonomousBlueFar extends OpMode {
                                     new Pose(56.000, 8.000),
                                     new Pose(56.673, 33.681),
                                     new Pose(43.543, 36.186),
-                                    new Pose(18.900, 35.700)
+                                    new Pose(15.900, 35.700)
                             )
                     ).setConstantHeadingInterpolation(Math.toRadians(180))
                     .build();
 
             Path4 = follower.pathBuilder().addPath(
                             new BezierCurve(
-                                    new Pose(18.900, 35.700),
+                                    new Pose(15.900, 35.700),
                                     new Pose(43.543, 36.186),
                                     new Pose(56.673, 33.681),
-                                    new Pose(56.000, 12.000)
+                                    new Pose(56.000, 14.000)
                             )
                     ).setConstantHeadingInterpolation(Math.toRadians(180))
                     .build();
+
+//            Path5 = follower.pathBuilder().addPath(
+//                            new BezierCurve(
+//                                    new Pose(56.000, 8.000),
+//                                    new Pose(56.000, 30.000)
+//                            )
+//                    ).setConstantHeadingInterpolation(Math.toRadians(180))
+//                    .build(); Add the autonomousPathUpdate for this path
         }
     }
 }
