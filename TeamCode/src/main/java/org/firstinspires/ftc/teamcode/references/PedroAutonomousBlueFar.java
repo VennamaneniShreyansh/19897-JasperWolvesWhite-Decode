@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.opmodes;
+package org.firstinspires.ftc.teamcode.references;
 
 import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.PanelsTelemetry;
@@ -8,8 +8,8 @@ import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
-import com.pedropathing.paths.PathConstraints;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import org.firstinspires.ftc.teamcode.helper.Alliance;
 import org.firstinspires.ftc.teamcode.helper.Data;
@@ -17,8 +17,9 @@ import org.firstinspires.ftc.teamcode.helper.ThreeBallShooterFar;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.subsystems.Robot;
 
-@Autonomous(name = "BA Far 9 Artifact", group = "Autonomous")
+@Autonomous(name = "Blue-Auto Far 9 Artifact", group = "Autonomous")
 @Configurable
+@Disabled
 public class PedroAutonomousBlueFar extends OpMode {
 
     private TelemetryManager panelsTelemetry;
@@ -117,6 +118,7 @@ public class PedroAutonomousBlueFar extends OpMode {
 
                     if (System.currentTimeMillis() - stopCheckTime >= 500) {
                         follower.setMaxPower(.5);
+                        follower.setMaxPowerScaling(.5);
                         follower.followPath(paths.Path2);
                         pathState = 2;
                         stopCheckTime = 0;

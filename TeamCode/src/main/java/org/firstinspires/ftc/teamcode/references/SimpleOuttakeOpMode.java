@@ -1,10 +1,12 @@
 package org.firstinspires.ftc.teamcode.references;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 @TeleOp(name = "Simple Outtake OpMode", group = "TeleOp")
+@Disabled
 public class SimpleOuttakeOpMode extends OpMode {
 
     private DcMotor outtakeLeft, outtakeRight;

@@ -17,8 +17,7 @@ public class ThreeBallShooterFar {
     public int stage = 0;
     public long stageStartTime = 0;
 
-    public ThreeBallShooterFar(Intake intake, Outtake outtake) {
-        this.intake = intake;
+    public ThreeBallShooterFar(Intake intake, Outtake outtake) {        this.intake = intake;
         this.outtake = outtake;
     }
 

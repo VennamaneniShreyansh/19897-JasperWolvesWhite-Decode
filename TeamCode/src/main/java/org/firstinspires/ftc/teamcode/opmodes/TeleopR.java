@@ -5,8 +5,8 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.subsystems.Robot;
 import org.firstinspires.ftc.teamcode.helper.Alliance;
 
-@TeleOp(name = "Main TeleOp", group = "TeleOp")
-public class Teleop extends OpMode {
+@TeleOp(name = "Main TeleOp Red", group = "TeleOp")
+public class TeleopR extends OpMode {
 
     private Robot robot;
     private boolean lastA = false;
@@ -15,11 +15,11 @@ public class Teleop extends OpMode {
     private boolean lastY = false;
     private boolean autoRPM = false;
 
-    private boolean autoAim = true;
+    private boolean autoAim = false;
 
     @Override
     public void init() {
-        robot = new Robot(hardwareMap, Alliance.BLUE);
+        robot = new Robot(hardwareMap, Alliance.RED);
     }
 
     @Override
@@ -48,25 +48,27 @@ public class Teleop extends OpMode {
         } else robot.adjustSpeedAutomatically(robot.getDistanceFromTarget());
 
 
-        if (gamepad2.x && !lastX) autoAim = !autoAim;
-        lastX = gamepad2.x;
+//        if (gamepad2.x && !lastX) autoAim = !autoAim;
+//        lastX = gamepad2.x;
+
+        if (gamepad2.x) robot.turret.setTurretTarget(0);
 
         if (autoAim) {
             robot.autoAim();
         }
 
-        if (Math.abs(gamepad2.left_stick_x) > 0.2) {
-            autoAim = false;
-            robot.manualTurret(gamepad2.left_stick_x * 0.2);
-        } else {
-            robot.autoTurret();
-        }
+//        if (Math.abs(gamepad2.left_stick_x) > 0.2) {
+//            autoAim = false;
+//            robot.manualTurret(gamepad2.left_stick_x * 0.2);
+//        } else {
+//            robot.autoTurret();
+//        }
 
-        if (gamepad2.start) {
-            robot.turret.off();
-            robot.turret.resetTurret();
-            robot.turret.on();
-        }
+//        if (gamepad2.start) {
+//            robot.turret.off();
+//            robot.turret.resetTurret();
+//            robot.turret.on();
+//        }
 
         if (gamepad2.a) {
             robot.setUpRapidFire();
@@ -88,10 +90,10 @@ public class Teleop extends OpMode {
         if (gamepad2.left_stick_y > 0.3) robot.hood.moveDown();
         if (gamepad2.left_stick_y < -0.3) robot.hood.moveUp();
 
-        boolean allowVision = autoAim || robot.shooterReady();
+//        boolean allowVision = autoAim || robot.shooterReady();
 
 //        robot.turret.updateWithVisionAssist(allowVision);
-        robot.periodic(allowVision);
+        robot.periodic(false);
 
         updateTelemetry();
     }
