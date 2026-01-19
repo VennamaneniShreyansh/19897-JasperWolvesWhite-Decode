@@ -113,8 +113,8 @@ public class TeleopR extends OpMode {
         telemetry.addData("Shooter Ready", robot.shooterReady());
         telemetry.addData("RPM Left", robot.outtake.getRPMLeft());
         telemetry.addData("RPM Right", robot.outtake.getRPMLeft());
-        telemetry.addData("Left Ticks", robot.outtake.getTickLeft());
-        telemetry.addData("Right Ticks", robot.outtake.getTickRight());
+//        telemetry.addData("Left Ticks", robot.outtake.getTickLeft());
+//        telemetry.addData("Right Ticks", robot.outtake.getTickRight());
         telemetry.addData("Auto RPM", autoRPM);
 
         // Intake

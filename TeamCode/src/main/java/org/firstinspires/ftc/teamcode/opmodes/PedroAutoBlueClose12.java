@@ -246,22 +246,6 @@ public class PedroAutoBlueClose12 extends OpMode {
                     }
                 }
                 break;
-
-//            case 6: // End
-//                if (!follower.isBusy()) {
-//                    if (stopCheckTime == 0) {
-//                        stopCheckTime = System.currentTimeMillis();
-//                    }
-//
-//                    if (System.currentTimeMillis() - stopCheckTime >= 200) {
-//                        robot.intakeOff();
-//                        robot.turret.setTurretTarget(0);
-//                        Data.setAutoPose(follower.getPose());
-//                        requestOpModeStop();
-//                        stopCheckTime = 0;
-//                    }
-//                }
-//                break;
             case 8: // Leave launch pad
                 if (!follower.isBusy()) {
                     if (stopCheckTime == 0) {

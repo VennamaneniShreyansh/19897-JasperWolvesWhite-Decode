@@ -13,13 +13,12 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import org.firstinspires.ftc.teamcode.helper.Alliance;
 import org.firstinspires.ftc.teamcode.helper.Data;
 import org.firstinspires.ftc.teamcode.helper.RapidFire;
-import org.firstinspires.ftc.teamcode.helper.ThreeBallShooterClose;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.subsystems.Robot;
 
-@Autonomous(name = "Blue Auto Close 15 Artifact", group = "Autonomous")
+@Autonomous(name = "Blue Auto Close 15 Park Artifact", group = "Autonomous")
 @Configurable
-public class PedroAuto15Ball extends OpMode {
+public class PedroAutoBlue15Ball extends OpMode {
 
     private TelemetryManager panelsTelemetry;
     public Follower follower;
@@ -52,7 +51,7 @@ public class PedroAuto15Ball extends OpMode {
 
     @Override
     public void start() {
-        robot.hood.set(.08, .92);
+        robot.hood.set(.05, .85);
         robot.outtake.periodic();
     }
 

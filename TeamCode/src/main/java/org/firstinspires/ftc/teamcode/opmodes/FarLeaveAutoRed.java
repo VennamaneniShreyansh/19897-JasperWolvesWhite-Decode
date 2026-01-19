@@ -51,7 +51,6 @@ public class FarLeaveAutoRed extends OpMode {
 
     @Override
     public void start() {
-        // DEFAULT SAFE / TRANSFER POSITIONS
         robot.gate.closeGate();
         robot.intakeOff();
         robot.stopShooter();
@@ -126,7 +125,7 @@ public class FarLeaveAutoRed extends OpMode {
                     .addPath(
                             new BezierLine(
                                     new Pose(56.500, 8.500).mirror(),
-                                    new Pose(35.000, 8.500).mirror()
+                                    new Pose(40.000, 8.500).mirror()
                             )
                     )
                     .setConstantHeadingInterpolation(Math.toRadians(0))

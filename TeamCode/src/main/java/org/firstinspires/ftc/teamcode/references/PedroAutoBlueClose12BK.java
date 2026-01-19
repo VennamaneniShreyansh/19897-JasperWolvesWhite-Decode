@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.opmodes;
+package org.firstinspires.ftc.teamcode.references;
 
 import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.PanelsTelemetry;
@@ -9,6 +9,7 @@ import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import org.firstinspires.ftc.teamcode.helper.Alliance;
 import org.firstinspires.ftc.teamcode.helper.Data;
@@ -18,6 +19,7 @@ import org.firstinspires.ftc.teamcode.subsystems.Robot;
 
 @Autonomous(name = "BK - Blue Auto Close 12 Artifact", group = "Autonomous")
 @Configurable
+@Disabled
 public class PedroAutoBlueClose12BK extends OpMode {
 
     private TelemetryManager panelsTelemetry;

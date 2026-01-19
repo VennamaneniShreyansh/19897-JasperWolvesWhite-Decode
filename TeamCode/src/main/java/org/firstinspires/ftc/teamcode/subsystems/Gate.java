@@ -9,7 +9,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 public class Gate {
     private final Servo servo;
 
-    public static double open = 0.61;
+    public static double open = 0.59;
     public static double close = 0.0;
 
     public Gate(HardwareMap hw) {

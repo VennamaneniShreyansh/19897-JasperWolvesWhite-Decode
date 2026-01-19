@@ -126,7 +126,7 @@ public class FarLeaveAutoBlue extends OpMode {
                     .addPath(
                             new BezierLine(
                                     new Pose(56.500, 8.500),
-                                    new Pose(35.000, 8.500)
+                                    new Pose(40.000, 8.500)
                             )
                     )
                     .setConstantHeadingInterpolation(Math.toRadians(180))

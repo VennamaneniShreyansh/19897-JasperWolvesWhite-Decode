@@ -15,7 +15,7 @@ public class TeleopB extends OpMode {
     private boolean lastY = false;
     private boolean autoRPM = false;
 
-    private boolean autoAim = false;
+    private boolean autoAim = true;
 
     @Override
     public void init() {
@@ -36,7 +36,8 @@ public class TeleopB extends OpMode {
             robot.resetDrivePos();
         }
 
-        if (gamepad2.left_bumper) robot.intakeIn();
+        if (gamepad2.left_bumper && gamepad2.right_trigger > .1 || gamepad2.left_trigger > .1) robot.intake.slowSpinIn();
+        else if (gamepad2.left_bumper) robot.intakeIn();
         else if (gamepad2.left_trigger > 0.2) robot.intakeOut();
         else if (gamepad2.left_bumper && gamepad2.a) robot.intake.slowSpinIn();
         else robot.intakeOff();
@@ -48,8 +49,8 @@ public class TeleopB extends OpMode {
         } else robot.adjustSpeedAutomatically(robot.getDistanceFromTarget());
 
 
-//        if (gamepad2.x && !lastX) autoAim = !autoAim;
-//        lastX = gamepad2.x;
+        if (gamepad2.x && !lastX) autoAim = !autoAim;
+        lastX = gamepad2.x;
 
         if (gamepad2.x) robot.turret.setTurretTarget(0);
 
@@ -57,12 +58,12 @@ public class TeleopB extends OpMode {
             robot.autoAim();
         }
 
-//        if (Math.abs(gamepad2.left_stick_x) > 0.2) {
-//            autoAim = false;
-//            robot.manualTurret(gamepad2.left_stick_x * 0.2);
-//        } else {
-//            robot.autoTurret();
-//        }
+        if (Math.abs(gamepad2.left_stick_x) > 0.2) {
+            autoAim = false;
+            robot.manualTurret(gamepad2.left_stick_x * 0.2);
+        } else {
+            robot.autoTurret();
+        }
 
 //        if (gamepad2.start) {
 //            robot.turret.off();
@@ -70,10 +71,10 @@ public class TeleopB extends OpMode {
 //            robot.turret.on();
 //        }
 
-        if (gamepad2.a) {
-            robot.setUpRapidFire();
-        }
-        lastA = gamepad2.a;
+//        if (gamepad2.a) {
+//            robot.setUpRapidFire();
+//        }
+//        lastA = gamepad2.a;
 
         if (gamepad2.b && !lastB) robot.gate.toggle();
         lastB = gamepad2.b;
@@ -113,8 +114,8 @@ public class TeleopB extends OpMode {
         telemetry.addData("Shooter Ready", robot.shooterReady());
         telemetry.addData("RPM Left", robot.outtake.getRPMLeft());
         telemetry.addData("RPM Right", robot.outtake.getRPMLeft());
-        telemetry.addData("Left Ticks", robot.outtake.getTickLeft());
-        telemetry.addData("Right Ticks", robot.outtake.getTickRight());
+//        telemetry.addData("Left Ticks", robot.outtake.getTickLeft());
+//        telemetry.addData("Right Ticks", robot.outtake.getTickRight());
         telemetry.addData("Auto RPM", autoRPM);
 
         // Intake

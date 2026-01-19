@@ -6,9 +6,9 @@ public class ThreeBallShooterFar {
     private final Intake intake;
     private final Outtake outtake;
     private static final int SPINUP_MS = 1500;    // 1.5s spinup
-    private static final int INTAKE_ON_MS = 124;  // 0.3s feed
+    private static final int INTAKE_ON_MS = 80;  // 0.3s feed
     private static final int LAST_INTAKE_ON_MS = 1000;
-    private static final int INTAKE_OFF_MS = 700; // 0.5s pause
+    private static final int INTAKE_OFF_MS = 500; // 0.5s pause
     private static final int MAX_BALLS = 3;
 
     public boolean shootingActive = false;
@@ -17,7 +17,8 @@ public class ThreeBallShooterFar {
     public int stage = 0;
     public long stageStartTime = 0;
 
-    public ThreeBallShooterFar(Intake intake, Outtake outtake) {        this.intake = intake;
+    public ThreeBallShooterFar(Intake intake, Outtake outtake) {
+        this.intake = intake;
         this.outtake = outtake;
     }
 
@@ -27,7 +28,7 @@ public class ThreeBallShooterFar {
         ballsShot = 0;
         stage = 0;
         stageStartTime = System.currentTimeMillis();
-        outtake.shootHigh(); // Start flywheel
+        outtake.shootLow(); // Start flywheel
     }
 
     public boolean isActive() { return shootingActive && !shootingDone; }
@@ -67,7 +68,7 @@ public class ThreeBallShooterFar {
                         shootingActive = false;
                         shootingDone = true;
                         intake.spinOff();
-                        outtake.shootHigh();
+                        outtake.shootLow();
                     } else {
                         stage = 1;
                         stageStartTime = now;

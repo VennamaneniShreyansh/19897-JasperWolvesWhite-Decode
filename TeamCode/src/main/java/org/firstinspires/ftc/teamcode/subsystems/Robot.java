@@ -22,7 +22,7 @@ public class Robot {
     private final LynxModule hub;
 
     public static Pose defaultPose = new Pose(56.5, 8.5, Math.toRadians(90)); // Blue allience park zone
-    public static Pose shootTarget = new Pose(11, 137.5, 0);
+    public static Pose shootTarget = new Pose(3.78, 140.5, 0);
 
     public Robot(HardwareMap hw, Alliance alliance) {
         this.alliance = alliance;
@@ -131,7 +131,7 @@ public void adjustSpeedAutomatically(double distInches) {
         drivetrain.periodic();
         turret.periodic();
         turret.updateWithVisionAssist(allowVision);
-//        outtake.periodic();
+        outtake.periodic();
     }
 
     public void setUpRapidFire() {
@@ -159,12 +159,12 @@ public void adjustSpeedAutomatically(double distInches) {
 
     public void shootHigh() {
         outtake.shootHigh();
-        hood.set(.1, .9);
+//        hood.set(.1, .9);
     }
 
     public void shootLow() {
         outtake.shootLow();
-        hood.set(.1, .9);
+//        hood.set(.1, .9);
     }
 
     public void stopShooter() {
