@@ -15,6 +15,10 @@ import org.firstinspires.ftc.teamcode.helper.Data;
 import org.firstinspires.ftc.teamcode.helper.ThreeBallShooterClose;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.subsystems.Robot;
+import org.firstinspires.ftc.teamcode.pedroPathing.Tuning;  // Has draw() methods
+//import org.firstinspires.ftc.teamcode.pedroPathing.Drawing; // Path visualization
+import org.firstinspires.ftc.teamcode.pedroPathing.Tuning.*;
+
 
 @Autonomous(name = "Blue Auto Close 12 Artifact", group = "Autonomous")
 @Configurable
@@ -67,6 +71,8 @@ public class PedroAutoBlueClose12 extends OpMode {
 
         pathState = autonomousPathUpdate();
 
+//        Tuning.draw();
+//        Tuning.drawOnlyCurrent();
         panelsTelemetry.debug("Path State", pathState);
         panelsTelemetry.debug("Shooter Stage", threeBallShooter.stage);
         panelsTelemetry.debug("Outtake RPM L", robot.outtake.getRPMLeft());

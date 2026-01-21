@@ -1,4 +1,3 @@
-
 package org.firstinspires.ftc.teamcode.opmodes;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -254,7 +253,7 @@ public class BlueAuto12Gate extends OpMode {
 
                     if (System.currentTimeMillis() - stopCheckTime >= 300) {
                         follower.followPath(paths.ToShoot2);
-                        follower.setMaxPowerScaling(1);
+                        follower.setMaxPowerScaling(.5);
                         pathState = 3;
                         stopCheckTime = 0;
                         settleStartTime = 0;

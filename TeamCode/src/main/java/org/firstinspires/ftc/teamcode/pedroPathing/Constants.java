@@ -43,7 +43,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 //            .rightRearMotorDirection(DcMotorSimple.Direction.FORWARD)
 //            .xVelocity(75.2125)
 //            .yVelocity(60.0761)
-
+//
 //            ;
 //
 //    public static TwoWheelConstants localizerConstants = new TwoWheelConstants()
@@ -79,12 +79,12 @@ public class Constants {
             .forwardZeroPowerAcceleration(-40.195562029)
             .lateralZeroPowerAcceleration(-55.88776139)
             .translationalPIDFCoefficients(new PIDFCoefficients(0.05, 0, 0.00067, 0.04))
-            .headingPIDFCoefficients(new PIDFCoefficients(.67, 0, .042, .001))
-            .drivePIDFCoefficients(new FilteredPIDFCoefficients(0.03, 0, 0.00195, 0.6, 0.01))
+            .headingPIDFCoefficients(new PIDFCoefficients(.8, 0, 0.0001, .001))
+            .drivePIDFCoefficients(new FilteredPIDFCoefficients(0.035, 0, 0.00195, 0.6, 0.01))
             .centripetalScaling(0.0003)
             ;
 
-    public static PathConstraints pathConstraints = new PathConstraints(0.99, 100, 1, 1);
+    public static PathConstraints pathConstraints = new PathConstraints(0.99, 100, 1.6, 3);
 
     public static Follower createFollower(HardwareMap hardwareMap) {
         return new FollowerBuilder(followerConstants, hardwareMap)
@@ -94,8 +94,9 @@ public class Constants {
                 .build();
     }
     public static PinpointConstants localizerConstants = new PinpointConstants()
-            .strafePodX(-4.18)
-            .forwardPodY(-6.49)
+            // --, ++, +-, -+
+            .strafePodX(4.18)
+            .forwardPodY(-5.6525)
             .distanceUnit(DistanceUnit.INCH)
             .hardwareMapName("pinpoint")
             .encoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD)

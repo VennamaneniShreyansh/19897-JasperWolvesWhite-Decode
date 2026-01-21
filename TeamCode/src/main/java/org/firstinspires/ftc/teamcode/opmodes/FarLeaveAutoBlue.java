@@ -16,6 +16,10 @@ import org.firstinspires.ftc.teamcode.helper.Data;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.subsystems.Robot;
 
+import com.acmerobotics.dashboard.config.Config;
+
+@Config
+
 @Autonomous(name = "Far Leave Auto Blue", group = "Autonomous")
 @Configurable
 public class FarLeaveAutoBlue extends OpMode {
