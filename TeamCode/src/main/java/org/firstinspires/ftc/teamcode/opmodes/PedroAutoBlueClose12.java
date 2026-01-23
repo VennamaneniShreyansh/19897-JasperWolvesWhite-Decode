@@ -1,5 +1,9 @@
 package org.firstinspires.ftc.teamcode.opmodes;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.canvas.Canvas;
+import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.bylazar.telemetry.TelemetryManager;
@@ -7,6 +11,7 @@ import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
+import com.pedropathing.math.Vector;
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -22,6 +27,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Tuning.*;
 
 @Autonomous(name = "Blue Auto Close 12 Artifact", group = "Autonomous")
 @Configurable
+@Config
 public class PedroAutoBlueClose12 extends OpMode {
 
     private TelemetryManager panelsTelemetry;
@@ -35,6 +41,37 @@ public class PedroAutoBlueClose12 extends OpMode {
     private long stopCheckTime = 0;
     private static final long SETTLE_MS = 50;
 
+    public void drawRobot(Canvas canvas, Pose pose) {
+        Pose newPose = PedroToFTC(pose.getX(), pose.getY(), pose.getHeading());
+        canvas.strokeCircle(newPose.getX(), newPose.getY(), 9);
+        Vector v = newPose.getHeadingAsUnitVector().times(9);
+        double x1 = newPose.getX() + v.getXComponent() / 2, y1 = newPose.getY() + v.getYComponent() / 2;
+        double x2 = newPose.getX() + v.getXComponent(), y2 = newPose.getY() + v.getYComponent();
+        canvas.strokeLine(x1, y1, x2, y2);
+    }
+    public double angleWrap(double heading) {
+        while (heading >= Math.PI) {
+            heading -= Math.PI;
+        }
+        while (heading < -Math.PI) {
+            heading += Math.PI;
+        }
+        return heading;
+    }
+    public Pose PedroToFTC(double pedroX, double pedroY, double pedroHeading) {
+        // 1. Convert position
+        double ftcY = -72 + pedroX;   // FTC +Y → Pedro +X
+        double ftcX = 72 - pedroY;   // FTC +X (down) → Pedro -Y (up)
+
+        // 2. Convert heading
+        double ftcHeading = pedroHeading + Math.PI / 2;
+
+        // 3. Normalize to 0 → 2π
+        ftcHeading %= 2 * Math.PI;
+        ftcHeading = angleWrap(ftcHeading);
+
+        return new Pose(ftcX, ftcY, ftcHeading);
+    }
 
     @Override
     public void init() {
@@ -42,7 +79,7 @@ public class PedroAutoBlueClose12 extends OpMode {
         follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(new Pose(33.75, 135.5, Math.toRadians(180)));
         paths = new Paths(follower);
-        robot = new Robot(hardwareMap, Alliance.BLUE);
+        robot = new Robot(hardwareMap, Alliance.BLUE, false);
         threeBallShooter = new ThreeBallShooterClose(robot.intake, robot.outtake);
 
         robot.outtake.periodic();
@@ -73,6 +110,13 @@ public class PedroAutoBlueClose12 extends OpMode {
 
 //        Tuning.draw();
 //        Tuning.drawOnlyCurrent();
+        try {
+                TelemetryPacket packet = new TelemetryPacket();
+                drawRobot(packet.fieldOverlay(), follower.getPose());
+                FtcDashboard.getInstance().sendTelemetryPacket(packet);
+            } catch (RuntimeException e) {
+                e.printStackTrace();
+            }
         panelsTelemetry.debug("Path State", pathState);
         panelsTelemetry.debug("Shooter Stage", threeBallShooter.stage);
         panelsTelemetry.debug("Outtake RPM L", robot.outtake.getRPMLeft());

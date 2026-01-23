@@ -272,6 +272,9 @@ public class Outtake {
         left.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         right.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
+        left.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        right.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+
         stop();
     }
 
@@ -316,6 +319,8 @@ public class Outtake {
         double errorR = targetRPM - rightVel;
 
         if (Math.abs(errorL) <= RPM_TOLERANCE && Math.abs(errorR) <= RPM_TOLERANCE) {
+            left.setPower(0);
+            right.setPower(0);
             return;
         }
 

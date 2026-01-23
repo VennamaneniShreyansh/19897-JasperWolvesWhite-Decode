@@ -13,9 +13,8 @@ public class Drivetrain {
     private Follower follower;
     private final Alliance alliance;
     public boolean hold = false, fieldCentric = false;
-    public Drivetrain(HardwareMap hardwareMap, Alliance a, Pose start) {
+    public Drivetrain(HardwareMap hardwareMap, Alliance a) {
         follower = Constants.createFollower(hardwareMap);
-        follower.setStartingPose(start);
 
         this.alliance = a;
     }

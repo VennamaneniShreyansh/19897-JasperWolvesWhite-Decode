@@ -19,10 +19,35 @@ public class Robot {
     public final Hood hood;
 
     public final Alliance alliance;
-    private final LynxModule hub;
 
     public static Pose defaultPose = new Pose(56.5, 8.5, Math.toRadians(90)); // Blue allience park zone
     public static Pose shootTarget = new Pose(3.78, 140.5, 0);
+
+    public Robot(HardwareMap hw, Alliance alliance, boolean drivetrainOn) {
+        this.alliance = alliance;
+
+        Pose startPose;
+//
+        if (alliance == Alliance.RED) {
+            shootTarget = new Pose(11, 137.5, 0).mirror();
+            defaultPose = defaultPose.mirror();
+        }
+
+        if (Data.hasAutoData && Data.getAutoEndPose() != null) {
+            startPose = Data.getAutoEndPose();
+        } else {
+            startPose = defaultPose;
+        }
+
+        intake = new Intake(hw);
+        outtake = new Outtake(hw);
+        turret = new Turret(hw);
+        feeder = new Feeder(hw);
+        gate = new Gate(hw);
+        hood = new Hood(hw);
+
+        drivetrain = null;
+    }
 
     public Robot(HardwareMap hw, Alliance alliance) {
         this.alliance = alliance;
@@ -42,8 +67,7 @@ public class Robot {
 
         drivetrain = new Drivetrain(
                 hw,
-                alliance,
-                startPose
+                alliance
         );
 
         intake = new Intake(hw);
@@ -53,14 +77,10 @@ public class Robot {
         gate = new Gate(hw);
         hood = new Hood(hw);
 
-        hub = hw.getAll(LynxModule.class).get(0);
-        hub.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
-
         drivetrain.startDrive();
     }
 
     public void autoPeriodic() {
-        hub.clearBulkCache();
         turret.updateWithVisionAssist(true);
         outtake.periodic();
     }
@@ -127,7 +147,6 @@ public void adjustSpeedAutomatically(double distInches) {
 
 
     public void periodic(boolean allowVision) {
-        hub.clearBulkCache();
         drivetrain.periodic();
         turret.periodic();
         turret.updateWithVisionAssist(allowVision);
