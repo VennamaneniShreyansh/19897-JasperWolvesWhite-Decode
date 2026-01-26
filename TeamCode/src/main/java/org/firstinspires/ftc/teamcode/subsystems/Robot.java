@@ -117,24 +117,28 @@ public class Robot {
 //    }
 
 public void adjustSpeedAutomatically(double distInches) {
-    // left hood position (quadratic):
-    // y = 0.0000239184x^2 - 0.000945151x + 0.00533069
-    double leftPos =
-            0.0000239184 * distInches * distInches
-                    - 0.000945151 * distInches
-                    + 0.00533069;
 
-    // shooter rpm (quartic):
-    // y = -0.00036334x^4 + 0.0985122x^3 - 9.46482x^2 + 388.98258x - 1928.21211
+    // LEFT hood servo (quartic)
+    // y = 6.83688e-8 x^4 - 0.0000245371 x^3 + 0.00314857 x^2 - 0.16488 x + 3.00982
+    double leftPos =
+            (6.83688e-8) * Math.pow(distInches, 4)
+                    - 0.0000245371 * Math.pow(distInches, 3)
+                    + 0.00314857 * distInches * distInches
+                    - 0.16488 * distInches
+                    + 3.00982;
+
+    // SHOOTER RPM (quartic)
+    // y = -0.0000822196 x^4 + 0.0312467 x^3 - 4.40085 x^2 + 290.04881 x - 3290.83485
     double rpm =
-            -0.00036334 * Math.pow(distInches, 4)
-                    + 0.0985122  * Math.pow(distInches, 3)
-                    - 9.46482    * distInches * distInches
-                    + 388.98258  * distInches
-                    - 1928.21211;
+            -0.0000822196 * Math.pow(distInches, 4)
+                    + 0.0312467  * Math.pow(distInches, 3)
+                    - 4.40085    * distInches * distInches
+                    + 290.04881  * distInches
+                    - 3290.83485;
 
     double rightPos = 1.0 - leftPos;
 
+    // Safety clamps
     rpm = Math.max(0, rpm);
     leftPos  = Math.max(0.0, Math.min(1.0, leftPos));
     rightPos = Math.max(0.0, Math.min(1.0, rightPos));
@@ -142,6 +146,7 @@ public void adjustSpeedAutomatically(double distInches) {
     outtake.setTargetRPM(rpm);
     hood.set(leftPos, rightPos);
 }
+
 
 
 
