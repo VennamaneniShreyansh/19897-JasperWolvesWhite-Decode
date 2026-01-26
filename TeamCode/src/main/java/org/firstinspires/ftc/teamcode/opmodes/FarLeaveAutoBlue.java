@@ -39,10 +39,9 @@ public class FarLeaveAutoBlue extends OpMode {
 
         follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(new Pose(56.5, 8.5, Math.toRadians(180)));
+        paths = new FarLeaveAutoBlue.Paths(follower);
 
-        paths = new Paths(follower);
-
-        robot = new Robot(hardwareMap, Alliance.BLUE);
+        robot = new Robot(hardwareMap, Alliance.BLUE, false);
 
         robot.outtake.periodic();
         Data.setAutoPose(follower.getPose());
@@ -55,7 +54,6 @@ public class FarLeaveAutoBlue extends OpMode {
 
     @Override
     public void start() {
-        // DEFAULT SAFE / TRANSFER POSITIONS
         robot.gate.closeGate();
         robot.intakeOff();
         robot.stopShooter();
@@ -72,6 +70,7 @@ public class FarLeaveAutoBlue extends OpMode {
         follower.setMaxPower(.5);
 
         pathState = autonomousPathUpdate();
+        Data.setAutoPose(follower.getPose());
 
         panelsTelemetry.debug("Path State", pathState);
         panelsTelemetry.debug("X", follower.getPose().getX());

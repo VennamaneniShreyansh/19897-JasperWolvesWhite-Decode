@@ -1,4 +1,7 @@
 package org.firstinspires.ftc.teamcode.opmodes;
+import com.acmerobotics.dashboard.canvas.Canvas;
+import com.acmerobotics.dashboard.config.Config;
+import com.pedropathing.math.Vector;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.bylazar.configurables.annotations.Configurable;
@@ -20,6 +23,7 @@ import com.pedropathing.geometry.Pose;
 
 @Autonomous(name = "Blue Auto 12 Gate", group = "Autonomous")
 @Configurable // Panels
+@Config
 public class BlueAuto12Gate extends OpMode {
     private TelemetryManager panelsTelemetry; // Panels Telemetry instance
     public Follower follower; // Pedro Pathing follower instance
@@ -32,13 +36,45 @@ public class BlueAuto12Gate extends OpMode {
     private long stopCheckTime = 0;
     private static final long SETTLE_MS = 50;
 
+    public void drawRobot(Canvas canvas, Pose pose) {
+        Pose newPose = PedroToFTC(pose.getX(), pose.getY(), pose.getHeading());
+        canvas.strokeCircle(newPose.getX(), newPose.getY(), 9);
+        Vector v = newPose.getHeadingAsUnitVector().times(9);
+        double x1 = newPose.getX() + v.getXComponent() / 2, y1 = newPose.getY() + v.getYComponent() / 2;
+        double x2 = newPose.getX() + v.getXComponent(), y2 = newPose.getY() + v.getYComponent();
+        canvas.strokeLine(x1, y1, x2, y2);
+    }
+    public double angleWrap(double heading) {
+        while (heading >= Math.PI) {
+            heading -= Math.PI;
+        }
+        while (heading < -Math.PI) {
+            heading += Math.PI;
+        }
+        return heading;
+    }
+    public Pose PedroToFTC(double pedroX, double pedroY, double pedroHeading) {
+        // 1. Convert position
+        double ftcY = -72 + pedroX;   // FTC +Y → Pedro +X
+        double ftcX = 72 - pedroY;   // FTC +X (down) → Pedro -Y (up)
+
+        // 2. Convert heading
+        double ftcHeading = pedroHeading + Math.PI / 2;
+
+        // 3. Normalize to 0 → 2π
+        ftcHeading %= 2 * Math.PI;
+        ftcHeading = angleWrap(ftcHeading);
+
+        return new Pose(ftcX, ftcY, ftcHeading);
+    }
+
     @Override
     public void init() {
         panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();
         follower = Constants.createFollower(hardwareMap);
-        follower.setStartingPose(new Pose(33.863, 135.233, Math.toRadians(180)));
+        follower.setStartingPose(new Pose(33.75, 135.5, Math.toRadians(180)));
         paths = new BlueAuto12Gate.Paths(follower);
-        robot = new Robot(hardwareMap, Alliance.BLUE);
+        robot = new Robot(hardwareMap, Alliance.BLUE, false);
         threeBallShooter = new RapidFire(robot.intake, robot.outtake);
 
         robot.outtake.periodic();
@@ -51,7 +87,7 @@ public class BlueAuto12Gate extends OpMode {
 
     @Override
     public void start() {
-        robot.hood.set(.05, .95);
+        robot.hood.set(.23, .77);
         robot.outtake.periodic();
     }
 
@@ -105,7 +141,7 @@ public class BlueAuto12Gate extends OpMode {
                             new BezierCurve(
                                     new Pose(53.000, 90.000),
                                     new Pose(45.500, 84.500),
-                                    new Pose(19.500, 84.000)
+                                    new Pose(23.000, 84.000)
                             )
                     ).setConstantHeadingInterpolation(Math.toRadians(180))
 
@@ -252,8 +288,8 @@ public class BlueAuto12Gate extends OpMode {
                     }
 
                     if (System.currentTimeMillis() - stopCheckTime >= 300) {
-                        follower.followPath(paths.ToShoot2);
-                        follower.setMaxPowerScaling(.5);
+                        follower.followPath(paths.OpenGate);
+                        follower.setMaxPowerScaling(.4);
                         pathState = 3;
                         stopCheckTime = 0;
                         settleStartTime = 0;

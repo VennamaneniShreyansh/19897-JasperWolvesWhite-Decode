@@ -40,34 +40,23 @@ public class Drivetrain {
         hold = true;
     }
 
-    public void releaseHold() {
-        hold = false;
-    }
-
-    public void teleToggleCentric() {
-        fieldCentric = !fieldCentric;
-    }
-
     public void cornerReset() {
         if (alliance.isBlue())
-            follower.setPose(new Pose(8.5, 8.5, Math.toRadians(90)).mirror()); // Blue park
+            follower.setPose(new Pose(8.5, 8.5, Math.toRadians(90)).mirror());
         else
             follower.setPose(new Pose(8.5, 8.5, Math.toRadians(90)));
     }
-
+    public void goalReset() {
+        if (alliance.isBlue()) {
+            follower.setPose(new Pose(32.5, 135, Math.toRadians(180)));
+        } else follower.setPose(new Pose(32.5, 135, Math.toRadians(180)).mirror());
+    }
 
     public void setStart(Pose start) {
         follower.setStartingPose(start);
     }
-
     public Pose getPose() {
         return follower.getPose();
     }
-
-
-    public double getT() {
-        return follower.getCurrentTValue();
-    }
-
     public Follower getFollower() { return follower;}
 }

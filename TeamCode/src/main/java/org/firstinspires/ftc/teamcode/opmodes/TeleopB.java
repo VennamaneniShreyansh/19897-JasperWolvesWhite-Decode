@@ -36,10 +36,13 @@ public class TeleopB extends OpMode {
             robot.resetDrivePos();
         }
 
-        if (gamepad2.left_bumper && gamepad2.right_trigger > .1 || gamepad2.left_trigger > .1) robot.intake.slowSpinIn();
+        if (gamepad1.a) {
+            robot.resetDrivePosAtGoal();
+        }
+
+        if (gamepad2.left_bumper && gamepad2.right_trigger > .1 && gamepad2.right_bumper) robot.intake.slowSpinIn();
         else if (gamepad2.left_bumper) robot.intakeIn();
         else if (gamepad2.left_trigger > 0.2) robot.intakeOut();
-        else if (gamepad2.left_bumper && gamepad2.a) robot.intake.slowSpinIn();
         else robot.intakeOff();
 
         if (!autoRPM) {
@@ -65,12 +68,6 @@ public class TeleopB extends OpMode {
             robot.autoTurret();
         }
 
-//        if (gamepad2.start) {
-//            robot.turret.off();
-//            robot.turret.resetTurret();
-//            robot.turret.on();
-//        }
-
 //        if (gamepad2.a) {
 //            robot.setUpRapidFire();
 //        }
@@ -86,14 +83,9 @@ public class TeleopB extends OpMode {
         lastY = gamepad2.y;
 
 
-        if (gamepad2.dpad_up) robot.hood.moveUp();
-        else if (gamepad2.dpad_down) robot.hood.moveDown();
-        if (gamepad2.left_stick_y > 0.3) robot.hood.moveDown();
-        if (gamepad2.left_stick_y < -0.3) robot.hood.moveUp();
+        if (gamepad2.dpadUpWasPressed()) robot.hood.moveUp();
+        else if (gamepad2.dpadDownWasPressed()) robot.hood.moveDown();
 
-//        boolean allowVision = autoAim || robot.shooterReady();
-
-//        robot.turret.updateWithVisionAssist(allowVision);
         robot.periodic(false);
 
         updateTelemetry();
@@ -114,8 +106,8 @@ public class TeleopB extends OpMode {
         telemetry.addData("Shooter Ready", robot.shooterReady());
         telemetry.addData("RPM Left", robot.outtake.getRPMLeft());
         telemetry.addData("RPM Right", robot.outtake.getRPMLeft());
-//        telemetry.addData("Left Ticks", robot.outtake.getTickLeft());
-//        telemetry.addData("Right Ticks", robot.outtake.getTickRight());
+        telemetry.addData("Left Ticks", robot.outtake.getTickLeft());
+        telemetry.addData("Right Ticks", robot.outtake.getTickRight());
         telemetry.addData("Auto RPM", autoRPM);
 
         // Intake

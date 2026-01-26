@@ -65,11 +65,12 @@ public class Robot {
             startPose = defaultPose;
         }
 
+
         drivetrain = new Drivetrain(
                 hw,
                 alliance
         );
-
+        drivetrain.setStart(startPose);
         intake = new Intake(hw);
         outtake = new Outtake(hw);
         turret = new Turret(hw);
@@ -178,7 +179,6 @@ public void adjustSpeedAutomatically(double distInches) {
 
     public void shootHigh() {
         outtake.shootHigh();
-//        hood.set(.1, .9);
     }
 
     public void shootLow() {
@@ -189,20 +189,17 @@ public void adjustSpeedAutomatically(double distInches) {
     public void stopShooter() {
         outtake.stop();
     }
-
     public boolean shooterReady() {
         return outtake.atTarget();
     }
-
     public void resetDrivePos() {
         drivetrain.cornerReset();
     }
+    public void resetDrivePosAtGoal() {drivetrain.goalReset();}
 
     public void intakeIn()  { intake.spinIn(); }
     public void intakeOut() { intake.spinOut(); }
     public void intakeOff() { intake.spinOff(); }
-
-
     public Pose getPose() {
         return drivetrain.getPose();
     }

@@ -49,7 +49,7 @@ public class Turret {
     }
 
     public void setTurretTarget(double ticks) {
-        target = Math.max(-345, Math.min(345, ticks));
+        target = Math.max(-350, Math.min(345, ticks));
     }
 
 
