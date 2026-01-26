@@ -138,10 +138,16 @@ public class Turret {
     public void addYaw(double radians) { setYaw(getYaw() + radians); }
 
     public void face(Pose targetPose, Pose robotPose) {
-        double angleToTargetFromCenter = Math.atan2(targetPose.getY() - robotPose.getY(), targetPose.getX() - robotPose.getX());
-        double robotAngleDiff = normalizeAngle(angleToTargetFromCenter - robotPose.getHeading());
-        setYaw(robotAngleDiff);
+        double dx = targetPose.getX() - robotPose.getX();
+        double dy = targetPose.getY() - robotPose.getY();
+
+        double targetAngle = Math.atan2(dy, dx);
+        double turretYaw = normalizeAngle(targetAngle -
+                robotPose.getHeading());
+
+        setYaw(turretYaw);
     }
+
 
     public void resetTurret() {
         m.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);

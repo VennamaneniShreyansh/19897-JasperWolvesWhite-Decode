@@ -149,7 +149,7 @@ public class BlueAuto12Gate extends OpMode {
 
             OpenGate = follower.pathBuilder().addPath(
                             new BezierCurve(
-                                    new Pose(19.500, 84.000),
+                                    new Pose(23.000, 84.000),
                                     new Pose(20.665, 77.659),
                                     new Pose(16.500, 72.500)
                             )
@@ -272,8 +272,8 @@ public class BlueAuto12Gate extends OpMode {
 
                     if (System.currentTimeMillis() - stopCheckTime >= 300) {
                         robot.intakeOff();
-                        follower.followPath(paths.ToShoot2);
-                        follower.setMaxPowerScaling(1);
+                        follower.setMaxPowerScaling(.4);
+                        follower.followPath(paths.OpenGate);
                         pathState = 10;
                         stopCheckTime = 0;
                         settleStartTime = 0;
@@ -288,8 +288,8 @@ public class BlueAuto12Gate extends OpMode {
                     }
 
                     if (System.currentTimeMillis() - stopCheckTime >= 300) {
-                        follower.followPath(paths.OpenGate);
-                        follower.setMaxPowerScaling(.4);
+                        follower.setMaxPowerScaling(1);
+                        follower.followPath(paths.ToShoot2);
                         pathState = 3;
                         stopCheckTime = 0;
                         settleStartTime = 0;
