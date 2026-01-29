@@ -227,7 +227,7 @@ public class BlueAuto12Gate extends OpMode {
 
             case 0: // Go to First Shoot
                 robot.turret.setTurretTarget(-123);
-                robot.outtake.shootLow();
+                robot.shootLow();
                 if (!follower.isBusy()) {
                     robot.gate.closeGate();
                     follower.followPath(paths.ToShoot);
