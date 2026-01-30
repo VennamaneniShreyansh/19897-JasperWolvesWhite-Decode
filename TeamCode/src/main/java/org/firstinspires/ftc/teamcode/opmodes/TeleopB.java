@@ -68,11 +68,6 @@ public class TeleopB extends OpMode {
             robot.autoTurret();
         }
 
-//        if (gamepad2.a) {
-//            robot.setUpRapidFire();
-//        }
-//        lastA = gamepad2.a;
-
         if (gamepad2.b && !lastB) robot.gate.toggle();
         lastB = gamepad2.b;
 

@@ -77,14 +77,10 @@ public class Turret {
         m.setPower(power);
     }
 
-    public void updateWithVisionAssist(boolean outtakeRunning) {
+    public void updateWithVisionAssist() {
         if (manual) {
             periodic();
             return;
-        }
-
-        if (outtakeRunning && visionEnabled) {
-            limelightAimAssist();
         }
         periodic();
     }

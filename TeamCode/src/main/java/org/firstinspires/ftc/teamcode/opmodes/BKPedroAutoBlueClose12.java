@@ -13,34 +13,40 @@ import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.math.Vector;
 import com.pedropathing.paths.PathChain;
+import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.util.ElapsedTime;
+
 import org.firstinspires.ftc.teamcode.helper.Alliance;
 import org.firstinspires.ftc.teamcode.helper.Data;
-import org.firstinspires.ftc.teamcode.helper.RapidFire;
 import org.firstinspires.ftc.teamcode.helper.ThreeBallShooterClose;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.subsystems.Robot;
-import org.firstinspires.ftc.teamcode.pedroPathing.Tuning;  // Has draw() methods
+
+import java.util.List;
 //import org.firstinspires.ftc.teamcode.pedroPathing.Drawing; // Path visualization
-import org.firstinspires.ftc.teamcode.pedroPathing.Tuning.*;
 
 
 @Autonomous(name = "Blue Auto Close 12 Artifact", group = "Autonomous")
 @Configurable
 @Config
-public class PedroAutoBlueClose12 extends OpMode {
+public class BKPedroAutoBlueClose12 extends OpMode {
 
     private TelemetryManager panelsTelemetry;
     public Follower follower;
     private int pathState;
     private Paths paths;
     private Robot robot;
-    private RapidFire threeBallShooter;
+    private ThreeBallShooterClose threeBallShooter;
     private long shootStartTime = 0;
     private long settleStartTime = 0;
     private long stopCheckTime = 0;
     private static final long SETTLE_MS = 50;
+
+    private ElapsedTime loopTimer = new ElapsedTime();
+    private int loopCount = 0;
+    private double avgLoopTimeMs = 0;
 
     public void drawRobot(Canvas canvas, Pose pose) {
         Pose newPose = PedroToFTC(pose.getX(), pose.getY(), pose.getHeading());
@@ -76,14 +82,19 @@ public class PedroAutoBlueClose12 extends OpMode {
 
     @Override
     public void init() {
-        panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();
+//        panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();
+
+        List<LynxModule> hubs = hardwareMap.getAll(LynxModule.class);
+        for (LynxModule hub : hubs) {
+            hub.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
+        }
+
         follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(new Pose(33.75, 135.5, Math.toRadians(180)));
         paths = new Paths(follower);
         robot = new Robot(hardwareMap, Alliance.BLUE, false);
-        threeBallShooter = new RapidFire(robot.intake, robot.outtake);
+        threeBallShooter = new ThreeBallShooterClose(robot.intake, robot.outtake);
 
-//        robot.outtake.periodic();
         Data.setAutoPose(follower.getPose());
 
         panelsTelemetry.debug("Status", "Initialized");
@@ -93,45 +104,46 @@ public class PedroAutoBlueClose12 extends OpMode {
 
     @Override
     public void start() {
-        robot.hood.set(.1, .9);
+        robot.hood.set(.15, .85);
         robot.outtake.periodic();
     }
 
+    private int loopCounter = 0;
+
     @Override
     public void loop() {
-        follower.update();
+        loopTimer.reset();
 
-//        robot.outtake.periodic();
+        follower.update();
         robot.autoPeriodic();
         threeBallShooter.update();
-
         Data.setAutoPose(follower.getPose());
-
         pathState = autonomousPathUpdate();
         robot.shootLow();
 
-//        Tuning.draw();
-//        Tuning.drawOnlyCurrent();
-        try {
-                TelemetryPacket packet = new TelemetryPacket();
-                drawRobot(packet.fieldOverlay(), follower.getPose());
-                FtcDashboard.getInstance().sendTelemetryPacket(packet);
-            } catch (RuntimeException e) {
-                e.printStackTrace();
+        if (++loopCounter % 10 == 0) {
+            for (LynxModule hub : hardwareMap.getAll(LynxModule.class)) {
+                hub.clearBulkCache();
             }
-        panelsTelemetry.debug("Path State", pathState);
-        panelsTelemetry.debug("Shooter Stage", threeBallShooter.stage);
+        }
+
+        // Calculate loop time (in ms)
+        double loopTimeMs = loopTimer.milliseconds();
+
+        // Running average (every 10 loops)
+        if (++loopCount > 10) {
+            avgLoopTimeMs = (avgLoopTimeMs * 0.9) + (loopTimeMs * 0.1);
+            loopCount = 0;
+        }
+        panelsTelemetry.debug("Loop Time", String.format("%.1fms", loopTimeMs));
+        panelsTelemetry.debug("Avg Loop", String.format("%.1fms", avgLoopTimeMs));
+
         panelsTelemetry.debug("Outtake RPM L", robot.outtake.getRPMLeft());
         panelsTelemetry.debug("Outtake RPM R", robot.outtake.getRPMRight());
         panelsTelemetry.debug("Outtake Target", robot.outtake.targetRPM);
-        panelsTelemetry.debug("Shooter enabled", robot.outtake.isEnabled());
-        panelsTelemetry.debug("Shooter target", robot.outtake.targetRPM);
-
-        panelsTelemetry.debug("At Target", robot.outtake.atTarget());
-        panelsTelemetry.debug("X", follower.getPose().getX());
-        panelsTelemetry.debug("Y", follower.getPose().getY());
         panelsTelemetry.update(telemetry);
     }
+
 
     public int autonomousPathUpdate() {
         switch (pathState) {
@@ -167,7 +179,7 @@ public class PedroAutoBlueClose12 extends OpMode {
                             settleStartTime = 0;
                             robot.gate.closeGate();
                             robot.intakeIn();
-                            follower.setMaxPower(.9);
+                            follower.setMaxPower(1);
                             follower.followPath(paths.IntakeFirstSet);
                             pathState = 2;
                         }
@@ -212,7 +224,7 @@ public class PedroAutoBlueClose12 extends OpMode {
                             settleStartTime = 0;
                             robot.gate.closeGate();
                             robot.intakeIn();
-                            follower.setMaxPower(.9);
+                            follower.setMaxPower(1);
                             follower.followPath(paths.IntakeSecondSet);
                             pathState = 4;
                         }
@@ -257,7 +269,7 @@ public class PedroAutoBlueClose12 extends OpMode {
                             settleStartTime = 0;
                             robot.gate.closeGate();
                             robot.intakeIn();
-                            follower.setMaxPower(.9);
+                            follower.setMaxPower(1);
                             follower.followPath(paths.IntakeThirdSet);
                             pathState = 6;
                         }

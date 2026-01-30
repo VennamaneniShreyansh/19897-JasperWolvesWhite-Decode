@@ -18,7 +18,7 @@ import org.firstinspires.ftc.teamcode.subsystems.Robot;
 
 @Autonomous(name = "Red Auto Close 12 Artifact", group = "Autonomous")
 @Configurable
-public class PedroAutoRedClose12 extends OpMode {
+public class BKPedroAutoRedClose12 extends OpMode {
 
     private TelemetryManager panelsTelemetry;
     public Follower follower;
@@ -38,7 +38,7 @@ public class PedroAutoRedClose12 extends OpMode {
         follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(new Pose(33.75, 135.5, Math.toRadians(180)).mirror());
         paths = new Paths(follower);
-        robot = new Robot(hardwareMap, Alliance.RED);
+        robot = new Robot(hardwareMap, Alliance.RED, false);
         threeBallShooter = new ThreeBallShooterClose(robot.intake, robot.outtake);
 
         robot.outtake.periodic();

@@ -26,7 +26,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Tuning;  // Has draw() method
 import org.firstinspires.ftc.teamcode.pedroPathing.Tuning.*;
 
 
-@Autonomous(name = "Blue Auto", group = "Autonomous")
+@Autonomous(name = "Blue Auto Final LT", group = "Autonomous")
 @Configurable
 @Config
 public class BlueAuto12Gate extends OpMode {
@@ -167,7 +167,7 @@ public class BlueAuto12Gate extends OpMode {
                             settleStartTime = 0;
                             robot.gate.closeGate();
                             robot.intakeIn();
-//                            follower.setMaxPower(.9);
+                            follower.setMaxPower(.9);
                             follower.followPath(paths.IntakeFirstSet);
                             pathState = 2;
                         }
@@ -183,7 +183,7 @@ public class BlueAuto12Gate extends OpMode {
 
                     if (System.currentTimeMillis() - stopCheckTime >= 400) {
                         robot.intakeOff();
-                        follower.setMaxPower(.6);
+                        follower.setMaxPower(.8);
                         follower.followPath(paths.OpenGate);
                         pathState = 10;
                         stopCheckTime = 0;
@@ -228,6 +228,7 @@ public class BlueAuto12Gate extends OpMode {
                             settleStartTime = 0;
                             robot.gate.closeGate();
                             robot.intakeIn();
+                            follower.setMaxPower(.9);
                             follower.followPath(paths.IntakeSecondSet);
                             pathState = 4;
                         }
@@ -242,9 +243,9 @@ public class BlueAuto12Gate extends OpMode {
                     }
 
                     if (System.currentTimeMillis() - stopCheckTime >= 300) {
+                        follower.setMaxPower(1);
                         robot.intakeOff();
                         follower.followPath(paths.ToShoot3);
-                        follower.setMaxPowerScaling(1);
                         pathState = 5;
                         stopCheckTime = 0;
                         settleStartTime = 0;
@@ -272,6 +273,7 @@ public class BlueAuto12Gate extends OpMode {
                             settleStartTime = 0;
                             robot.gate.closeGate();
                             robot.intakeIn();
+                            follower.setMaxPower(.9);
                             follower.followPath(paths.IntakeThirdSet);
                             pathState = 6;
                         }
@@ -298,7 +300,7 @@ public class BlueAuto12Gate extends OpMode {
                 if (!follower.isBusy()) {
                     robot.gate.openGate();
 
-                    if (settleStartTime == 0) { r
+                    if (settleStartTime == 0) {
                         settleStartTime = System.currentTimeMillis();
                     }
 
@@ -369,7 +371,7 @@ public class BlueAuto12Gate extends OpMode {
                     .setConstantHeadingInterpolation(Math.toRadians(180)).build();
 
             IntakeSecondSet = follower.pathBuilder()
-                    .addPath(new BezierCurve(new Pose(53.000, 90.000), new Pose(52.000, 73.000), new Pose(60.000, 59.500), new Pose(21.000, 58.000)))
+                    .addPath(new BezierCurve(new Pose(53.000, 90.000), new Pose(52.000, 73.000), new Pose(60.000, 59.500), new Pose(19.000, 58.000)))
                     .setConstantHeadingInterpolation(Math.toRadians(180)).build();
 
             ToShoot3 = follower.pathBuilder()
@@ -377,7 +379,7 @@ public class BlueAuto12Gate extends OpMode {
                     .setConstantHeadingInterpolation(Math.toRadians(180)).build();
 
             IntakeThirdSet = follower.pathBuilder()
-                    .addPath(new BezierCurve(new Pose(53.000, 90.000), new Pose(61.500, 30.500), new Pose(44.500, 35.500), new Pose(21.00, 36.000)))
+                    .addPath(new BezierCurve(new Pose(53.000, 90.000), new Pose(61.500, 30.500), new Pose(44.500, 35.500), new Pose(19.00, 36.000)))
                     .setConstantHeadingInterpolation(Math.toRadians(180)).build();
 
             ToShoot4 = follower

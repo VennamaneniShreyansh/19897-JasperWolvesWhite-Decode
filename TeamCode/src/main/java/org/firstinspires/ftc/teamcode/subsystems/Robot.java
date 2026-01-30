@@ -82,7 +82,7 @@ public class Robot {
     }
 
     public void autoPeriodic() {
-        turret.updateWithVisionAssist(true);
+        turret.periodic();
         outtake.periodic();
     }
 
@@ -128,14 +128,7 @@ public void adjustSpeedAutomatically(double distInches) {
     public void periodic(boolean allowVision) {
         drivetrain.periodic();
         turret.periodic();
-        turret.updateWithVisionAssist(allowVision);
         outtake.periodic();
-    }
-
-    public void setUpRapidFire() {
-        outtake.setTargetRPM(4250);
-        hood.set(.1, .9);
-
     }
 
 
