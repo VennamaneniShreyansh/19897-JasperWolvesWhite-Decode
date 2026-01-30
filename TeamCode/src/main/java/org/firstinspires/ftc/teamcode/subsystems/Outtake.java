@@ -243,7 +243,7 @@ public class Outtake {
     private final DcMotorEx left, right;
 
     public static double HIGH_RPM = 4400;
-    public static double LOW_RPM  = 4400;
+    public static double LOW_RPM  = 5000;
     public static double TICKS_PER_REV = 28;
 
     // Manual power PIDF (configurable)
@@ -319,8 +319,8 @@ public class Outtake {
         double errorR = targetRPM - rightVel;
 
         if (Math.abs(errorL) <= RPM_TOLERANCE && Math.abs(errorR) <= RPM_TOLERANCE) {
-            left.setPower(0);
-            right.setPower(0);
+//            left.setPower(0);
+//            right.setPower(0);
             return;
         }
 
@@ -329,13 +329,10 @@ public class Outtake {
 
         double derivL = (errorL - lastErrorL) / Math.max(dt, 0.001);
         double derivR = (errorR - lastErrorR) / Math.max(dt, 0.001);
-
         lastErrorL = errorL;
         lastErrorR = errorR;
-
         integralL = Math.max(-1.0, Math.min(1.0, integralL));
         integralR = Math.max(-1.0, Math.min(1.0, integralR));
-
         double powerL = kF + kP * errorL + kI * integralL + kD * derivL;
         double powerR = kF + kP * errorR + kI * integralR + kD * derivR;
 

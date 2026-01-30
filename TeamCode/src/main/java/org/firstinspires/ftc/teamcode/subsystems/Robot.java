@@ -89,33 +89,6 @@ public class Robot {
     public double getDistanceFromTarget() {
         return shootTarget.distanceFrom(drivetrain.getPose());
     }
-
-//    public void adjustSpeedAutomatically(double distInches) {
-////        // y = 0.1436x^2 - 5.08065x + 3679.19483
-////        double rpm = 9.16492 * distInches + 3581.43175;
-////
-//////         y = 0.21568 * sin(0.0433515x - 2.54881) + 0.236258
-//////        double rightPos =
-//////                0.0778295 * Math.sin(.235227 * distInches + .85403)
-//////                        + 0.85403;
-//////        double leftPos = (0.00403668*distInches)-0.00964995;
-////
-////        // y = 0.216576 * sin(0.043305x + 0.595078) + 0.762743
-////        double leftPos =
-////                0.216576 * Math.sin(0.235227 * distInches - 2.94949)
-////                        + .14597;
-////        double rightPos = 1-leftPos;
-////
-//////        double rightPos = (-0.00405751*distInches)+1.00987;
-//
-//        rpm = Math.max(0, rpm);
-//        leftPos  = Math.max(0.0, Math.min(1.0, leftPos));
-//        rightPos = Math.max(0.0, Math.min(1.0, rightPos));
-//
-//        outtake.setTargetRPM(rpm);
-//        hood.set(leftPos, rightPos);
-//    }
-
 public void adjustSpeedAutomatically(double distInches) {
 
     // LEFT hood servo (quartic)

@@ -25,7 +25,6 @@ public class RapidFire {
         ballsShot = 0;
         stage = 0;
         stageStartTime = System.currentTimeMillis();
-        outtake.shootLow(); // Start flywheel
     }
 
     public boolean isActive() { return shootingActive && !shootingDone; }
@@ -57,7 +56,6 @@ public class RapidFire {
                 shootingActive = false;
                 shootingDone = true;
                 intake.spinOff();
-                outtake.shootLow();
 
 
         }
