@@ -30,7 +30,6 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Tuning.*;
 @Configurable
 @Config
 public class RedAuto12Gate extends OpMode {
-
     private TelemetryManager panelsTelemetry;
     public Follower follower;
     private int pathState;
@@ -133,7 +132,7 @@ public class RedAuto12Gate extends OpMode {
         switch (pathState) {
 
             case 0: // Go to First Shoot
-                robot.turret.setTurretTarget(-120);
+                robot.turret.setTurretTarget(119);
                 robot.shootLow();
                 if (!follower.isBusy()) {
                     robot.gate.closeGate();
@@ -151,7 +150,7 @@ public class RedAuto12Gate extends OpMode {
                         settleStartTime = System.currentTimeMillis();
                     }
 
-                    if (System.currentTimeMillis() - settleStartTime >= SETTLE_MS) {
+                    if (System.currentTimeMillis() - settleStartTime >= 1000) {
 
                         if (shootStartTime == 0) {
                             threeBallShooter.start();
@@ -284,7 +283,7 @@ public class RedAuto12Gate extends OpMode {
 
                     if (System.currentTimeMillis() - stopCheckTime >= 300) {
                         robot.intakeOff();
-                        robot.turret.setTurretTarget(-113);
+                        robot.turret.setTurretTarget(113);
                         follower.followPath(paths.ToShoot4);
                         settleStartTime = 0;
                         pathState = 7;
@@ -345,7 +344,7 @@ public class RedAuto12Gate extends OpMode {
 
         public Paths(Follower follower) {
             ToShoot = follower.pathBuilder()
-                    .addPath(new BezierLine(new Pose(33.756, 135.220).mirror(), new Pose(41.000, 105.000).mirror()))
+                    .addPath(new BezierLine(new Pose(33.756, 135.220).mirror(), new Pose(41.000, 110.000).mirror()))
                     .setConstantHeadingInterpolation(Math.toRadians(0)).build();
 
             IntakeFirstSet = follower.pathBuilder()
