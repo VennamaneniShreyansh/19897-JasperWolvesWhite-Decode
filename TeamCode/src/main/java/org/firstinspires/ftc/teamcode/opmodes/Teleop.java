@@ -9,6 +9,7 @@ import org.firstinspires.ftc.teamcode.helper.Alliance;
 public class TeleopB extends OpMode {
 
     private Robot robot;
+    double loopStart = System.nanoTime();
     private boolean lastA = false;
     private boolean lastB = false;
     private boolean lastX = false;
@@ -30,6 +31,7 @@ public class TeleopB extends OpMode {
 
     @Override
     public void loop() {
+        telemetry.addData("Loop ms", (System.nanoTime() - loopStart) / 1e6);
         robot.drive(gamepad1);
 
         if (gamepad1.y) {
@@ -40,7 +42,7 @@ public class TeleopB extends OpMode {
             robot.resetDrivePosAtGoal();
         }
 
-        if (gamepad2.left_bumper && gamepad2.right_trigger > .1 && gamepad2.right_bumper) robot.intake.slowSpinIn();
+        if (gamepad2.left_bumper && gamepad2.right_trigger > .1 && gamepad2.right_bumper) robot.slowIntakeIn();
         else if (gamepad2.left_bumper) robot.intakeIn();
         else if (gamepad2.left_trigger > 0.2) robot.intakeOut();
         else robot.intakeOff();
@@ -81,7 +83,7 @@ public class TeleopB extends OpMode {
         if (gamepad2.dpadUpWasPressed()) robot.hood.moveUp();
         else if (gamepad2.dpadDownWasPressed()) robot.hood.moveDown();
 
-        robot.periodic(false);
+        robot.periodic();
 
         updateTelemetry();
     }
@@ -90,23 +92,14 @@ public class TeleopB extends OpMode {
     public void updateTelemetry() {
         telemetry.addData("Turret Ticks", robot.turret.getTurret());
         telemetry.addData("Turret Target", robot.turret.getTurretTarget());
-        telemetry.addData("Turret Yaw (rad)", robot.turret.getYaw());
-        telemetry.addData("Turret Power", robot.turret.power);
-        telemetry.addData("Turret Mode", robot.turret.manual ? "Manual" : "Auto");
         telemetry.addData("Turret Degrees", Math.toDegrees(robot.turret.getYaw()));
-        telemetry.addData("Ticks to Degrees", String.format("%.0f°", robot.turret.getTurret() * 0.374)); // 1° = 2.67 ticks
         telemetry.addData("Auto Aim", autoAim);
 
-        // Shooter / Outtake
-        telemetry.addData("Shooter Ready", robot.shooterReady());
         telemetry.addData("RPM Left", robot.outtake.getRPMLeft());
         telemetry.addData("RPM Right", robot.outtake.getRPMLeft());
         telemetry.addData("Left Ticks", robot.outtake.getTickLeft());
         telemetry.addData("Right Ticks", robot.outtake.getTickRight());
         telemetry.addData("Auto RPM", autoRPM);
-
-        // Intake
-        telemetry.addData("Intake Power", (gamepad2.left_bumper ? "In" : (gamepad2.left_trigger > 0.2 ? "Out" : "Off")));
 
         // Hood
         telemetry.addData("Right Servo Position", robot.hood.getRightPosition());

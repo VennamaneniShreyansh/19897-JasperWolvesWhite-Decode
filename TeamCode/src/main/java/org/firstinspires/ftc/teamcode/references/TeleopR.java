@@ -217,7 +217,7 @@ public class TeleopR extends OpMode {
         if (gamepad2.dpadUpWasPressed()) robot.hood.moveUp();
         else if (gamepad2.dpadDownWasPressed()) robot.hood.moveDown();
 
-        robot.periodic(false);
+        robot.periodic();
 
         updateTelemetry();
     }
@@ -234,7 +234,7 @@ public class TeleopR extends OpMode {
         telemetry.addData("Auto Aim", autoAim);
 
         // Shooter / Outtake
-        telemetry.addData("Shooter Ready", robot.shooterReady());
+//        telemetry.addData("Shooter Ready", robot.shooterReady());
         telemetry.addData("RPM Left", robot.outtake.getRPMLeft());
         telemetry.addData("RPM Right", robot.outtake.getRPMLeft());
         telemetry.addData("Left Ticks", robot.outtake.getTickLeft());

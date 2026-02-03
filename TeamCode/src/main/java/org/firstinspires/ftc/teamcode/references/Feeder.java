@@ -15,7 +15,6 @@ public class Feeder {
     public Feeder(HardwareMap hw) {
         servo = hw.get(Servo.class, "feeder");
     }
-
     public void push() {
         servo.setPosition(out);
     }
