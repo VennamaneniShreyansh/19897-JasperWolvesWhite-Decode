@@ -26,10 +26,10 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Tuning;  // Has draw() method
 import org.firstinspires.ftc.teamcode.pedroPathing.Tuning.*;
 
 
-@Autonomous(name = "Blue Auto Final LT", group = "Autonomous")
+@Autonomous(name = "Spare Blue Auto", group = "Autonomous")
 @Configurable
 @Config
-public class BlueAuto12Gate extends OpMode {
+public class SpareBlueGate extends OpMode {
 
     private TelemetryManager panelsTelemetry;
     public Follower follower;
@@ -93,7 +93,7 @@ public class BlueAuto12Gate extends OpMode {
 
     @Override
     public void start() {
-        robot.hood.set(.1, .9);
+        robot.hood.set(.15, .85);
         robot.outtake.periodic();
     }
 
@@ -123,11 +123,11 @@ public class BlueAuto12Gate extends OpMode {
         panelsTelemetry.debug("Shooter Stage", threeBallShooter.stage);
         panelsTelemetry.debug("Outtake RPM L", robot.outtake.getRPMLeft());
         panelsTelemetry.debug("Outtake RPM R", robot.outtake.getRPMRight());
-        panelsTelemetry.debug("Outtake Target", robot.outtake.targetRPM);
+//        panelsTelemetry.debug("Outtake Target", robot.outtake.targetRPM);
         panelsTelemetry.debug("Shooter enabled", robot.outtake.isEnabled());
-        panelsTelemetry.debug("Shooter target", robot.outtake.targetRPM);
-
-        panelsTelemetry.debug("At Target", robot.outtake.atTarget());
+//        panelsTelemetry.debug("Shooter target", robot.outtake.targetRPM);
+//
+//        panelsTelemetry.debug("At Target", robot.outtake.atTarget());
         panelsTelemetry.debug("X", follower.getPose().getX());
         panelsTelemetry.debug("Y", follower.getPose().getY());
         panelsTelemetry.update(telemetry);
@@ -375,7 +375,7 @@ public class BlueAuto12Gate extends OpMode {
                     .setConstantHeadingInterpolation(Math.toRadians(180)).build();
 
             ToShoot3 = follower.pathBuilder()
-                    .addPath(new BezierLine(new Pose(22.000, 58.000), new Pose(41.000, 101.000)))
+                    .addPath(new BezierCurve(new Pose(22.000, 58.000), new Pose(39.000, 72.600), new Pose(41.000, 101.000)))
                     .setConstantHeadingInterpolation(Math.toRadians(180)).build();
 
             IntakeThirdSet = follower.pathBuilder()

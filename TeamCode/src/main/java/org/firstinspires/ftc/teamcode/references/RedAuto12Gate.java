@@ -26,10 +26,10 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Tuning;  // Has draw() method
 import org.firstinspires.ftc.teamcode.pedroPathing.Tuning.*;
 
 
-@Autonomous(name = "Spare Red Auto", group = "Autonomous")
+@Autonomous(name = "Red Auto Final LT", group = "Autonomous")
 @Configurable
 @Config
-public class SpareRedGate extends OpMode {
+public class RedAuto12Gate extends OpMode {
     private TelemetryManager panelsTelemetry;
     public Follower follower;
     private int pathState;
@@ -118,11 +118,11 @@ public class SpareRedGate extends OpMode {
         panelsTelemetry.debug("Shooter Stage", threeBallShooter.stage);
         panelsTelemetry.debug("Outtake RPM L", robot.outtake.getRPMLeft());
         panelsTelemetry.debug("Outtake RPM R", robot.outtake.getRPMRight());
-        panelsTelemetry.debug("Outtake Target", robot.outtake.targetRPM);
+//        panelsTelemetry.debug("Outtake Target", robot.outtake.targetRPM);
         panelsTelemetry.debug("Shooter enabled", robot.outtake.isEnabled());
-        panelsTelemetry.debug("Shooter target", robot.outtake.targetRPM);
-
-        panelsTelemetry.debug("At Target", robot.outtake.atTarget());
+//        panelsTelemetry.debug("Shooter target", robot.outtake.targetRPM);
+//
+//        panelsTelemetry.debug("At Target", robot.outtake.atTarget());
         panelsTelemetry.debug("X", follower.getPose().getX());
         panelsTelemetry.debug("Y", follower.getPose().getY());
         panelsTelemetry.update(telemetry);
@@ -369,17 +369,9 @@ public class SpareRedGate extends OpMode {
                     .addPath(new BezierCurve(new Pose(53.000, 90.000).mirror(), new Pose(52.000, 73.000).mirror(), new Pose(60.000, 59.500).mirror(), new Pose(19.000, 58.000).mirror()))
                     .setConstantHeadingInterpolation(Math.toRadians(0)).build();
 
-//            ToShoot3 = follower.pathBuilder()
-//                    .addPath(new BezierLine(new Pose(22.000, 58.000).mirror(), new Pose(41.000, 101.000).mirror()))
-//                    .setConstantHeadingInterpolation(Math.toRadians(0)).build();
-
-            ToShoot3 = follower.pathBuilder().addPath(
-                    new BezierCurve(
-                            new Pose(19.000, 58.000).mirror(),
-                            new Pose(39.000, 72.600).mirror(),
-                            new Pose(41.000, 101.000).mirror()
-                    )
-            ).setConstantHeadingInterpolation(Math.toRadians(0)).build();
+            ToShoot3 = follower.pathBuilder()
+                    .addPath(new BezierLine(new Pose(22.000, 58.000).mirror(), new Pose(41.000, 101.000).mirror()))
+                    .setConstantHeadingInterpolation(Math.toRadians(0)).build();
 
             IntakeThirdSet = follower.pathBuilder()
                     .addPath(new BezierCurve(new Pose(53.000, 90.000).mirror(), new Pose(61.500, 30.500).mirror(), new Pose(44.500, 35.500).mirror(), new Pose(19.00, 36.000).mirror()))
