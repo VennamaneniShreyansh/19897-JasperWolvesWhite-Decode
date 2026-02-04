@@ -18,12 +18,9 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import org.firstinspires.ftc.teamcode.helper.Alliance;
 import org.firstinspires.ftc.teamcode.helper.Data;
 import org.firstinspires.ftc.teamcode.helper.RapidFire;
-import org.firstinspires.ftc.teamcode.helper.ThreeBallShooterClose;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.subsystems.Robot;
-import org.firstinspires.ftc.teamcode.pedroPathing.Tuning;  // Has draw() methods
 //import org.firstinspires.ftc.teamcode.pedroPathing.Drawing; // Path visualization
-import org.firstinspires.ftc.teamcode.pedroPathing.Tuning.*;
 
 
 @Autonomous(name = "Red Auto Test LT", group = "Autonomous")
@@ -32,6 +29,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Tuning.*;
 public class RedAuto12GateNew extends OpMode {
     private TelemetryManager panelsTelemetry;
     public Follower follower;
+    double loopStart = System.nanoTime();
     private int pathState;
     private Paths paths;
     private Robot robot;
@@ -92,14 +90,14 @@ public class RedAuto12GateNew extends OpMode {
     @Override
     public void start() {
         robot.hood.set(.1, .9);
-        robot.outtake.periodic();
     }
 
     @Override
     public void loop() {
         follower.update();
+        telemetry.addData("Loop ms", (System.nanoTime() - loopStart) / 1e6);
 
-        robot.autoPeriodic();
+        robot.periodic();
         threeBallShooter.update();
 
         Data.setAutoPose(follower.getPose());
@@ -118,11 +116,7 @@ public class RedAuto12GateNew extends OpMode {
         panelsTelemetry.debug("Shooter Stage", threeBallShooter.stage);
         panelsTelemetry.debug("Outtake RPM L", robot.outtake.getRPMLeft());
         panelsTelemetry.debug("Outtake RPM R", robot.outtake.getRPMRight());
-        panelsTelemetry.debug("Outtake Target", robot.outtake.targetRPM);
         panelsTelemetry.debug("Shooter enabled", robot.outtake.isEnabled());
-        panelsTelemetry.debug("Shooter target", robot.outtake.targetRPM);
-
-        panelsTelemetry.debug("At Target", robot.outtake.atTarget());
         panelsTelemetry.debug("X", follower.getPose().getX());
         panelsTelemetry.debug("Y", follower.getPose().getY());
         panelsTelemetry.update(telemetry);
@@ -344,7 +338,7 @@ public class RedAuto12GateNew extends OpMode {
 
         public Paths(Follower follower) {
             ToShoot = follower.pathBuilder()
-                    .addPath(new BezierLine(new Pose(33.756, 135.220).mirror(), new Pose(41.000, 110.000).mirror()))
+                    .addPath(new BezierLine(new Pose(33.756, 135.220).mirror(), new Pose(42.000, 110.000).mirror()))
                     .setConstantHeadingInterpolation(Math.toRadians(0)).build();
 
             IntakeFirstSet = follower.pathBuilder()

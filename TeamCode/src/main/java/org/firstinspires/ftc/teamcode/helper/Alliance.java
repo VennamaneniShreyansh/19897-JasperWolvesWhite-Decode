@@ -1,14 +1,19 @@
 package org.firstinspires.ftc.teamcode.helper;
 
 public enum Alliance {
-    RED,
-    BLUE;
+    BLUE(1),
+    RED(-1);
 
-    public boolean isBlue() {
-        return this == BLUE;
+    private final int ySign;
+
+    Alliance(int ySign) {
+        this.ySign = ySign;
     }
 
-    public boolean isRed() {
-        return this == RED;
+    public int ySign() {
+        return ySign;
     }
+
+    public boolean isBlue() { return this == BLUE; }
+    public boolean isRed()  { return this == RED;  }
 }

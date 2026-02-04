@@ -5,8 +5,8 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.subsystems.Robot;
 import org.firstinspires.ftc.teamcode.helper.Alliance;
 
-@TeleOp(name = "Main TeleOp Blue", group = "TeleOp")
-public class TeleopB extends OpMode {
+@TeleOp(name = "Main TeleOp", group = "TeleOp")
+public class Teleop extends OpMode {
 
     private Robot robot;
     double loopStart = System.nanoTime();
@@ -20,7 +20,20 @@ public class TeleopB extends OpMode {
 
     @Override
     public void init() {
-        robot = new Robot(hardwareMap, Alliance.BLUE);
+        telemetry.addLine("Select Alliance:");
+        telemetry.addLine("❌ X = BLUE");
+        telemetry.addLine("🔺 Y = RED");
+        telemetry.update();
+    }
+
+    @Override
+    public void init_loop() {
+        Alliance alliance = null;
+        if (gamepad1.x) alliance = Alliance.BLUE;
+        if (gamepad1.y) alliance = Alliance.RED;
+
+        telemetry.addData("Selected Alliance", alliance);
+        telemetry.update();
     }
 
     @Override
@@ -57,7 +70,7 @@ public class TeleopB extends OpMode {
         if (gamepad2.x && !lastX) autoAim = !autoAim;
         lastX = gamepad2.x;
 
-        if (gamepad2.x) robot.turret.setTurretTarget(0);
+        if (gamepad2.x) robot.stopTurretAim();
 
         if (autoAim) {
             robot.autoAim();

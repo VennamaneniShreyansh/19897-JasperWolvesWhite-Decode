@@ -1,281 +1,86 @@
-//package org.firstinspires.ftc.teamcode.subsystems;
-//
-//import com.bylazar.configurables.annotations.Configurable;
-//import com.qualcomm.robotcore.hardware.DcMotor;
-//import com.qualcomm.robotcore.hardware.DcMotorEx;
-//import com.qualcomm.robotcore.hardware.HardwareMap;
-//
-//@Configurable
-//public class Outtake {
-//
-//    private final DcMotorEx left, right;
-//
-//    public static double HIGH_RPM = 4800;
-//    public static double LOW_RPM  = 4300;
-//    public static double TICKS_PER_REV = 28;
-//
-//    public static double kP = 0.19;    // Start 1.0–2.0
-//    public static double kI = 0.0;    // Generally 0 for velocity
-//    public static double kD = 0.04;    // For damping oscillation
-//    public static double kF = 14.25;  // Feedforward-> tune first
-//
-//    public double targetRPM = 0;
-//    private double lastTargetTicks = 0;
-//    private boolean enabled = false;
-//    private long stableStartTime = 0;
-//
-//    public Outtake(HardwareMap hw) {
-//        left  = hw.get(DcMotorEx.class, "outtakeLeft");
-//        right = hw.get(DcMotorEx.class, "outtakeRight");
-//
-//        // Recommended: reverse one motor then keep power positive
-//        left.setDirection(DcMotor.Direction.REVERSE);
-//        right.setDirection(DcMotor.Direction.FORWARD);
-//
-//        left.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-//        right.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-//        updatePIDF();
-//        stop();
-//    }
-//
-//    private void updatePIDF() {
-//        left.setVelocityPIDFCoefficients(kP, kI, kD, kF);
-//        right.setVelocityPIDFCoefficients(kP, kI, kD, kF);
-//    }
-//
-//    public void shootHigh() { setTargetRPM(HIGH_RPM); }
-//    public void shootLow()  { setTargetRPM(LOW_RPM); }
-//
-//
-//
-//    public void stop() {
-//        enabled = false;
-//        targetRPM = 0;
-//        lastTargetTicks = 0;
-//        left.setVelocity(0);
-//        right.setVelocity(0);
-//        stableStartTime = 0;
-//    }
-//
-//    public void setTargetRPM(double rpm) {
-//        targetRPM = rpm;
-//        enabled = true;
-//
-//        double ticksPerSec = rpm * TICKS_PER_REV / 60.0;
-//        if (Math.abs(ticksPerSec - lastTargetTicks) > 1) {
-//            left.setVelocity(ticksPerSec);
-//            right.setVelocity(ticksPerSec);
-//            lastTargetTicks = ticksPerSec;
-//        }
-//        stableStartTime = 0;
-//    }
-//
-//    public void periodic() {
-//        updatePIDF();  // allow live tuning
-//
-//        if (!enabled || targetRPM == 0) {
-//            if (Math.abs(lastTargetTicks) > 1) {
-//                stop();
-//            }
-//        }
-//    }
-//
-//    public boolean atTarget() {
-//        double leftRPM  = getRPMLeft();
-//        double rightRPM = getRPMRight();
-//        boolean steady = Math.abs(leftRPM - targetRPM) < 50 && Math.abs(rightRPM - targetRPM) < 50;
-//
-//        if (steady) {
-//            if (stableStartTime == 0) stableStartTime = System.currentTimeMillis();
-//            return System.currentTimeMillis() - stableStartTime > 50;
-//        } else {
-//            stableStartTime = 0;
-//            return false;
-//        }
-//    }
-//
-//    public double getRPMLeft()  { return Math.abs(left.getVelocity() * 60 / TICKS_PER_REV); }
-//    public double getRPMRight() { return Math.abs(right.getVelocity() * 60 / TICKS_PER_REV); }
-//    public double getTickLeft() { return left.getVelocity(); }
-//    public double getTickRight(){ return right.getVelocity(); }
-//
-//    public boolean isEnabled() { return enabled; }
-//}
-
-
 package org.firstinspires.ftc.teamcode.subsystems;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.bylazar.configurables.annotations.Configurable;
+import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-//
-//@Configurable
-//public class Outtake {
-//
-//    private final DcMotorEx left, right;
-//
-//    public static double HIGH_RPM = 4800;
-//    public static double LOW_RPM  = 4300;
-//    public static double TICKS_PER_REV = 28;
-//
-//    // Manual PIDF (configurable)
-//    public static double kP = 0.19;
-//    public static double kI = 0.0;
-//    public static double kD = 0.04;
-//    public static double kF = 14.25;
-//
-//    // Safety / tolerance
-//    public static double RPM_TOLERANCE = 50.0;
-//
-//    public double targetRPM = 0;
-//    private double lastError = 0;
-//    private double integral = 0;
-//    private long lastTime = 0;
-//
-//    private boolean enabled = true;
-//    private long stableStartTime = 0;
-//
-//    public Outtake(HardwareMap hw) {
-//        left  = hw.get(DcMotorEx.class, "outtakeLeft");
-//        right = hw.get(DcMotorEx.class, "outtakeRight");
-//
-//        left.setDirection(DcMotor.Direction.REVERSE);
-//        right.setDirection(DcMotor.Direction.FORWARD);
-//
-//        left.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-//        right.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-//
-//        stop();
-//    }
-//
-//    public void shootHigh() { setTargetRPM(HIGH_RPM); }
-//    public void shootLow()  { setTargetRPM(LOW_RPM); }
-//
-//    public void stop() {
-//        enabled = false;
-//        targetRPM = 0;
-//        lastError = 0;
-//        integral = 0;
-//        lastTime = 0;
-//        stableStartTime = 0;
-//        left.setPower(0);
-//        right.setPower(0);
-//    }
-//
-//    public void setTargetRPM(double rpm) {
-//        targetRPM = rpm;
-//        enabled = rpm != 0;
-//        lastError = 0;
-//        integral = 0;
-//        lastTime = 0;
-//        stableStartTime = 0;
-//    }
-//
-//    // Call this every loop from your OpMode
-//    public void periodic() {
-//        if (!enabled || targetRPM == 0) {
-//            // already off
-//            return;
-//        }
-//
-//        double leftRPM  = getRPMLeft();
-//        double rightRPM = getRPMRight();
-//        double currentRPM = (leftRPM + rightRPM) / 2.0;
-//
-//        double error = targetRPM - currentRPM;
-//        long now = System.nanoTime();
-//        double dt = (lastTime == 0) ? 0 : (now - lastTime) / 1e9;
-//        lastTime = now;
-//
-//        if (dt > 0) {
-//            integral += error * dt;
-//            double derivative = (error - lastError) / dt;
-//            lastError = error;
-//
-//            // Manual PIDF output -> power
-//            double ff = kF * targetRPM;    // you will tune this so it's in the right scale
-//            double output = ff + kP * error + kI * integral + kD * derivative;
-//
-//            // Clamp power
-//            output = Math.max(-1.0, Math.min(1.0, output));
-//
-//            left.setPower(output);
-//            right.setPower(output);
-//        }
-//
-//        // Auto‑disable when within tolerance
-//        if (Math.abs(error) <= RPM_TOLERANCE) {
-//            // consider it stable, stop motor so it holds speed by inertia
-//            stop();
-//        }
-//    }
-//
-//    public boolean atTarget() {
-//        double leftRPM  = getRPMLeft();
-//        double rightRPM = getRPMRight();
-//        boolean steady =
-//                Math.abs(leftRPM - targetRPM) <= RPM_TOLERANCE &&
-//                        Math.abs(rightRPM - targetRPM) <= RPM_TOLERANCE;
-//
-//        if (steady) {
-//            if (stableStartTime == 0) stableStartTime = System.currentTimeMillis();
-//            return System.currentTimeMillis() - stableStartTime > 50;
-//        } else {
-//            stableStartTime = 0;
-//            return false;
-//        }
-//    }
-//
-//    public double getRPMLeft()  { return Math.abs(left.getVelocity() * 60.0 / TICKS_PER_REV); }
-//    public double getRPMRight() { return Math.abs(right.getVelocity() * 60.0 / TICKS_PER_REV); }
-//    public double getTickLeft() { return left.getVelocity(); }
-//    public double getTickRight(){ return right.getVelocity(); }
-//
-//    public boolean isEnabled() { return enabled; }
-//}
+import com.seattlesolvers.solverslib.hardware.motors.MotorEx;
 
-
+import java.util.List;
 
 @Configurable
+@Config
 public class Outtake {
 
-    private final DcMotorEx left, right;
-
-    public static double HIGH_RPM = 4400;
-    public static double LOW_RPM  = 5000;
+    private final MotorEx left, right;
+    private final List<LynxModule> allHubs;
+    // target RPMs
+    public static double HIGH_RPM = 4500;
+    public static double LOW_RPM  = 4000;
     public static double TICKS_PER_REV = 28;
 
-    // Manual power PIDF (configurable)
-    public static double kP = 0.0005;  // RPM error → power (tune small)
-    public static double kI = 0.00001; // RPM error * sec → power
-    public static double kD = 0.0002;  // RPM/sec → power
-    public static double kF = 0.85;    // base power (0.7–1.0, tune first!)
+    public static double kP = 0.05;
+    public static double kI = 0.0;
+    public static double kD = 0.31;
 
-    public static double RPM_TOLERANCE = 50.0;
+    // Feedforward (kS + kV + kA) are unitless motor model gains
+    public static double kS = 0.92;
+    public static double kV = 0.47;
+    public static double kA = 0.0;   // start at 0 unless you need accel comp
+
+
+    private static final double RPM_FILTER_ALPHA = 0.67;
+
+    private double leftFilteredRPM = 0.0;
+    private double rightFilteredRPM = 0.0;
+    private boolean rpmFilterInitialized = false;
+
 
     public double targetRPM = 0;
-    private double lastErrorL = 0, lastErrorR = 0;
-    private double integralL = 0, integralR = 0;
-    private long lastTime = 0;
-
     private boolean enabled = false;
     private long stableStartTime = 0;
 
+    private double lowPass(double previous, double current) {
+        return RPM_FILTER_ALPHA * previous + (1.0 - RPM_FILTER_ALPHA) * current;
+    }
+
+
     public Outtake(HardwareMap hw) {
-        left  = hw.get(DcMotorEx.class, "outtakeLeft");
-        right = hw.get(DcMotorEx.class, "outtakeRight");
+        allHubs = hw.getAll(LynxModule.class);
+        for (LynxModule hub : allHubs) {
+            hub.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
+        }
 
-        left.setDirection(DcMotor.Direction.REVERSE);
-        right.setDirection(DcMotor.Direction.FORWARD);
+        left  = new MotorEx(hw, "outtakeLeft");
+        right = new MotorEx(hw, "outtakeRight");
 
-        left.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        right.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        left.setInverted(true);
+        right.setInverted(false);
 
-        left.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        right.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        // motor run mode: velocity controlled
+        left.setRunMode(MotorEx.RunMode.VelocityControl);
+        right.setRunMode(MotorEx.RunMode.VelocityControl);
+
+        // configure coeffs once
+        updateVeloPIDF();
 
         stop();
+    }
+
+    private void updateVeloPIDF() {
+        // configure PID
+        left.setVeloCoefficients(kP, kI, kD);
+        right.setVeloCoefficients(kP, kI, kD);
+
+        // configure feedforward
+        if (kA == 0.0) {
+            left.setFeedforwardCoefficients(kS, kV);
+            right.setFeedforwardCoefficients(kS, kV);
+        } else {
+            left.setFeedforwardCoefficients(kS, kV, kA);
+            right.setFeedforwardCoefficients(kS, kV, kA);
+        }
     }
 
     public void shootHigh() { setTargetRPM(HIGH_RPM); }
@@ -284,82 +89,87 @@ public class Outtake {
     public void stop() {
         enabled = false;
         targetRPM = 0;
-        lastErrorL = lastErrorR = 0;
-        integralL = integralR = 0;
-        lastTime = 0;
         stableStartTime = 0;
-        left.setPower(0);
-        right.setPower(0);
+
+        rpmFilterInitialized = false;
+        leftFilteredRPM = 0.0;
+        rightFilteredRPM = 0.0;
+
+        left.setRunMode(MotorEx.RunMode.RawPower);
+        right.setRunMode(MotorEx.RunMode.RawPower);
+        left.set(0);
+        right.set(0);
     }
+
 
     public void setTargetRPM(double rpm) {
         targetRPM = rpm;
         enabled = rpm != 0;
-        lastErrorL = lastErrorR = 0;
-        integralL = integralR = 0;
-        lastTime = 0;
         stableStartTime = 0;
+
+        if (!enabled) {
+            stop();
+            return;
+        }
+        // ensure velocity mode is active
+        left.setRunMode(MotorEx.RunMode.VelocityControl);
+        right.setRunMode(MotorEx.RunMode.VelocityControl);
+
+        double ticksPerSec = rpm * TICKS_PER_REV / 60.0;
+
+        left.set(ticksPerSec);
+        right.set(ticksPerSec);
     }
 
     public void periodic() {
         if (!enabled || targetRPM == 0) {
-            left.setPower(0);
-            right.setPower(0);
+            // keep motors stopped if not enabled
+            left.setRunMode(MotorEx.RunMode.RawPower);
+            right.setRunMode(MotorEx.RunMode.RawPower);
+            left.set(0);
+            right.set(0);
             return;
         }
 
-        long now = System.nanoTime();
-        double dt = (lastTime == 0) ? 0.02 : (now - lastTime) / 1e9;
-        lastTime = now;
+        updateVeloPIDF();
 
-        double leftVel  = getRPMLeft();
-        double rightVel = getRPMRight();
-
-        double errorL = targetRPM - leftVel;
-        double errorR = targetRPM - rightVel;
-
-        if (Math.abs(errorL) <= RPM_TOLERANCE && Math.abs(errorR) <= RPM_TOLERANCE) {
-//            left.setPower(0);
-//            right.setPower(0);
-            return;
-        }
-
-        integralL += errorL * dt;
-        integralR += errorR * dt;
-
-        double derivL = (errorL - lastErrorL) / Math.max(dt, 0.001);
-        double derivR = (errorR - lastErrorR) / Math.max(dt, 0.001);
-        lastErrorL = errorL;
-        lastErrorR = errorR;
-        integralL = Math.max(-1.0, Math.min(1.0, integralL));
-        integralR = Math.max(-1.0, Math.min(1.0, integralR));
-        double powerL = kF + kP * errorL + kI * integralL + kD * derivL;
-        double powerR = kF + kP * errorR + kI * integralR + kD * derivR;
-
-        left.setPower(Math.max(0, Math.min(1.0, powerL)));
-        right.setPower(Math.max(0, Math.min(1.0, powerR)));
+        double ticksPerSec = targetRPM * TICKS_PER_REV / 60.0;
+        left.set(ticksPerSec);
+        right.set(ticksPerSec);
     }
 
 
-    public boolean atTarget() {
-        double leftRPM  = getRPMLeft();
-        double rightRPM = getRPMRight();
-        boolean steady =
-                Math.abs(leftRPM - targetRPM) <= RPM_TOLERANCE &&
-                        Math.abs(rightRPM - targetRPM) <= RPM_TOLERANCE;
+    public double getRPMLeft() {
+        double rawRPM =
+                Math.abs(left.getVelocity() * 60.0 / TICKS_PER_REV);
 
-        if (steady) {
-            if (stableStartTime == 0) stableStartTime = System.currentTimeMillis();
-            return System.currentTimeMillis() - stableStartTime > 50;
-        } else {
-            stableStartTime = 0;
-            return false;
+        if (!rpmFilterInitialized) {
+            leftFilteredRPM = rawRPM;
+            rpmFilterInitialized = true;
+            return rawRPM;
         }
+
+        leftFilteredRPM = lowPass(leftFilteredRPM, rawRPM);
+        return leftFilteredRPM;
     }
 
-    public double getRPMLeft()  { return Math.abs(left.getVelocity()  * 60.0 / TICKS_PER_REV); }
-    public double getRPMRight() { return Math.abs(right.getVelocity() * 60.0 / TICKS_PER_REV); }
-    public double getTickLeft() { return left.getVelocity(); }
-    public double getTickRight(){ return right.getVelocity(); }
-    public boolean isEnabled()  { return enabled; }
+
+    public double getRPMRight() {
+        double rawRPM =
+                Math.abs(right.getVelocity() * 60.0 / TICKS_PER_REV);
+
+        if (!rpmFilterInitialized) {
+            rightFilteredRPM = rawRPM;
+            rpmFilterInitialized = true;
+            return rawRPM;
+        }
+
+        rightFilteredRPM = lowPass(rightFilteredRPM, rawRPM);
+        return rightFilteredRPM;
+    }
+
+
+    public double getTickLeft()  { return left.getVelocity(); }
+    public double getTickRight() { return right.getVelocity(); }
+    public boolean isEnabled()   { return enabled; }
 }

@@ -18,12 +18,9 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import org.firstinspires.ftc.teamcode.helper.Alliance;
 import org.firstinspires.ftc.teamcode.helper.Data;
 import org.firstinspires.ftc.teamcode.helper.RapidFire;
-import org.firstinspires.ftc.teamcode.helper.ThreeBallShooterClose;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.subsystems.Robot;
-import org.firstinspires.ftc.teamcode.pedroPathing.Tuning;  // Has draw() methods
 //import org.firstinspires.ftc.teamcode.pedroPathing.Drawing; // Path visualization
-import org.firstinspires.ftc.teamcode.pedroPathing.Tuning.*;
 
 
 @Autonomous(name = "Blue Auto Test LT", group = "Autonomous")
@@ -100,9 +97,7 @@ public class BlueAuto12GateNew extends OpMode {
     @Override
     public void loop() {
         follower.update();
-
-//        robot.outtake.periodic();
-        robot.autoPeriodic();
+        robot.periodic();
         threeBallShooter.update();
 
         Data.setAutoPose(follower.getPose());
@@ -123,11 +118,7 @@ public class BlueAuto12GateNew extends OpMode {
         panelsTelemetry.debug("Shooter Stage", threeBallShooter.stage);
         panelsTelemetry.debug("Outtake RPM L", robot.outtake.getRPMLeft());
         panelsTelemetry.debug("Outtake RPM R", robot.outtake.getRPMRight());
-        panelsTelemetry.debug("Outtake Target", robot.outtake.targetRPM);
         panelsTelemetry.debug("Shooter enabled", robot.outtake.isEnabled());
-        panelsTelemetry.debug("Shooter target", robot.outtake.targetRPM);
-
-        panelsTelemetry.debug("At Target", robot.outtake.atTarget());
         panelsTelemetry.debug("X", follower.getPose().getX());
         panelsTelemetry.debug("Y", follower.getPose().getY());
         panelsTelemetry.update(telemetry);

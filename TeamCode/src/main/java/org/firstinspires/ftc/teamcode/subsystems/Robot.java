@@ -1,12 +1,12 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
 import com.pedropathing.geometry.Pose;
-import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.teamcode.helper.Data;
-import org.firstinspires.ftc.teamcode.subsystems.*;
 import org.firstinspires.ftc.teamcode.helper.Alliance;
+import org.firstinspires.ftc.teamcode.helper.FieldConstants;
+import org.firstinspires.ftc.teamcode.references.Feeder;
 
 public class Robot {
 
@@ -18,26 +18,12 @@ public class Robot {
     public final Gate gate;
     public final Hood hood;
 
-    public final Alliance alliance;
+    private final Alliance alliance;
+    private Pose shootTarget = null;
 
-    public static Pose defaultPose = new Pose(56.5, 8.5, Math.toRadians(90)); // Blue allience park zone
-    public static Pose shootTarget = new Pose(3.78, 140.5, 0);
 
     public Robot(HardwareMap hw, Alliance alliance, boolean drivetrainOn) {
         this.alliance = alliance;
-
-        Pose startPose;
-//
-        if (alliance == Alliance.RED) {
-            shootTarget = new Pose(11, 137.5, 0).mirror();
-            defaultPose = defaultPose.mirror();
-        }
-
-        if (Data.hasAutoData && Data.getAutoEndPose() != null) {
-            startPose = Data.getAutoEndPose();
-        } else {
-            startPose = defaultPose;
-        }
 
         intake = new Intake(hw);
         outtake = new Outtake(hw);
@@ -49,28 +35,20 @@ public class Robot {
         drivetrain = null;
     }
 
+
+
     public Robot(HardwareMap hw, Alliance alliance) {
         this.alliance = alliance;
 
-        Pose startPose;
-//
-        if (alliance == Alliance.RED) {
-            shootTarget = new Pose(11, 137.5, 0).mirror();
-            defaultPose = defaultPose.mirror();
-        }
+        Pose startPose = Data.hasAutoData && Data.getAutoEndPose() != null
+                ? Data.getAutoEndPose()
+                : FieldConstants.startPose(alliance);
 
-        if (Data.hasAutoData && Data.getAutoEndPose() != null) {
-            startPose = Data.getAutoEndPose();
-        } else {
-            startPose = defaultPose;
-        }
+        shootTarget = FieldConstants.goalPose(alliance);
 
-
-        drivetrain = new Drivetrain(
-                hw,
-                alliance
-        );
+        drivetrain = new Drivetrain(hw, alliance);
         drivetrain.setStart(startPose);
+
         intake = new Intake(hw);
         outtake = new Outtake(hw);
         turret = new Turret(hw);
@@ -81,87 +59,70 @@ public class Robot {
         drivetrain.startDrive();
     }
 
-    public void autoPeriodic() {
-        turret.periodic();
-        outtake.periodic();
-    }
-
     public double getDistanceFromTarget() {
         return shootTarget.distanceFrom(drivetrain.getPose());
     }
-public void adjustSpeedAutomatically(double distInches) {
+    public void adjustSpeedAutomatically(double distInches) {
 
-    // LEFT hood servo (quartic)
-    // y = 6.83688e-8 x^4 - 0.0000245371 x^3 + 0.00314857 x^2 - 0.16488 x + 3.00982
-    double leftPos =
-            (6.83688e-8) * Math.pow(distInches, 4)
-                    - 0.0000245371 * Math.pow(distInches, 3)
-                    + 0.00314857 * distInches * distInches
-                    - 0.16488 * distInches
-                    + 3.00982;
+        // LEFT hood servo (quartic)
+        // y = 6.83688e-8 x^4 - 0.0000245371 x^3 + 0.00314857 x^2 - 0.16488 x + 3.00982
+        double leftPos =
+                (6.83688e-8) * Math.pow(distInches, 4)
+                        - 0.0000245371 * Math.pow(distInches, 3)
+                        + 0.00314857 * distInches * distInches
+                        - 0.16488 * distInches
+                        + 3.00982;
 
-    // SHOOTER RPM (quartic)
-    // y = -0.0000822196 x^4 + 0.0312467 x^3 - 4.40085 x^2 + 290.04881 x - 3290.83485
-    double rpm =
-            -0.0000822196 * Math.pow(distInches, 4)
-                    + 0.0312467  * Math.pow(distInches, 3)
-                    - 4.40085    * distInches * distInches
-                    + 290.04881  * distInches
-                    - 3290.83485;
+        // SHOOTER RPM (quartic)
+        // y = -0.0000822196 x^4 + 0.0312467 x^3 - 4.40085 x^2 + 290.04881 x - 3290.83485
+        double rpm =
+                -0.0000822196 * Math.pow(distInches, 4)
+                        + 0.0312467  * Math.pow(distInches, 3)
+                        - 4.40085    * distInches * distInches
+                        + 290.04881  * distInches
+                        - 3290.83485;
 
-    double rightPos = 1.0 - leftPos;
+        double rightPos = 1.0 - leftPos;
 
-    // Safety clamps
-    rpm = Math.max(0, rpm);
-    leftPos  = Math.max(0.0, Math.min(1.0, leftPos));
-    rightPos = Math.max(0.0, Math.min(1.0, rightPos));
+        // Safety clamps
+        rpm = Math.max(0, rpm);
+        leftPos  = Math.max(0.0, Math.min(1.0, leftPos));
+        rightPos = Math.max(0.0, Math.min(1.0, rightPos));
 
-    outtake.setTargetRPM(rpm);
-    hood.set(leftPos, rightPos);
-}
+        outtake.setTargetRPM(rpm);
+        hood.set(leftPos, rightPos);
+    }
 
-
-
-
-
-
-    public void periodic(boolean allowVision) {
-        drivetrain.periodic();
+    public void periodic() {
+        if (drivetrain != null) drivetrain.periodic();
         turret.periodic();
         outtake.periodic();
+    }
+    public void setHood(double leftHood, double rightHood) {
+        hood.set(leftHood, rightHood);
     }
 
 
     public void drive(com.qualcomm.robotcore.hardware.Gamepad gp) {
         drivetrain.drive(gp);
     }
-
-
     public void manualTurret(double power) {
         turret.manual(power);
     }
     public void autoTurret() {
         turret.automatic();
     }
-
     public void autoAim() {
         turret.face(shootTarget, drivetrain.getPose());
     }
+    public void stopTurretAim() {turret.setTurretTarget(0);}
 
     public void shootHigh() {
         outtake.shootHigh();
     }
-
-    public void shootLow() {
-        outtake.shootLow();
-//        hood.set(.1, .9);
-    }
-
+    public void shootLow() { outtake.shootLow(); }
     public void stopShooter() {
         outtake.stop();
-    }
-    public boolean shooterReady() {
-        return outtake.atTarget();
     }
     public void resetDrivePos() {
         drivetrain.cornerReset();
@@ -171,6 +132,7 @@ public void adjustSpeedAutomatically(double distInches) {
     public void intakeIn()  { intake.spinIn(); }
     public void intakeOut() { intake.spinOut(); }
     public void intakeOff() { intake.spinOff(); }
+    public void slowIntakeIn() { intake.slowSpinIn(); }
     public Pose getPose() {
         return drivetrain.getPose();
     }

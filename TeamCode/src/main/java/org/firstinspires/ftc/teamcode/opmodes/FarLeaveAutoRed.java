@@ -40,7 +40,6 @@ public class FarLeaveAutoRed extends OpMode {
 
         robot = new Robot(hardwareMap, Alliance.RED);
 
-        robot.outtake.periodic();
         Data.setAutoPose(follower.getPose());
 
         pathState = 0;
@@ -51,19 +50,13 @@ public class FarLeaveAutoRed extends OpMode {
 
     @Override
     public void start() {
-        robot.gate.closeGate();
-        robot.intakeOff();
-        robot.stopShooter();
         robot.turret.setTurretTarget(0);
-//        robot.hood.set(.05, .95);
     }
 
     @Override
     public void loop() {
         follower.update();
 
-        robot.outtake.periodic();
-        robot.autoPeriodic();
         follower.setMaxPower(.5);
 
         pathState = autonomousPathUpdate();
@@ -78,10 +71,7 @@ public class FarLeaveAutoRed extends OpMode {
     public int autonomousPathUpdate() {
         switch (pathState) {
 
-            case 0: // START → SET DEFAULTS
-                robot.gate.closeGate();
-                robot.intakeOff();
-                robot.stopShooter();
+            case 0:
                 robot.turret.setTurretTarget(0);
 
                 follower.followPath(paths.Path1);
@@ -103,9 +93,7 @@ public class FarLeaveAutoRed extends OpMode {
                 }
                 break;
 
-            case 2: // END AUTO CLEANLY
-                robot.intakeOff();
-                robot.stopShooter();
+            case 2:
                 robot.gate.closeGate();
                 robot.turret.setTurretTarget(0);
 

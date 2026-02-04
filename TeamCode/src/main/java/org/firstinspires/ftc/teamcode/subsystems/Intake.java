@@ -21,11 +21,9 @@ public class Intake {
     public void set(double power) {
         i.setPower(power);
     }
-
     public void spinIn()  {
         set(IN);
     }
-
     public void slowSpinIn() {
         set(SLOW_IN);
     }

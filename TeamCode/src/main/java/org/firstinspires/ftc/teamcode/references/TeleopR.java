@@ -134,14 +134,16 @@
 //}
 
 
-package org.firstinspires.ftc.teamcode.opmodes;
+package org.firstinspires.ftc.teamcode.references;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.subsystems.Robot;
 import org.firstinspires.ftc.teamcode.helper.Alliance;
 
 @TeleOp(name = "Main TeleOp Red", group = "TeleOp")
+@Disabled
 public class TeleopR extends OpMode {
 
     private Robot robot;

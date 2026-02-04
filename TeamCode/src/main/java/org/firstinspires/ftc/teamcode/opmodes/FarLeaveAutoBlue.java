@@ -16,10 +16,6 @@ import org.firstinspires.ftc.teamcode.helper.Data;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.subsystems.Robot;
 
-import com.acmerobotics.dashboard.config.Config;
-
-@Config
-
 @Autonomous(name = "Far Leave Auto Blue", group = "Autonomous")
 @Configurable
 public class FarLeaveAutoBlue extends OpMode {
@@ -39,11 +35,11 @@ public class FarLeaveAutoBlue extends OpMode {
 
         follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(new Pose(56.5, 8.5, Math.toRadians(180)));
-        paths = new FarLeaveAutoBlue.Paths(follower);
 
-        robot = new Robot(hardwareMap, Alliance.BLUE, false);
+        paths = new Paths(follower);
 
-        robot.outtake.periodic();
+        robot = new Robot(hardwareMap, Alliance.BLUE);
+
         Data.setAutoPose(follower.getPose());
 
         pathState = 0;
@@ -54,23 +50,16 @@ public class FarLeaveAutoBlue extends OpMode {
 
     @Override
     public void start() {
-        robot.gate.closeGate();
-        robot.intakeOff();
-        robot.stopShooter();
         robot.turret.setTurretTarget(0);
-//        robot.hood.set(.05, .95);
     }
 
     @Override
     public void loop() {
         follower.update();
 
-        robot.outtake.periodic();
-        robot.autoPeriodic();
         follower.setMaxPower(.5);
 
         pathState = autonomousPathUpdate();
-        Data.setAutoPose(follower.getPose());
 
         panelsTelemetry.debug("Path State", pathState);
         panelsTelemetry.debug("X", follower.getPose().getX());
@@ -82,10 +71,7 @@ public class FarLeaveAutoBlue extends OpMode {
     public int autonomousPathUpdate() {
         switch (pathState) {
 
-            case 0: // START → SET DEFAULTS
-                robot.gate.closeGate();
-                robot.intakeOff();
-                robot.stopShooter();
+            case 0:
                 robot.turret.setTurretTarget(0);
 
                 follower.followPath(paths.Path1);
@@ -107,9 +93,7 @@ public class FarLeaveAutoBlue extends OpMode {
                 }
                 break;
 
-            case 2: // END AUTO CLEANLY
-                robot.intakeOff();
-                robot.stopShooter();
+            case 2:
                 robot.gate.closeGate();
                 robot.turret.setTurretTarget(0);
 
@@ -135,5 +119,6 @@ public class FarLeaveAutoBlue extends OpMode {
                     .setConstantHeadingInterpolation(Math.toRadians(180))
                     .build();
         }
+
     }
 }

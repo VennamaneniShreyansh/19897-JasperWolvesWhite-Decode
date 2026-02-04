@@ -23,26 +23,12 @@ public class Turret {
 
     public static boolean on = true, manual = false;
 
-    // Limelight support
-    private Limelight3A limelight;
-    private boolean visionEnabled = false;
-    public static double vision_kP = 0.4;   // scales target movement
-    public static double visionDeadband = 0.7; // degrees
 
 
     public Turret(HardwareMap hardwareMap) {
         m = hardwareMap.get(DcMotorEx.class, "turret");
         m.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         m.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-
-        try {
-            limelight = hardwareMap.get(Limelight3A.class, "limelight");
-            limelight.pipelineSwitch(0);
-            limelight.start();
-            visionEnabled = true;
-        } catch (Exception e) {
-            visionEnabled = false;
-        }
 
         primaryPID = new PIDFController(new PIDFCoefficients(kp, 0, kd, kf));
         secondaryPID = new PIDFController(new PIDFCoefficients(sp, 0, sd, sf));
@@ -77,35 +63,6 @@ public class Turret {
         m.setPower(power);
     }
 
-    public void updateWithVisionAssist() {
-        if (manual) {
-            periodic();
-            return;
-        }
-        periodic();
-    }
-
-    private void limelightAimAssist() {
-        if (limelight == null) return;
-
-        LLResult result = limelight.getLatestResult();
-        if (result == null || !result.isValid()) return;
-
-        double txDeg = result.getTx(); // degrees
-        if (Math.abs(txDeg) < visionDeadband) return;
-
-        double txRad = Math.toRadians(txDeg);
-        double tickCorrection = txRad / rpt;
-
-        double newTarget = getTurretTarget() - tickCorrection * vision_kP;
-
-        // soft limits
-        if (newTarget > -230 && newTarget < 240) {
-            setTurretTarget(newTarget);
-        }
-    }
-
-
 
     public void manual(double power) {
         manual = true;
@@ -130,8 +87,6 @@ public class Turret {
         radians = normalizeAngle(radians);
         setTurretTarget(radians / rpt);
     }
-
-    public void addYaw(double radians) { setYaw(getYaw() + radians); }
 
     public void face(Pose targetPose, Pose robotPose) {
         double dx = targetPose.getX() - robotPose.getX();
@@ -159,5 +114,4 @@ public class Turret {
     }
 
     public double getError() { return error; }
-    public boolean isReady() { return Math.abs(getError()) < 30; }
 }
