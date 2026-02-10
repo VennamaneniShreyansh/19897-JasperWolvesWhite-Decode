@@ -20,24 +20,45 @@ public class Teleop extends OpMode {
 
     @Override
     public void init() {
+
         telemetry.addLine("Select Alliance:");
-        telemetry.addLine("❌ X = BLUE");
-        telemetry.addLine("🔺 Y = RED");
+        telemetry.addLine("X = BLUE");
+        telemetry.addLine("Y = RED");
         telemetry.update();
     }
 
     @Override
     public void init_loop() {
-        Alliance alliance = null;
-        if (gamepad1.x) alliance = Alliance.BLUE;
-        if (gamepad1.y) alliance = Alliance.RED;
+        boolean alrDone = false;
+        if (alrDone) {
+            telemetry.addData("Status", "Robot initialized");
+            telemetry.update();
+            return;  // Exit early after init
+        }
 
-        telemetry.addData("Selected Alliance", alliance);
+        Alliance alliance = null;
+        if (gamepad1.x) {
+            alliance = Alliance.BLUE;
+        } else if (gamepad1.y) {
+            alliance = Alliance.RED;
+        }
+
+        if (alliance != null) {
+            alrDone = true;
+            robot = new Robot(hardwareMap, alliance);
+            telemetry.addData("Selected", alliance.name());
+        } else {
+            telemetry.addData("Press", "X=Blue, Y=Red");
+        }
+
+        telemetry.addData("alrDone", alrDone);
         telemetry.update();
     }
 
+
     @Override
     public void start() {
+
         robot.gate.closeGate();
         robot.hood.low();
     }
@@ -55,7 +76,7 @@ public class Teleop extends OpMode {
             robot.resetDrivePosAtGoal();
         }
 
-        if (gamepad2.left_bumper && gamepad2.right_trigger > .1 && gamepad2.right_bumper) robot.slowIntakeIn();
+        if (gamepad2.left_bumper && (gamepad2.right_trigger > .1 || gamepad2.right_bumper)) robot.slowIntakeIn();
         else if (gamepad2.left_bumper) robot.intakeIn();
         else if (gamepad2.left_trigger > 0.2) robot.intakeOut();
         else robot.intakeOff();

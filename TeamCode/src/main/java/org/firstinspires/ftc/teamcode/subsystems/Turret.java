@@ -9,6 +9,7 @@ import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 @Configurable
 public class Turret {
@@ -16,10 +17,29 @@ public class Turret {
     public static double rpt = 0.00653;
 
     public final DcMotorEx m;
-    private PIDFController primaryPID, secondaryPID;
+//    private PIDFController primaryPID, secondaryPID;
     public static double target = 0;
-    public static double pidfSwitch = 5;
-    public static double kp = 0.004, kf = 0.0001, kd = 0.000, sp = .008, sf = 0, sd = 0.0001;
+//    public static double pidfSwitch = 5;
+//    public static double kp = 0.004, kf = 0.0001, kd = 0.000, sp = .03, sf = 0, sd = 0.0001;
+//
+
+    // New Stuff
+    private double integralSum = 0;
+    private double lastError = 0;
+    private double lastReference = 0;
+    private double previousFilterEstimate = 0;
+    private double currentFilterEstimate = 0;
+
+    private final double a = 0.8; // low-pass filter constant
+    private final double maxIntegralSum = 1000; // anti-windup limit
+
+    // PID constants; use new tuning values from Homeostasis model
+    public static double Kp = 0.0067;
+    public static double Ki = 0.0;
+    public static double Kd = 0.0002;
+
+    private final ElapsedTime timer = new ElapsedTime();
+
 
     public static boolean on = true, manual = false;
 
@@ -30,8 +50,8 @@ public class Turret {
         m.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         m.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        primaryPID = new PIDFController(new PIDFCoefficients(kp, 0, kd, kf));
-        secondaryPID = new PIDFController(new PIDFCoefficients(sp, 0, sd, sf));
+//        primaryPID = new PIDFController(new PIDFCoefficients(kp, 0, kd, kf));
+//        secondaryPID = new PIDFController(new PIDFCoefficients(sp, 0, sd, sf));
     }
 
     public void setTurretTarget(double ticks) {
@@ -42,26 +62,65 @@ public class Turret {
     public double getTurretTarget() { return target; }
     public double getTurret() { return m.getCurrentPosition(); }
 
-    public void periodic() {
-        if (!on) { m.setPower(0); return; }
-
-        if (manual) { m.setPower(manualPower); return; }
-
-        primaryPID.setCoefficients(new PIDFCoefficients(kp, 0, kd, kf));
-        secondaryPID.setCoefficients(new PIDFCoefficients(sp, 0, sd, sf));
-
-        error = getTurretTarget() - getTurret();
-        if (Math.abs(error) > pidfSwitch) {
-            primaryPID.updateError(error);
-            primaryPID.updateFeedForwardInput(Math.signum(error));
-            power = primaryPID.run();
-        } else {
-            secondaryPID.updateError(error);
-            power = secondaryPID.run();
-        }
-
-        m.setPower(power);
+//    public void periodic() {
+//        if (!on) { m.setPower(0); return; }
+//
+//        if (manual) { m.setPower(manualPower); return; }
+//
+//        primaryPID.setCoefficients(new PIDFCoefficients(kp, 0, kd, kf));
+//        secondaryPID.setCoefficients(new PIDFCoefficients(sp, 0, sd, sf));
+//
+//        error = getTurretTarget() - getTurret();
+//        if (Math.abs(error) > pidfSwitch) {
+//            primaryPID.updateError(error);
+//            primaryPID.updateFeedForwardInput(Math.signum(error));
+//            power = primaryPID.run();
+//        } else {
+//            secondaryPID.updateError(error);
+//            power = secondaryPID.run();
+//        }
+//
+//        m.setPower(power);
+//    }
+public void periodic() {
+    if (!on) {
+        m.setPower(0);
+        return;
     }
+    if (manual) {
+        m.setPower(manualPower);
+        return;
+    }
+    double currentPosition = getTurret();
+    double reference = getTurretTarget();
+
+    double error = reference - currentPosition;
+
+    double elapsedTime = timer.seconds();
+    if (elapsedTime <= 0) elapsedTime = 1e-3;
+    double errorChange = error - lastError;
+
+    currentFilterEstimate = (a * previousFilterEstimate) + ((1 - a) * errorChange);
+    previousFilterEstimate = currentFilterEstimate;
+
+    double derivative = currentFilterEstimate / elapsedTime;
+
+    integralSum += error * elapsedTime;
+    integralSum = Math.max(-maxIntegralSum, Math.min(maxIntegralSum, integralSum));
+
+    if (reference != lastReference) {
+        integralSum = 0;
+    }
+
+    double output = (Kp * error) + (Ki * integralSum) + (Kd * derivative);
+
+    m.setPower(Math.max(-1, Math.min(1, output)));
+
+    lastError = error;
+    lastReference = reference;
+    timer.reset();
+}
+
 
 
     public void manual(double power) {

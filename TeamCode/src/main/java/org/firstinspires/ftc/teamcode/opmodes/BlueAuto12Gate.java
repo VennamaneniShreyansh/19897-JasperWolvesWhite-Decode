@@ -18,22 +18,23 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import org.firstinspires.ftc.teamcode.helper.Alliance;
 import org.firstinspires.ftc.teamcode.helper.Data;
 import org.firstinspires.ftc.teamcode.helper.RapidFire;
+import org.firstinspires.ftc.teamcode.helper.ThreeBallShooterClose;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.subsystems.Robot;
 //import org.firstinspires.ftc.teamcode.pedroPathing.Drawing; // Path visualization
 
 
-@Autonomous(name = "Red Auto Test LT", group = "Autonomous")
+@Autonomous(name = "Blue Auto 12 Gate", group = "Autonomous")
 @Configurable
 @Config
-public class RedAuto12GateNew extends OpMode {
+public class BlueAuto12Gate extends OpMode {
+
     private TelemetryManager panelsTelemetry;
     public Follower follower;
-    double loopStart = System.nanoTime();
     private int pathState;
     private Paths paths;
     private Robot robot;
-    private RapidFire threeBallShooter;
+    private ThreeBallShooterClose threeBallShooter;
     private long shootStartTime = 0;
     private long settleStartTime = 0;
     private long stopCheckTime = 0;
@@ -75,10 +76,10 @@ public class RedAuto12GateNew extends OpMode {
     public void init() {
         panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();
         follower = Constants.createFollower(hardwareMap);
-        follower.setStartingPose(new Pose(33.75, 135.5, Math.toRadians(180)).mirror());
+        follower.setStartingPose(new Pose(33.75, 135.5, Math.toRadians(180)));
         paths = new Paths(follower);
         robot = new Robot(hardwareMap, Alliance.BLUE, false);
-        threeBallShooter = new RapidFire(robot.intake, robot.outtake);
+        threeBallShooter = new ThreeBallShooterClose(robot.intake, robot.outtake);
 
         Data.setAutoPose(follower.getPose());
 
@@ -89,14 +90,13 @@ public class RedAuto12GateNew extends OpMode {
 
     @Override
     public void start() {
-        robot.hood.set(.1, .9);
+        robot.hood.set(1, 0);
+        robot.outtake.periodic();
     }
 
     @Override
     public void loop() {
         follower.update();
-        telemetry.addData("Loop ms", (System.nanoTime() - loopStart) / 1e6);
-
         robot.periodic();
         threeBallShooter.update();
 
@@ -105,6 +105,8 @@ public class RedAuto12GateNew extends OpMode {
         pathState = autonomousPathUpdate();
         robot.shootLow();
 
+//        Tuning.draw();
+//        Tuning.drawOnlyCurrent();
         try {
             TelemetryPacket packet = new TelemetryPacket();
             drawRobot(packet.fieldOverlay(), follower.getPose());
@@ -126,7 +128,7 @@ public class RedAuto12GateNew extends OpMode {
         switch (pathState) {
 
             case 0: // Go to First Shoot
-                robot.turret.setTurretTarget(119);
+                robot.turret.setTurretTarget(-125);
                 robot.shootLow();
                 if (!follower.isBusy()) {
                     robot.gate.closeGate();
@@ -170,7 +172,7 @@ public class RedAuto12GateNew extends OpMode {
                         stopCheckTime = System.currentTimeMillis();
                     }
 
-                    if (System.currentTimeMillis() - stopCheckTime >= 400) {
+                    if (System.currentTimeMillis() - stopCheckTime >= 300) {
                         robot.intakeOff();
                         follower.setMaxPower(.8);
                         follower.followPath(paths.OpenGate);
@@ -187,7 +189,7 @@ public class RedAuto12GateNew extends OpMode {
                         stopCheckTime = System.currentTimeMillis();
                     }
 
-                    if (System.currentTimeMillis() - stopCheckTime >= 1000) {
+                    if (System.currentTimeMillis() - stopCheckTime >= 500) {
                         follower.setMaxPower(1);
                         follower.followPath(paths.ToShoot2);
                         pathState = 3;
@@ -277,7 +279,7 @@ public class RedAuto12GateNew extends OpMode {
 
                     if (System.currentTimeMillis() - stopCheckTime >= 300) {
                         robot.intakeOff();
-                        robot.turret.setTurretTarget(113);
+                        robot.turret.setTurretTarget(-72);
                         follower.followPath(paths.ToShoot4);
                         settleStartTime = 0;
                         pathState = 7;
@@ -305,7 +307,6 @@ public class RedAuto12GateNew extends OpMode {
                             settleStartTime = 0;
                             robot.gate.closeGate();
                             robot.stopShooter();
-                            follower.followPath(paths.LeaveLaunchPad);
                             pathState = 8;
                         }
                     }
@@ -321,7 +322,7 @@ public class RedAuto12GateNew extends OpMode {
                         robot.intakeOff();
                         robot.turret.setTurretTarget(0);
                         Data.setAutoPose(follower.getPose());
-                        requestOpModeStop();
+//                        requestOpModeStop();
                         stopCheckTime = 0;
                     }
                 }
@@ -332,70 +333,100 @@ public class RedAuto12GateNew extends OpMode {
         return pathState;
     }
 
+
     public static class Paths {
-        public PathChain ToShoot, IntakeFirstSet, ToShoot2, IntakeSecondSet, ToShoot3,
-                IntakeThirdSet, ToShoot4, LeaveLaunchPad, OpenGate;
+        public PathChain ToShoot;
+        public PathChain IntakeFirstSet;
+        public PathChain OpenGate;
+        public PathChain ToShoot2;
+        public PathChain IntakeSecondSet;
+        public PathChain ToShoot3;
+        public PathChain IntakeThirdSet;
+        public PathChain ToShoot4;
 
         public Paths(Follower follower) {
-            ToShoot = follower.pathBuilder()
-                    .addPath(new BezierLine(new Pose(33.756, 135.220).mirror(), new Pose(42.000, 110.000).mirror()))
-                    .setConstantHeadingInterpolation(Math.toRadians(0)).build();
+            ToShoot = follower.pathBuilder().addPath(
+                            new BezierLine(
+                                    new Pose(33.756, 135.220),
 
-            IntakeFirstSet = follower.pathBuilder()
-                    .addPath(new BezierCurve(new Pose(53.000, 90.000).mirror(), new Pose(51.750, 81.370).mirror(), new Pose(24.500, 84.000).mirror()))
-                    .setConstantHeadingInterpolation(Math.toRadians(0)).build();
-
-            OpenGate = follower.pathBuilder().addPath(
-                            new BezierCurve(
-                                    new Pose(24.500, 84.000).mirror(),
-                                    new Pose(26.660, 76.616).mirror(),
-                                    new Pose(20, 74).mirror()
+                                    new Pose(56.000, 88.000)
                             )
-                    ).setConstantHeadingInterpolation(Math.toRadians(90))
+                    ).setConstantHeadingInterpolation(Math.toRadians(180))
 
                     .build();
 
-            ToShoot2 = follower.pathBuilder()
-                    .addPath(new BezierLine(new Pose(25.000, 84.000).mirror(), new Pose(41.000, 101.000).mirror()))
-                    .setConstantHeadingInterpolation(Math.toRadians(0)).build();
+            IntakeFirstSet = follower.pathBuilder().addPath(
+                            new BezierCurve(
+                                    new Pose(56.000, 88.000),
+                                    new Pose(45.600, 81.370),
+                                    new Pose(24.000, 84.000)
+                            )
+                    ).setConstantHeadingInterpolation(Math.toRadians(180))
 
-            IntakeSecondSet = follower.pathBuilder()
-                    .addPath(new BezierCurve(new Pose(53.000, 90.000).mirror(), new Pose(52.000, 73.000).mirror(), new Pose(60.000, 59.500).mirror(), new Pose(19.000, 58.000).mirror()))
-                    .setConstantHeadingInterpolation(Math.toRadians(0)).build();
+                    .build();
 
-//            ToShoot3 = follower.pathBuilder()
-//                    .addPath(new BezierLine(new Pose(22.000, 58.000).mirror(), new Pose(41.000, 101.000).mirror()))
-//                    .setConstantHeadingInterpolation(Math.toRadians(0)).build();
+            OpenGate = follower.pathBuilder().addPath(
+                            new BezierLine(
+                                    new Pose(24.000, 84.000),
+//                                    new Pose(20.665, 77.659),
+                                    new Pose(20.000, 75.000)
+                            )
+                    ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(90))
+
+                    .build();
+
+            ToShoot2 = follower.pathBuilder().addPath(
+                            new BezierLine(
+                                    new Pose(20.000, 75.000),
+
+                                    new Pose(56.000, 88.000)
+                            )
+                    ).setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(180))
+
+                    .build();
+
+            IntakeSecondSet = follower.pathBuilder().addPath(
+                            new BezierCurve(
+                                    new Pose(56.000, 88.000),
+                                    new Pose(48.873, 63.967),
+                                    new Pose(43.498, 58.458),
+                                    new Pose(17.000, 60.000)
+                            )
+                    ).setConstantHeadingInterpolation(Math.toRadians(180))
+
+                    .build();
 
             ToShoot3 = follower.pathBuilder().addPath(
                             new BezierCurve(
-                                    new Pose(19.000, 58.000).mirror(),
-                                    new Pose(39.000, 72.600).mirror(),
-                                    new Pose(41.000, 101.000).mirror()
+                                    new Pose(17.000, 60.000),
+                                    new Pose(39.000, 72.600),
+                                    new Pose(56.000, 88.000)
                             )
-                    ).setConstantHeadingInterpolation(Math.toRadians(0)).build();
+                    ).setConstantHeadingInterpolation(Math.toRadians(180))
 
-            IntakeThirdSet = follower.pathBuilder()
-                    .addPath(new BezierCurve(new Pose(53.000, 90.000).mirror(), new Pose(61.500, 30.500).mirror(), new Pose(44.500, 35.500).mirror(), new Pose(19.00, 36.000).mirror()))
-                    .setConstantHeadingInterpolation(Math.toRadians(0)).build();
-
-            ToShoot4 = follower
-                    .pathBuilder()
-                    .addPath(
-                            new BezierLine(new Pose(17.500, 36.000).mirror(), new Pose(41.000, 101.000).mirror())
-                    )
-                    .setConstantHeadingInterpolation(Math.toRadians(0))
                     .build();
 
-            LeaveLaunchPad = follower
-                    .pathBuilder()
-                    .addPath(
-                            new BezierLine(new Pose(53.000, 90.000).mirror(), new Pose(39.000, 77.000).mirror())
-                    )
-                    .setConstantHeadingInterpolation(Math.toRadians(0))
+            IntakeThirdSet = follower.pathBuilder().addPath(
+                            new BezierCurve(
+                                    new Pose(56.000, 88.000),
+                                    new Pose(61.500, 30.500),
+                                    new Pose(44.500, 35.500),
+                                    new Pose(17.000, 36.000)
+                            )
+                    ).setConstantHeadingInterpolation(Math.toRadians(180))
+
                     .build();
 
+            ToShoot4 = follower.pathBuilder().addPath(
+                            new BezierLine(
+                                    new Pose(17.000, 36.000),
 
+                                    new Pose(56.000, 110.000)
+                            )
+                    ).setConstantHeadingInterpolation(Math.toRadians(180))
+
+                    .build();
         }
     }
+
 }

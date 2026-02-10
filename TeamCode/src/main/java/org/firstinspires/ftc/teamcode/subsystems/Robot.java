@@ -7,6 +7,7 @@ import org.firstinspires.ftc.teamcode.helper.Data;
 import org.firstinspires.ftc.teamcode.helper.Alliance;
 import org.firstinspires.ftc.teamcode.helper.FieldConstants;
 import org.firstinspires.ftc.teamcode.references.Feeder;
+import org.firstinspires.ftc.teamcode.subsystems.Gate;
 
 public class Robot {
 

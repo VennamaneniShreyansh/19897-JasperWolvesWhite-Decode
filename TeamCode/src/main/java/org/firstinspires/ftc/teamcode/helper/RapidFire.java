@@ -5,8 +5,8 @@ import org.firstinspires.ftc.teamcode.subsystems.Outtake;
 public class RapidFire {
     private final Intake intake;
     private final Outtake outtake;
-    private static final int SPINUP_MS = 500;    // 0.5s spinup
-    private static final int INTAKE_ON_MS = 1500;  // 0.3s feed
+    private static final int SPINUP_MS = 400;    // 0.5s spinup
+    private static final int INTAKE_ON_MS = 1000;  // 0.3s feed
 
     public boolean shootingActive = false;
     public boolean shootingDone = false;

@@ -23,7 +23,7 @@ public class Hood {
     public Hood(HardwareMap hw) {
         left  = hw.get(Servo.class, "hoodServoLeft");
         right = hw.get(Servo.class, "hoodServoRight");
-        low();
+//        low();
     }
 
     private double clamp(double v) {
