@@ -9,7 +9,7 @@ import org.firstinspires.ftc.teamcode.helper.Alliance;
 import org.firstinspires.ftc.teamcode.helper.Data;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.subsystems.Robot;
-import org.firstinspires.ftc.teamcode.references.ThreeBallShooterFar; // Add this import
+import org.firstinspires.ftc.teamcode.helper.ThreeBallShooterFar;
 
 import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
@@ -53,9 +53,8 @@ public class FarBlue6Auto extends OpMode {
 
     @Override
     public void start() {
-        robot.hood.set(.85, .15); // Adjust for your far shooting distance
-        robot.turret.setTurretTarget(-165); // Adjust turret for far shooting
-
+        robot.hood.set(1, 0); // Adjust for your far shooting distance
+        robot.turret.setTurretTarget(-172); // Adjust turret for far shooting
         follower.setMaxPower(.7);
     }
 
@@ -119,7 +118,7 @@ public class FarBlue6Auto extends OpMode {
                             new Pose(7.100, 29.000),
                             new Pose(12.200, 22.000),
                             new Pose(12.841, 4.644),
-                            new Pose(57.000, 15.000)
+                            new Pose(60.000, 15.000)
                     )
             ).setConstantHeadingInterpolation(Math.toRadians(180))
                     .addParametricCallback(0.5, () -> {
@@ -132,7 +131,7 @@ public class FarBlue6Auto extends OpMode {
 
             LeaveLaunch = follower.pathBuilder().addPath(
                     new BezierLine(
-                            new Pose(57.000, 15.000),
+                            new Pose(60.000, 15.000),
                             new Pose(35.000, 8.000)
                     )
             ).setConstantHeadingInterpolation(Math.toRadians(180)).build();
@@ -156,7 +155,7 @@ public class FarBlue6Auto extends OpMode {
                         settleStartTime = System.currentTimeMillis();
                     }
 
-                    if (System.currentTimeMillis() - settleStartTime >= SETTLE_MS) {
+                    if (System.currentTimeMillis() - settleStartTime >= 50) {
                         if (shootStartTime == 0) {
                             threeBallShooter.start();
                             shootStartTime = System.currentTimeMillis();
@@ -208,6 +207,7 @@ public class FarBlue6Auto extends OpMode {
             case 4: // Drive back to shoot
                 if (!follower.isBusy()) {
                     follower.setMaxPower(.7);
+                    robot.hood.set(1, 0);
                     follower.followPath(paths.ToShootTwo);
 
                     pathState = 5;
@@ -311,6 +311,7 @@ public class FarBlue6Auto extends OpMode {
             case 10: // Leave and finish
                 if (!follower.isBusy()) {
                     robot.turret.setTurretTarget(0);
+//                    robot.turret.setTurretTarget(0);
                     Data.setAutoPose(follower.getPose());
                 }
                 break;

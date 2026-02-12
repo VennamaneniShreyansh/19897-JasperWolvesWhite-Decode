@@ -99,16 +99,9 @@ public class Robot {
         turret.periodic();
         outtake.periodic();
     }
-    public void setHood(double leftHood, double rightHood) {
-        hood.set(leftHood, rightHood);
-    }
-
 
     public void drive(com.qualcomm.robotcore.hardware.Gamepad gp) {
         drivetrain.drive(gp);
-    }
-    public void manualTurret(double power) {
-        turret.manual(power);
     }
     public void autoTurret() {
         turret.automatic();

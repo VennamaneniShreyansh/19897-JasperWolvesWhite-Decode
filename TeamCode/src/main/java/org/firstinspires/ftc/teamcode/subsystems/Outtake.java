@@ -16,17 +16,17 @@ public class Outtake {
     private final MotorEx left, right;
     private final List<LynxModule> allHubs;
     // target RPMs
-    public static double HIGH_RPM = 5000;
-    public static double LOW_RPM  = 3900;
-    public static double HIGH_HIGH_RPM = 5500;
+    public static double HIGH_RPM = 4500;
+    public static double LOW_RPM  = 3450;
+    public static double HIGH_HIGH_RPM = 4700;
     public static double TICKS_PER_REV = 28.0;
 
     public static double kP = 0.00005;
     public static double kI = 0.0;
-    public static double kD = 0.0001;
+    public static double kD = 0.00006;
 
     // Feedforward (kS + kV + kA) are unitless motor model gains
-    public static double kS = 0.004;
+    public static double kS = .00007;
     public static double kV = 0.0005;
     public static double kA = 0.0;   // start at 0 unless you need accel comp
 

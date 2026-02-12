@@ -58,51 +58,44 @@ public class Teleop extends OpMode {
 
     @Override
     public void start() {
-
+        robot.resetDrivePosAtGoal();
         robot.gate.closeGate();
-        robot.hood.low();
+        robot.hood.high();
     }
 
     @Override
     public void loop() {
-        telemetry.addData("Loop ms", (System.nanoTime() - loopStart) / 1e6);
+        // Drivetrain
         robot.drive(gamepad1);
-
-        if (gamepad1.y) {
-            robot.resetDrivePos();
+        if (gamepad1.a) robot.resetDrivePosAtGoal();
+        // Manuel Turret
+        if (!autoAim && gamepad1.dpadLeftWasPressed()) {
+            robot.turret.incrementTurretRight();
+        } else if (!autoAim && gamepad1.dpadRightWasPressed()) {
+            robot.turret.incrementTurretLeft();
+        } else if (!autoAim && (gamepad1.yWasPressed())) {
+            robot.turret.resetTurret();
         }
-
-        if (gamepad1.a) {
-            robot.resetDrivePosAtGoal();
-        }
-
+        // Intake
         if (gamepad2.left_bumper && (gamepad2.right_trigger > .1 || gamepad2.right_bumper)) robot.slowIntakeIn();
         else if (gamepad2.left_bumper) robot.intakeIn();
         else if (gamepad2.left_trigger > 0.2) robot.intakeOut();
         else robot.intakeOff();
-
+        // Shooting
         if (!autoRPM) {
             if (gamepad2.right_bumper) robot.shootHigh();
             else if (gamepad2.right_trigger > 0.2) robot.shootLow();
             else robot.stopShooter();
         } else robot.adjustSpeedAutomatically(robot.getDistanceFromTarget());
-
-
+        // Auto Aim
         if (gamepad2.x && !lastX) autoAim = !autoAim;
         lastX = gamepad2.x;
-
         if (gamepad2.x) robot.stopTurretAim();
 
         if (autoAim) {
             robot.autoAim();
         }
 
-        if (Math.abs(gamepad2.left_stick_x) > 0.2) {
-            autoAim = false;
-            robot.manualTurret(gamepad2.left_stick_x * 0.2);
-        } else {
-            robot.autoTurret();
-        }
 
         if (gamepad2.b && !lastB) robot.gate.toggle();
         lastB = gamepad2.b;

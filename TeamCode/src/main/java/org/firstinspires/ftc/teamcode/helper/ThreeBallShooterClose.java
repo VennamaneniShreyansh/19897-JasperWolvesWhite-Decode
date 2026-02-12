@@ -6,12 +6,12 @@ import org.firstinspires.ftc.teamcode.subsystems.Outtake;
 public class ThreeBallShooterClose {
     private final Intake intake;
     private final Outtake outtake;
-    private static final int SPINUP_MS = 500;    // 1.5s spinup
-    private static final int INTAKE_ON_MS = 100;  // 0.3s feed
+    private static final int SPINUP_MS = 1000;
+    private static final int INTAKE_ON_MS = 100;
 
     private static final int SECOND_INTAKE_ON_MS = 80;
     private static final int LAST_INTAKE_ON_MS = 1000;
-    private static final int INTAKE_OFF_MS = 400; // 0.5s pause
+    private static final int INTAKE_OFF_MS = 400;
     private static final int MAX_BALLS = 3;
 
     public boolean shootingActive = false;

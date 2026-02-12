@@ -199,12 +199,12 @@ public class TeleopR extends OpMode {
             robot.autoAim();
         }
 
-        if (Math.abs(gamepad2.left_stick_x) > 0.2) {
-            autoAim = false;
-            robot.manualTurret(gamepad2.left_stick_x * 0.2);
-        } else {
-            robot.autoTurret();
-        }
+//        if (Math.abs(gamepad2.left_stick_x) > 0.2) {
+//            autoAim = false;
+//            robot.manualTurret(gamepad2.left_stick_x * 0.2);
+//        } else {
+//            robot.autoTurret();
+//        }
 
         if (gamepad2.b && !lastB) robot.gate.toggle();
         lastB = gamepad2.b;

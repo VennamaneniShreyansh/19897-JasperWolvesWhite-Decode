@@ -90,7 +90,7 @@ public class BlueAuto12Gate extends OpMode {
 
     @Override
     public void start() {
-        robot.hood.set(1, 0);
+        robot.hood.set(.90, .10);
         robot.outtake.periodic();
     }
 
@@ -277,6 +277,8 @@ public class BlueAuto12Gate extends OpMode {
                         stopCheckTime = System.currentTimeMillis();
                     }
 
+                    robot.hood.set(.85, .15);
+
                     if (System.currentTimeMillis() - stopCheckTime >= 300) {
                         robot.intakeOff();
                         robot.turret.setTurretTarget(-72);
@@ -366,10 +368,10 @@ public class BlueAuto12Gate extends OpMode {
                     .build();
 
             OpenGate = follower.pathBuilder().addPath(
-                            new BezierLine(
+                            new BezierCurve(
                                     new Pose(24.000, 84.000),
-//                                    new Pose(20.665, 77.659),
-                                    new Pose(20.000, 75.000)
+                                    new Pose(26.665, 77.659),
+                                    new Pose(18.000, 78.000)
                             )
                     ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(90))
 
@@ -411,7 +413,7 @@ public class BlueAuto12Gate extends OpMode {
                                     new Pose(56.000, 88.000),
                                     new Pose(61.500, 30.500),
                                     new Pose(44.500, 35.500),
-                                    new Pose(17.000, 36.000)
+                                    new Pose(17.000, 38.000)
                             )
                     ).setConstantHeadingInterpolation(Math.toRadians(180))
 
@@ -419,7 +421,7 @@ public class BlueAuto12Gate extends OpMode {
 
             ToShoot4 = follower.pathBuilder().addPath(
                             new BezierLine(
-                                    new Pose(17.000, 36.000),
+                                    new Pose(17.000, 38.000),
 
                                     new Pose(56.000, 110.000)
                             )

@@ -34,7 +34,7 @@ public class Turret {
     private final double maxIntegralSum = 1000; // anti-windup limit
 
     // PID constants; use new tuning values from Homeostasis model
-    public static double Kp = 0.0067;
+    public static double Kp = 0.0076;
     public static double Ki = 0.0;
     public static double Kd = 0.0002;
 
@@ -123,16 +123,16 @@ public void periodic() {
 
 
 
-    public void manual(double power) {
-        manual = true;
-
-        if (Math.abs(power) < 0.05) {
-            manualPower = 0;
-            m.setPower(0);
-        } else {
-            manualPower = power;
-        }
-    }
+//    public void manual(double power) {
+//        manual = true;
+//
+//        if (Math.abs(power) < 0.05) {
+//            manualPower = 0;
+//            m.setPower(0);
+//        } else {
+//            manualPower = power;
+//        }
+//    }
 
     public void automatic() {
         manual = false;
@@ -171,6 +171,28 @@ public void periodic() {
         if (angle > Math.PI) angle -= Math.PI * 2D;
         return angle;
     }
+
+    public void incrementTurretRight() {
+        setTurretTarget(target -= 20);
+    }
+    public void incrementTurretLeft() {
+        setTurretTarget(target += 20);
+    }
+
+    public double angleDegreesToTicks(double angleDegrees) {
+        double normalizedDegrees = normalizeAngleDegrees(angleDegrees);
+        normalizedDegrees = Math.max(-270.0, Math.min(270.0, normalizedDegrees));
+        double radians = Math.toRadians(normalizedDegrees);
+        return radians / rpt;
+    }
+    private double normalizeAngleDegrees(double angleDegrees) {
+        double angle = angleDegrees % 360.0;
+        if (angle > 180.0) angle -= 360.0;
+        if (angle <= -180.0) angle += 360.0;
+        return angle;
+    }
+
+
 
     public double getError() { return error; }
 }

@@ -69,8 +69,8 @@ public class ThreeBallShooterFar {
                         shootingActive = false;
                         shootingDone = true;
                         intake.spinOff();
-                        outtake.shootDoubleHigh();
                     } else {
+                        outtake.shootHigh();
                         stage = 1;
                         stageStartTime = now;
                     }

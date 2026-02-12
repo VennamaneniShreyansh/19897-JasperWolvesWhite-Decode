@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.subsystems;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierPoint;
 import com.pedropathing.geometry.Pose;
+import com.pedropathing.math.Vector;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
@@ -50,6 +51,10 @@ public class Drivetrain {
         if (alliance.isBlue()) {
             follower.setPose(new Pose(32.5, 135, Math.toRadians(180)));
         } else follower.setPose(new Pose(32.5, 135, Math.toRadians(180)).mirror());
+    }
+
+    public Vector getCurrentVelocity() {
+        return follower.getVelocity();
     }
 
     public void setStart(Pose start) {
