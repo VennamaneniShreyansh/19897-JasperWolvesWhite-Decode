@@ -6,8 +6,10 @@ import org.firstinspires.ftc.teamcode.subsystems.Outtake;
 public class ThreeBallShooterFar {
     private final Intake intake;
     private final Outtake outtake;
-    private static final int SPINUP_MS = 1500;    // 1.5s spinup
+    private static final int SPINUP_MS = 500;    // 1.5s spinup
+    private static final int LONG_SPINUP_MS = 3000;
     private static final int INTAKE_ON_MS = 100;  // 0.3s feed
+    private static final int SECOND_INTAKE_ON_MS = 120;
     private static final int LAST_INTAKE_ON_MS = 1000;
     private static final int INTAKE_OFF_MS = 600; // 0.5s pause
     private static final int MAX_BALLS = 3;
@@ -17,19 +19,21 @@ public class ThreeBallShooterFar {
     public int ballsShot = 0;
     public int stage = 0;
     public long stageStartTime = 0;
+    public boolean cycleBool = false;
 
     public ThreeBallShooterFar(Intake intake, Outtake outtake) {
         this.intake = intake;
         this.outtake = outtake;
     }
 
-    public void start() {
+    public void start(boolean condition) {
         shootingActive = true;
         shootingDone = false;
         ballsShot = 0;
         stage = 0;
         stageStartTime = System.currentTimeMillis();
         outtake.shootDoubleHigh(); // Start flywheel
+        cycleBool = condition;
     }
 
     public boolean isActive() { return shootingActive && !shootingDone; }
@@ -41,8 +45,11 @@ public class ThreeBallShooterFar {
 
         switch (stage) {
 
+
+
             case 0: // SPINUP
-                if (now - stageStartTime >= SPINUP_MS) {
+                int spinup = (ballsShot == 0 && cycleBool) ? LONG_SPINUP_MS : SPINUP_MS;
+                if (now - stageStartTime >= spinup) {
                     stage = 1;
                     stageStartTime = now;
                 }
@@ -51,9 +58,12 @@ public class ThreeBallShooterFar {
             case 1: // FEED BALL
                 intake.spinIn();
 
-                long feedTime = (ballsShot == MAX_BALLS - 1)
-                        ? LAST_INTAKE_ON_MS
-                        : INTAKE_ON_MS;
+                long feedTime = INTAKE_ON_MS;
+                if (ballsShot == MAX_BALLS - 1) {
+                    feedTime = LAST_INTAKE_ON_MS;
+                } else if (ballsShot == MAX_BALLS - 2) {
+                    feedTime = SECOND_INTAKE_ON_MS;
+                }
 
                 if (now - stageStartTime >= feedTime) {
                     stage = 2;

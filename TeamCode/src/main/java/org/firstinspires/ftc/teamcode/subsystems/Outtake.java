@@ -16,9 +16,9 @@ public class Outtake {
     private final MotorEx left, right;
     private final List<LynxModule> allHubs;
     // target RPMs
-    public static double HIGH_RPM = 4500;
-    public static double LOW_RPM  = 3450;
-    public static double HIGH_HIGH_RPM = 4700;
+    public static double HIGH_RPM = 4450;
+    public static double LOW_RPM  = 3700;
+    public static double HIGH_HIGH_RPM = 4450;
     public static double TICKS_PER_REV = 28.0;
 
     public static double kP = 0.00005;

@@ -14,6 +14,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 @Configurable
 public class Turret {
     public static double error = 0, power = 0, manualPower = 0;
+    public static int offsetTicks = 0;
     public static double rpt = 0.00653;
 
     public final DcMotorEx m;
@@ -60,28 +61,10 @@ public class Turret {
 
 
     public double getTurretTarget() { return target; }
-    public double getTurret() { return m.getCurrentPosition(); }
+    public double getTurret() {
+        return m.getCurrentPosition() + offsetTicks;
+    }
 
-//    public void periodic() {
-//        if (!on) { m.setPower(0); return; }
-//
-//        if (manual) { m.setPower(manualPower); return; }
-//
-//        primaryPID.setCoefficients(new PIDFCoefficients(kp, 0, kd, kf));
-//        secondaryPID.setCoefficients(new PIDFCoefficients(sp, 0, sd, sf));
-//
-//        error = getTurretTarget() - getTurret();
-//        if (Math.abs(error) > pidfSwitch) {
-//            primaryPID.updateError(error);
-//            primaryPID.updateFeedForwardInput(Math.signum(error));
-//            power = primaryPID.run();
-//        } else {
-//            secondaryPID.updateError(error);
-//            power = secondaryPID.run();
-//        }
-//
-//        m.setPower(power);
-//    }
 public void periodic() {
     if (!on) {
         m.setPower(0);
@@ -123,16 +106,18 @@ public void periodic() {
 
 
 
-//    public void manual(double power) {
-//        manual = true;
-//
-//        if (Math.abs(power) < 0.05) {
-//            manualPower = 0;
-//            m.setPower(0);
-//        } else {
-//            manualPower = power;
-//        }
-//    }
+    public void adjustOffsetRight(int ticks) {
+        offsetTicks -= ticks;
+        offsetTicks = Math.max(-50, Math.min(50, offsetTicks));
+    }
+    public void adjustOffsetLeft(int ticks) {
+        offsetTicks += ticks;
+        offsetTicks = Math.max(-50, Math.min(50, offsetTicks));
+    }
+    public void resetOffset() {
+        offsetTicks = 0;
+    }
+    public double getOffsetTicks() { return offsetTicks; }
 
     public void automatic() {
         manual = false;

@@ -3,11 +3,14 @@ package org.firstinspires.ftc.teamcode.subsystems;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
 import org.firstinspires.ftc.teamcode.helper.Data;
 import org.firstinspires.ftc.teamcode.helper.Alliance;
 import org.firstinspires.ftc.teamcode.helper.FieldConstants;
 import org.firstinspires.ftc.teamcode.references.Feeder;
 import org.firstinspires.ftc.teamcode.subsystems.Gate;
+
+import java.lang.reflect.Field;
 
 public class Robot {
 
@@ -20,11 +23,13 @@ public class Robot {
     public final Hood hood;
 
     private final Alliance alliance;
-    private Pose shootTarget = null;
+    public Pose shootTarget = null;
 
 
     public Robot(HardwareMap hw, Alliance alliance, boolean drivetrainOn) {
         this.alliance = alliance;
+
+        shootTarget = FieldConstants.farGoalPose(alliance);
 
         intake = new Intake(hw);
         outtake = new Outtake(hw);
@@ -98,7 +103,32 @@ public class Robot {
         if (drivetrain != null) drivetrain.periodic();
         turret.periodic();
         outtake.periodic();
+        trackDrivetrain();
     }
+
+    public void autoAimWithFollower(Pose robotPose) {
+        if (shootTarget != null) {
+            turret.face(shootTarget, robotPose);
+        }
+    }
+
+    public void trackDrivetrain() {
+        // Skip tracking if no drivetrain (autonomous case)
+        if (drivetrain == null) {
+            if (shootTarget == null) {
+                shootTarget = FieldConstants.farGoalPose(alliance);
+            }
+            return;
+        }
+
+        // Normal teleop tracking logic
+        if (drivetrain.isOnBottomHalf() && shootTarget != FieldConstants.farGoalPose(alliance)) {
+            shootTarget = FieldConstants.farGoalPose(alliance);
+        } else if (!drivetrain.isOnBottomHalf() && shootTarget != FieldConstants.goalPose(alliance)) {
+            shootTarget = FieldConstants.goalPose(alliance);
+        }
+    }
+
 
     public void drive(com.qualcomm.robotcore.hardware.Gamepad gp) {
         drivetrain.drive(gp);
@@ -122,6 +152,7 @@ public class Robot {
         drivetrain.cornerReset();
     }
     public void resetDrivePosAtGoal() {drivetrain.goalReset();}
+    public void resetDrivePosBackZone() {drivetrain.resetDrivePosBackZone();}
 
     public void intakeIn()  { intake.spinIn(); }
     public void intakeOut() { intake.spinOut(); }

@@ -7,6 +7,7 @@ import com.bylazar.telemetry.PanelsTelemetry;
 
 import org.firstinspires.ftc.teamcode.helper.Alliance;
 import org.firstinspires.ftc.teamcode.helper.Data;
+import org.firstinspires.ftc.teamcode.helper.FieldConstants;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.subsystems.Robot;
 import org.firstinspires.ftc.teamcode.helper.ThreeBallShooterFar;
@@ -17,9 +18,9 @@ import com.pedropathing.follower.Follower;
 import com.pedropathing.paths.PathChain;
 import com.pedropathing.geometry.Pose;
 
-@Autonomous(name = "Far Blue Auto 6", group = "Autonomous")
+@Autonomous(name = "Far Red Auto 9", group = "Autonomous")
 @Configurable
-public class FarBlue6Auto extends OpMode {
+public class FarRed9Auto extends OpMode {
     private TelemetryManager panelsTelemetry;
     public Follower follower;
     private int pathState;
@@ -36,14 +37,17 @@ public class FarBlue6Auto extends OpMode {
         panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();
 
         follower = Constants.createFollower(hardwareMap);
-        follower.setStartingPose(new Pose(56.5, 8.5, Math.toRadians(180)));
+        follower.setStartingPose(new Pose(56.5, 8.5, Math.toRadians(180)).mirror());
 
         paths = new Paths(follower);
         robot = new Robot(hardwareMap, Alliance.BLUE, false);
-        threeBallShooter = new ThreeBallShooterFar(robot.intake, robot.outtake); // Initialize shooter
+
+        // Set far goal target explicitly for autonomous
+        robot.shootTarget = FieldConstants.farGoalPose(Alliance.BLUE);
+
+        threeBallShooter = new ThreeBallShooterFar(robot.intake, robot.outtake);
 
         robot.outtake.periodic();
-
         Data.setAutoPose(follower.getPose());
         pathState = 0;
 
@@ -51,12 +55,16 @@ public class FarBlue6Auto extends OpMode {
         panelsTelemetry.update(telemetry);
     }
 
+
     @Override
     public void start() {
-        robot.hood.set(1, 0); // Adjust for your far shooting distance
-        robot.turret.setTurretTarget(-172); // Adjust turret for far shooting
+        robot.hood.set(1, 0);
+        robot.turret.setTurretTarget(-175);
+        robot.turret.automatic();
         follower.setMaxPower(.7);
+        Data.setAutoPose(follower.getPose());
     }
+
 
     @Override
     public void loop() {
@@ -64,9 +72,10 @@ public class FarBlue6Auto extends OpMode {
         robot.periodic();
         threeBallShooter.update();
 
+        robot.autoAimWithFollower(follower.getPose());
+
         pathState = autonomousPathUpdate();
 
-        // Log values
         panelsTelemetry.debug("Path State", pathState);
         panelsTelemetry.debug("Shooter Stage", threeBallShooter.stage);
         panelsTelemetry.debug("Outtake RPM L", robot.outtake.getRPMLeft());
@@ -74,53 +83,82 @@ public class FarBlue6Auto extends OpMode {
         panelsTelemetry.debug("X", follower.getPose().getX());
         panelsTelemetry.debug("Y", follower.getPose().getY());
         panelsTelemetry.debug("Heading", follower.getPose().getHeading());
+        panelsTelemetry.debug("Turret Target", robot.turret.getTurretTarget());
+        panelsTelemetry.debug("Turret Pos", robot.turret.getTurret());
         panelsTelemetry.update(telemetry);
     }
 
     public static class Paths {
         // Your existing paths (unchanged)
-        public PathChain ToShoot, IntakeFirst, GoBack, IntakeSecond, ToShootTwo, LeaveLaunch;
+        public PathChain ToShoot, IntakeFirst, GoBack, IntakeSecond, ToShootTwo, LeaveLaunch,
+                ToShootThree, IntakeThree;
 
         public Paths(Follower follower) {
             ToShoot = follower.pathBuilder().addPath(
                     new BezierLine(
-                            new Pose(56.000, 8.500),
-                            new Pose(60.000, 15.000)
+                            new Pose(56.000, 8.500).mirror(),
+                            new Pose(60.000, 15.000).mirror()
                     )
-            ).setConstantHeadingInterpolation(Math.toRadians(180)).build();
+            ).setConstantHeadingInterpolation(Math.toRadians(0)).build();
 
             IntakeFirst = follower.pathBuilder().addPath(
                     new BezierCurve(
-                            new Pose(60.000, 15.000),
-                            new Pose(37.200, 6.700),
-                            new Pose(23.000, 7.500),
-                            new Pose(13.000, 8.000)
+                            new Pose(60.000, 15.000).mirror(),
+                            new Pose(37.200, 6.700).mirror(),
+                            new Pose(23.000, 7.500).mirror(),
+                            new Pose(13.000, 8.000).mirror()
                     )
-            ).setConstantHeadingInterpolation(Math.toRadians(180)).build();
+            ).setConstantHeadingInterpolation(Math.toRadians(0)).build();
 
             GoBack = follower.pathBuilder().addPath(
                     new BezierLine(
-                            new Pose(13.000, 8.000),
-                            new Pose(20.000, 8.500)
+                            new Pose(13.000, 8.000).mirror(),
+                            new Pose(20.000, 8.500).mirror()
                     )
-            ).setConstantHeadingInterpolation(Math.toRadians(180)).build();
+            ).setConstantHeadingInterpolation(Math.toRadians(0)).build();
 
             IntakeSecond = follower.pathBuilder().addPath(
                     new BezierLine(
-                            new Pose(20.000, 8.500),
-                            new Pose(13.000, 8.000)
+                            new Pose(20.000, 8.500).mirror(),
+                            new Pose(13.000, 8.000).mirror()
                     )
-            ).setConstantHeadingInterpolation(Math.toRadians(180)).build();
+            ).setConstantHeadingInterpolation(Math.toRadians(0)).build();
 
             ToShootTwo = follower.pathBuilder().addPath(
+                            new BezierCurve(
+                                    new Pose(13.000, 8.000).mirror(),
+                                    new Pose(7.100, 29.000).mirror(),
+                                    new Pose(12.200, 22.000).mirror(),
+                                    new Pose(12.841, 4.644).mirror(),
+                                    new Pose(60.000, 15.000).mirror()
+                            )
+                    ).setConstantHeadingInterpolation(Math.toRadians(0))
+                    .addParametricCallback(0.5, () -> {
+                        robot.intakeOff();
+                    })
+                    .addParametricCallback(.67, () -> {
+                        robot.gate.openGate();
+                    })
+                    .build();
+
+            IntakeThree = follower.pathBuilder().addPath(
                     new BezierCurve(
-                            new Pose(13.000, 8.000),
-                            new Pose(7.100, 29.000),
-                            new Pose(12.200, 22.000),
-                            new Pose(12.841, 4.644),
-                            new Pose(60.000, 15.000)
+                            new Pose(60.000, 15.000).mirror(),
+                            new Pose(37.200, 6.700).mirror(),
+                            new Pose(23.000, 7.500).mirror(),
+                            new Pose(17.000, 8.000).mirror()
                     )
-            ).setConstantHeadingInterpolation(Math.toRadians(180))
+            ).setConstantHeadingInterpolation(Math.toRadians(0)).build();
+
+            ToShootThree = follower.pathBuilder().addPath(
+                            new BezierCurve(
+                                    new Pose(17.000, 8.000).mirror(),
+                                    new Pose(7.100, 29.000).mirror(),
+                                    new Pose(12.200, 22.000).mirror(),
+                                    new Pose(12.841, 4.644).mirror(),
+                                    new Pose(60.000, 15.000).mirror()
+                            )
+                    ).setConstantHeadingInterpolation(Math.toRadians(0))
                     .addParametricCallback(0.5, () -> {
                         robot.intakeOff();
                     })
@@ -131,10 +169,10 @@ public class FarBlue6Auto extends OpMode {
 
             LeaveLaunch = follower.pathBuilder().addPath(
                     new BezierLine(
-                            new Pose(60.000, 15.000),
-                            new Pose(35.000, 8.000)
+                            new Pose(60.000, 15.000).mirror(),
+                            new Pose(35.000, 8.000).mirror()
                     )
-            ).setConstantHeadingInterpolation(Math.toRadians(180)).build();
+            ).setConstantHeadingInterpolation(Math.toRadians(0)).build();
         }
     }
 
@@ -157,7 +195,7 @@ public class FarBlue6Auto extends OpMode {
 
                     if (System.currentTimeMillis() - settleStartTime >= 50) {
                         if (shootStartTime == 0) {
-                            threeBallShooter.start();
+                            threeBallShooter.start(true);
                             shootStartTime = System.currentTimeMillis();
                         }
 
@@ -224,7 +262,7 @@ public class FarBlue6Auto extends OpMode {
 
                     if (System.currentTimeMillis() - settleStartTime >= SETTLE_MS) {
                         if (shootStartTime == 0) {
-                            threeBallShooter.start();
+                            threeBallShooter.start(false);
                             shootStartTime = System.currentTimeMillis();
                         }
 
@@ -234,9 +272,9 @@ public class FarBlue6Auto extends OpMode {
 
                             robot.gate.closeGate();
                             robot.intakeIn();
-                            follower.followPath(paths.IntakeFirst);
+                            follower.followPath(paths.IntakeThree);
 
-                            pathState = 6;
+                            pathState = 8;
                         }
                     }
                 }
@@ -274,7 +312,8 @@ public class FarBlue6Auto extends OpMode {
             case 8: // Drive back to shoot
                 if (!follower.isBusy()) {
                     follower.setMaxPower(.7);
-                    follower.followPath(paths.ToShootTwo);
+//                    robot.turret.setTurretTarget(-172);
+                    follower.followPath(paths.ToShootThree);
 
                     pathState = 9;
                     settleStartTime = 0;
@@ -290,7 +329,7 @@ public class FarBlue6Auto extends OpMode {
 
                     if (System.currentTimeMillis() - settleStartTime >= SETTLE_MS) {
                         if (shootStartTime == 0) {
-                            threeBallShooter.start();
+                            threeBallShooter.start(false);
                             shootStartTime = System.currentTimeMillis();
                         }
 
@@ -298,7 +337,7 @@ public class FarBlue6Auto extends OpMode {
                             shootStartTime = 0;
                             settleStartTime = 0;
 
-                            robot.gate.closeGate();
+//                            robot.gate.closeGate();
                             robot.stopShooter();
                             follower.followPath(paths.LeaveLaunch);
 
@@ -310,7 +349,7 @@ public class FarBlue6Auto extends OpMode {
 
             case 10: // Leave and finish
                 if (!follower.isBusy()) {
-                    robot.turret.setTurretTarget(0);
+//                    robot.turret.setTurretTarget(0);
 //                    robot.turret.setTurretTarget(0);
                     Data.setAutoPose(follower.getPose());
                 }

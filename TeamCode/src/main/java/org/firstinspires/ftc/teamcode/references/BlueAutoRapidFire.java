@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.opmodes;
+package org.firstinspires.ftc.teamcode.references;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.canvas.Canvas;
@@ -14,27 +14,28 @@ import com.pedropathing.geometry.Pose;
 import com.pedropathing.math.Vector;
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import org.firstinspires.ftc.teamcode.helper.Alliance;
 import org.firstinspires.ftc.teamcode.helper.Data;
 import org.firstinspires.ftc.teamcode.helper.RapidFire;
-import org.firstinspires.ftc.teamcode.helper.ThreeBallShooterClose;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.subsystems.Robot;
 //import org.firstinspires.ftc.teamcode.pedroPathing.Drawing; // Path visualization
 
 
-@Autonomous(name = "Blue Auto 12 Gate", group = "Autonomous")
+@Autonomous(name = "Blue Auto RapidFire 12 Gate", group = "Autonomous")
 @Configurable
 @Config
-public class BlueAuto12Gate extends OpMode {
+@Disabled
+public class BlueAutoRapidFire extends OpMode {
 
     private TelemetryManager panelsTelemetry;
     public Follower follower;
     private int pathState;
     private Paths paths;
-    private Robot robot;
-    private ThreeBallShooterClose threeBallShooter;
+    private static Robot robot;
+    private RapidFire threeBallShooter;
     private long shootStartTime = 0;
     private long settleStartTime = 0;
     private long stopCheckTime = 0;
@@ -79,7 +80,7 @@ public class BlueAuto12Gate extends OpMode {
         follower.setStartingPose(new Pose(33.75, 135.5, Math.toRadians(180)));
         paths = new Paths(follower);
         robot = new Robot(hardwareMap, Alliance.BLUE, false);
-        threeBallShooter = new ThreeBallShooterClose(robot.intake, robot.outtake);
+        threeBallShooter = new RapidFire(robot.intake, robot.outtake);
 
         Data.setAutoPose(follower.getPose());
 
@@ -90,7 +91,7 @@ public class BlueAuto12Gate extends OpMode {
 
     @Override
     public void start() {
-        robot.hood.set(.9, .1);
+        robot.hood.set(.95, .05);
         robot.outtake.periodic();
     }
 
@@ -128,7 +129,7 @@ public class BlueAuto12Gate extends OpMode {
         switch (pathState) {
 
             case 0: // Go to First Shoot
-                robot.turret.setTurretTarget(-125);
+                robot.turret.setTurretTarget(-130);
                 robot.shootLow();
                 if (!follower.isBusy()) {
                     robot.gate.closeGate();
@@ -146,7 +147,7 @@ public class BlueAuto12Gate extends OpMode {
                         settleStartTime = System.currentTimeMillis();
                     }
 
-                    if (System.currentTimeMillis() - settleStartTime >= 1000) {
+                    if (System.currentTimeMillis() - settleStartTime >= 500) {
 
                         if (shootStartTime == 0) {
                             threeBallShooter.start();
@@ -156,10 +157,8 @@ public class BlueAuto12Gate extends OpMode {
                         if (threeBallShooter.isDone()) {
                             shootStartTime = 0;
                             settleStartTime = 0;
-                            robot.gate.closeGate();
                             robot.intakeIn();
                             follower.setMaxPower(.9);
-                            robot.hood.set(.95, .05);
                             follower.followPath(paths.IntakeFirstSet);
                             pathState = 2;
                         }
@@ -202,7 +201,6 @@ public class BlueAuto12Gate extends OpMode {
 
             case 3: // Shoot 2nd 3
                 if (!follower.isBusy()) {
-                    robot.gate.openGate();
 
                     if (settleStartTime == 0) {
                         settleStartTime = System.currentTimeMillis();
@@ -247,7 +245,6 @@ public class BlueAuto12Gate extends OpMode {
 
             case 5: // Shoot last 3
                 if (!follower.isBusy()) {
-                    robot.gate.openGate();
 
                     if (settleStartTime == 0) {
                         settleStartTime = System.currentTimeMillis();
@@ -263,7 +260,6 @@ public class BlueAuto12Gate extends OpMode {
                         if (threeBallShooter.isDone()) {
                             shootStartTime = 0;
                             settleStartTime = 0;
-                            robot.gate.closeGate();
                             robot.intakeIn();
                             follower.setMaxPower(.9);
                             follower.followPath(paths.IntakeThirdSet);
@@ -278,11 +274,9 @@ public class BlueAuto12Gate extends OpMode {
                         stopCheckTime = System.currentTimeMillis();
                     }
 
-                    robot.hood.set(.85, .15);
-
                     if (System.currentTimeMillis() - stopCheckTime >= 300) {
                         robot.intakeOff();
-                        robot.turret.setTurretTarget(-72);
+                        robot.turret.setTurretTarget(-75);
                         follower.followPath(paths.ToShoot4);
                         settleStartTime = 0;
                         pathState = 7;
@@ -292,7 +286,6 @@ public class BlueAuto12Gate extends OpMode {
 
             case 7: // Shoot 4th set
                 if (!follower.isBusy()) {
-                    robot.gate.openGate();
 
                     if (settleStartTime == 0) {
                         settleStartTime = System.currentTimeMillis();
@@ -325,7 +318,7 @@ public class BlueAuto12Gate extends OpMode {
                         robot.intakeOff();
                         robot.turret.setTurretTarget(0);
                         Data.setAutoPose(follower.getPose());
-//                        requestOpModeStop();
+                        requestOpModeStop();
                         stopCheckTime = 0;
                     }
                 }
@@ -371,8 +364,8 @@ public class BlueAuto12Gate extends OpMode {
             OpenGate = follower.pathBuilder().addPath(
                             new BezierCurve(
                                     new Pose(24.000, 84.000),
-                                    new Pose(26.665, 77.659),
-                                    new Pose(18.000, 78.000)
+                                    new Pose(20.665, 77.659),
+                                    new Pose(20.000, 77.000)
                             )
                     ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(90))
 
@@ -380,11 +373,14 @@ public class BlueAuto12Gate extends OpMode {
 
             ToShoot2 = follower.pathBuilder().addPath(
                             new BezierLine(
-                                    new Pose(20.000, 75.000),
+                                    new Pose(20.000, 74.000),
 
                                     new Pose(56.000, 88.000)
                             )
                     ).setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(180))
+                    .addParametricCallback(0.3, () -> {
+                        robot.gate.openGate();
+                    })
 
                     .build();
 
@@ -393,19 +389,25 @@ public class BlueAuto12Gate extends OpMode {
                                     new Pose(56.000, 88.000),
                                     new Pose(48.873, 63.967),
                                     new Pose(43.498, 58.458),
-                                    new Pose(17.000, 60.000)
+                                    new Pose(19.000, 58.000)
                             )
                     ).setConstantHeadingInterpolation(Math.toRadians(180))
+                    .addParametricCallback(0.3, () -> {
+                        robot.gate.closeGate();
+                    })
 
                     .build();
 
             ToShoot3 = follower.pathBuilder().addPath(
                             new BezierCurve(
-                                    new Pose(17.000, 60.000),
+                                    new Pose(19.000, 58.000),
                                     new Pose(39.000, 72.600),
                                     new Pose(56.000, 88.000)
                             )
                     ).setConstantHeadingInterpolation(Math.toRadians(180))
+                    .addParametricCallback(0.3, () -> {
+                        robot.gate.openGate();
+                    })
 
                     .build();
 
@@ -414,20 +416,25 @@ public class BlueAuto12Gate extends OpMode {
                                     new Pose(56.000, 88.000),
                                     new Pose(61.500, 30.500),
                                     new Pose(44.500, 35.500),
-                                    new Pose(17.000, 38.000)
+                                    new Pose(19.000, 36.000)
                             )
                     ).setConstantHeadingInterpolation(Math.toRadians(180))
+                    .addParametricCallback(0.4, () -> {
+                        robot.gate.closeGate();
+                    })
 
                     .build();
 
             ToShoot4 = follower.pathBuilder().addPath(
                             new BezierLine(
-                                    new Pose(17.000, 38.000),
+                                    new Pose(19.000, 36.000),
 
                                     new Pose(56.000, 110.000)
                             )
                     ).setConstantHeadingInterpolation(Math.toRadians(180))
-
+                    .addParametricCallback(0.3, () -> {
+                        robot.gate.openGate();
+                    })
                     .build();
         }
     }
