@@ -40,10 +40,10 @@ public class FarRed9Auto extends OpMode {
         follower.setStartingPose(new Pose(56.5, 8.5, Math.toRadians(180)).mirror());
 
         paths = new Paths(follower);
-        robot = new Robot(hardwareMap, Alliance.BLUE, false);
+        robot = new Robot(hardwareMap, Alliance.RED, false);
 
         // Set far goal target explicitly for autonomous
-        robot.shootTarget = FieldConstants.farGoalPose(Alliance.BLUE);
+        robot.shootTarget = FieldConstants.farGoalPose(Alliance.RED);
 
         threeBallShooter = new ThreeBallShooterFar(robot.intake, robot.outtake);
 

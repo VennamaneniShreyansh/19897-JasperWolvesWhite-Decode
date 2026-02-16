@@ -38,7 +38,7 @@ public class FarLeaveAutoRed extends OpMode {
 
         paths = new Paths(follower);
 
-        robot = new Robot(hardwareMap, Alliance.RED);
+        robot = new Robot(hardwareMap, Alliance.RED, false);
 
         Data.setAutoPose(follower.getPose());
 

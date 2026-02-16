@@ -78,7 +78,7 @@ public class RedAuto12Gate extends OpMode {
         follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(new Pose(33.75, 135.5, Math.toRadians(180)).mirror());
         paths = new Paths(follower);
-        robot = new Robot(hardwareMap, Alliance.BLUE, false);
+        robot = new Robot(hardwareMap, Alliance.RED, false);
         threeBallShooter = new ThreeBallShooterClose(robot.intake, robot.outtake);
 
         Data.setAutoPose(follower.getPose());
@@ -90,7 +90,7 @@ public class RedAuto12Gate extends OpMode {
 
     @Override
     public void start() {
-        robot.hood.set(.9, .1);
+        robot.hood.set(.85, .15);
         robot.outtake.periodic();
     }
 
@@ -159,7 +159,7 @@ public class RedAuto12Gate extends OpMode {
                             robot.gate.closeGate();
                             robot.intakeIn();
                             follower.setMaxPower(.9);
-                            robot.hood.set(.95, .05);
+//                            robot.hood.set(.95, .05);
                             follower.followPath(paths.IntakeFirstSet);
                             pathState = 2;
                         }
@@ -282,8 +282,8 @@ public class RedAuto12Gate extends OpMode {
 
                     if (System.currentTimeMillis() - stopCheckTime >= 300) {
                         robot.intakeOff();
-                        robot.turret.setTurretTarget(72);
-                        robot.hood.set(1, 0);
+                        robot.turret.setTurretTarget(69);
+//                        robot.hood.set(1, 0);
                         follower.followPath(paths.ToShoot4);
                         settleStartTime = 0;
                         pathState = 7;
@@ -393,7 +393,7 @@ public class RedAuto12Gate extends OpMode {
                             new BezierCurve(
                                     new Pose(56.000, 88.000).mirror(),
                                     new Pose(48.873, 63.967).mirror(),
-                                    new Pose(43.498, 58.458).mirror(),
+                                    new Pose(43.498, 60.000).mirror(),
                                     new Pose(17.000, 60.000).mirror()
                             )
                     ).setConstantHeadingInterpolation(Math.toRadians(0))
@@ -415,7 +415,7 @@ public class RedAuto12Gate extends OpMode {
                                     new Pose(56.000, 88.000).mirror(),
                                     new Pose(61.500, 30.500).mirror(),
                                     new Pose(44.500, 35.500).mirror(),
-                                    new Pose(17.000, 38.000).mirror()
+                                    new Pose(16.000, 38.000).mirror()
                             )
                     ).setConstantHeadingInterpolation(Math.toRadians(0))
 
@@ -423,7 +423,7 @@ public class RedAuto12Gate extends OpMode {
 
             ToShoot4 = follower.pathBuilder().addPath(
                             new BezierLine(
-                                    new Pose(17.000, 38.000).mirror(),
+                                    new Pose(16.000, 38.000).mirror(),
 
                                     new Pose(56.000, 110.000).mirror()
                             )

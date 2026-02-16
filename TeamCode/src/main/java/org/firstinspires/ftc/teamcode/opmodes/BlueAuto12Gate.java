@@ -90,7 +90,7 @@ public class BlueAuto12Gate extends OpMode {
 
     @Override
     public void start() {
-        robot.hood.set(.9, .1);
+        robot.hood.set(.85, .15);
         robot.outtake.periodic();
     }
 
@@ -159,7 +159,7 @@ public class BlueAuto12Gate extends OpMode {
                             robot.gate.closeGate();
                             robot.intakeIn();
                             follower.setMaxPower(.9);
-                            robot.hood.set(.95, .05);
+//                            robot.hood.set(.95, .05);
                             follower.followPath(paths.IntakeFirstSet);
                             pathState = 2;
                         }

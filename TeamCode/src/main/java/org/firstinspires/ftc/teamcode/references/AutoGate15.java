@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.opmodes;
+package org.firstinspires.ftc.teamcode.references;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.canvas.Canvas;
@@ -14,10 +14,10 @@ import com.pedropathing.geometry.Pose;
 import com.pedropathing.math.Vector;
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import org.firstinspires.ftc.teamcode.helper.Alliance;
 import org.firstinspires.ftc.teamcode.helper.Data;
-import org.firstinspires.ftc.teamcode.helper.RapidFire;
 import org.firstinspires.ftc.teamcode.helper.RapidFire;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.subsystems.Robot;
@@ -27,6 +27,7 @@ import org.firstinspires.ftc.teamcode.subsystems.Robot;
 @Autonomous(name = "Blue Auto RapidFire 15 Gate", group = "Autonomous")
 @Configurable
 @Config
+@Disabled
 public class AutoGate15 extends OpMode {
 
     private TelemetryManager panelsTelemetry;

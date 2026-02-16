@@ -115,8 +115,8 @@ public class Teleop extends OpMode {
         }
 
 
-        if (gamepad1.b && !lastB) robot.gate.toggle();
-        lastB = gamepad1.b;
+        if (gamepad2.b && !lastB) robot.gate.toggle();
+        lastB = gamepad2.b;
 
         if (gamepad2.y && !lastY) {
             autoRPM = !autoRPM;
