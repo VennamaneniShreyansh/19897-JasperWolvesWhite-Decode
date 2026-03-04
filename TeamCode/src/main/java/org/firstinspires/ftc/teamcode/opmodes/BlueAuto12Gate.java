@@ -282,7 +282,7 @@ public class BlueAuto12Gate extends OpMode {
 
                     if (System.currentTimeMillis() - stopCheckTime >= 300) {
                         robot.intakeOff();
-                        robot.turret.setTurretTarget(-72);
+                        robot.turret.setTurretTarget(-75);
                         follower.followPath(paths.ToShoot4);
                         settleStartTime = 0;
                         pathState = 7;

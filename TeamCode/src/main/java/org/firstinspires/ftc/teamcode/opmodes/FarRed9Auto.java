@@ -84,7 +84,7 @@ public class FarRed9Auto extends OpMode {
         panelsTelemetry.debug("Y", follower.getPose().getY());
         panelsTelemetry.debug("Heading", follower.getPose().getHeading());
         panelsTelemetry.debug("Turret Target", robot.turret.getTurretTarget());
-        panelsTelemetry.debug("Turret Pos", robot.turret.getTurret());
+//        panelsTelemetry.debug("Turret Pos", robot.turret.getTurret());
         panelsTelemetry.update(telemetry);
     }
 

@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
+
 import com.acmerobotics.dashboard.config.Config;
 import com.bylazar.configurables.annotations.Configurable;
 import com.qualcomm.hardware.lynx.LynxModule;
@@ -16,18 +17,18 @@ public class Outtake {
     private final MotorEx left, right;
     private final List<LynxModule> allHubs;
     // target RPMs
-    public static double HIGH_RPM = 4600;
-    public static double LOW_RPM  = 3850;
+    public static double HIGH_RPM = 4100;
+    public static double LOW_RPM  = 3600;
     public static double HIGH_HIGH_RPM = 4600;
     public static double TICKS_PER_REV = 28.0;
 
-    public static double kP = 0.000015;
+    public static double kP = 0.000035;
     public static double kI = 0.0;
     public static double kD = 0.00001;
 
     // Feedforward (kS + kV + kA) are unitless motor model gains
     public static double kS = 0;
-    public static double kV = 0.00047;
+    public static double kV = 0.00052;
     public static double kA = 0.0;   // start at 0 unless you need accel comp
 
 
@@ -83,6 +84,8 @@ public class Outtake {
             right.setFeedforwardCoefficients(kS, kV, kA);
         }
     }
+
+    public double getTarget() {return HIGH_RPM;}
 
     public void shootHigh() { setTargetRPM(HIGH_RPM); }
     public void shootLow()  { setTargetRPM(LOW_RPM); }

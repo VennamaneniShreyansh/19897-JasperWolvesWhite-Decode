@@ -226,13 +226,13 @@ public class TeleopR extends OpMode {
 
 
     public void updateTelemetry() {
-        telemetry.addData("Turret Ticks", robot.turret.getTurret());
+//        telemetry.addData("Turret Ticks", robot.turret.getTurret());
         telemetry.addData("Turret Target", robot.turret.getTurretTarget());
         telemetry.addData("Turret Yaw (rad)", robot.turret.getYaw());
         telemetry.addData("Turret Power", robot.turret.power);
         telemetry.addData("Turret Mode", robot.turret.manual ? "Manual" : "Auto");
         telemetry.addData("Turret Degrees", Math.toDegrees(robot.turret.getYaw()));
-        telemetry.addData("Ticks to Degrees", String.format("%.0f°", robot.turret.getTurret() * 0.374)); // 1° = 2.67 ticks
+//        telemetry.addData("Ticks to Degrees", String.format("%.0f°", robot.turret.getTurret() * 0.374)); // 1° = 2.67 ticks
         telemetry.addData("Auto Aim", autoAim);
 
         // Shooter / Outtake

@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.references;
+package org.firstinspires.ftc.teamcode.opmodes;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.canvas.Canvas;
@@ -27,7 +27,6 @@ import org.firstinspires.ftc.teamcode.subsystems.Robot;
 @Autonomous(name = "Blue Auto RapidFire 15 Gate", group = "Autonomous")
 @Configurable
 @Config
-@Disabled
 public class AutoGate15 extends OpMode {
 
     private TelemetryManager panelsTelemetry;
@@ -91,7 +90,7 @@ public class AutoGate15 extends OpMode {
 
     @Override
     public void start() {
-        robot.hood.set(.95, .05);
+        robot.hood.set(.5, .5);
         robot.outtake.periodic();
     }
 
@@ -104,7 +103,7 @@ public class AutoGate15 extends OpMode {
         Data.setAutoPose(follower.getPose());
 
         pathState = autonomousPathUpdate();
-        robot.shootLow();
+        robot.shootHigh();
 
 //        Tuning.draw();
 //        Tuning.drawOnlyCurrent();
@@ -130,7 +129,7 @@ public class AutoGate15 extends OpMode {
 
             case 0: // Go to First Shoot
                 robot.turret.setTurretTarget(-130);
-                robot.shootLow();
+                robot.shootHigh();
                 if (!follower.isBusy()) {
                     robot.gate.closeGate();
                     follower.followPath(paths.ToShoot);
@@ -410,11 +409,11 @@ public class AutoGate15 extends OpMode {
                             new BezierCurve(
                                     new Pose(56.000, 88.000),
                                     new Pose(38.200, 57.900),
-                                    new Pose(7.400, 70.000),
-                                    new Pose(11.200, 53.000)
+                                    new Pose(2.884, 64.441),
+                                    new Pose(11.200, 54.737)
                             )
-                    ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(145))
-                    .addParametricCallback(0.3, robot.gate::closeGate)
+                    ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(135))
+
                     .build();
 
             ToShoot3 = follower.pathBuilder().addPath(

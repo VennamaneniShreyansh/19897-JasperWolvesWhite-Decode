@@ -6,8 +6,8 @@ import org.firstinspires.ftc.teamcode.subsystems.Robot;
 import org.firstinspires.ftc.teamcode.helper.Alliance;
 import org.firstinspires.ftc.teamcode.subsystems.Turret;
 
-@TeleOp(name = "Main TeleOp", group = "TeleOp")
-public class Teleop extends OpMode {
+@TeleOp(name = "Single Player TeleOp", group = "TeleOp")
+public class SingleTeleop extends OpMode {
 
     private Robot robot;
     double loopStart = System.nanoTime();
@@ -21,6 +21,7 @@ public class Teleop extends OpMode {
     private boolean autoRPM = false;
 
     private boolean autoAim = true;
+    boolean gateOpen = false;  // Add as field
 
     @Override
     public void init() {
@@ -72,8 +73,8 @@ public class Teleop extends OpMode {
         // Drivetrain
         robot.drive(gamepad1);
         robot.trackDrivetrain();
-        if (gamepad1.a) robot.resetDrivePosAtGoal();
-        if (gamepad1.x) robot.resetDrivePosBackZone();
+        if (gamepad2.a) robot.resetDrivePosAtGoal();
+//        if (gamepad1.x) robot.resetDrivePosBackZone();
 
         // Manuel Turret
         if (!autoAim && gamepad1.dpadLeftWasPressed()) {
@@ -85,24 +86,24 @@ public class Teleop extends OpMode {
         }
 
         if (autoAim) {
-//            if (gamepad1.right_trigger > 0.5 && !lastRT) robot.turret.adjustOffsetRight(OFFSET_TICKS);
-//            if (gamepad1.left_trigger > 0.5 && !lastLT) robot.turret.adjustOffsetLeft(OFFSET_TICKS);
+//            if (gamepad2.right_trigger > 0.5 && !lastRT) robot.turret.adjustOffsetRight(OFFSET_TICKS);
+//            if (gamepad2.left_trigger > 0.5 && !lastLT) robot.turret.adjustOffsetLeft(OFFSET_TICKS);
             lastLT = gamepad1.left_trigger > 0.5;
             lastRT = gamepad1.right_trigger > 0.5;
-//            if (gamepad1.startWasPressed()) robot.turret.resetOffset();
+//            if (gamepad1.dpadUpWasPressed()) robot.turret.resetOffset();
         }
 
 
         // ------------------ Gamepad 2 ------------------
         // Intake
-        if (gamepad2.left_bumper && (gamepad2.right_trigger > .1 || gamepad2.right_bumper)) robot.slowIntakeIn();
-        else if (gamepad2.left_bumper) robot.intakeIn();
-        else if (gamepad2.left_trigger > 0.2) robot.intakeOut();
+        if (gamepad1.left_bumper && (gamepad1.right_trigger > .1 || gamepad1.right_bumper)) robot.slowIntakeIn();
+        else if (gamepad1.left_bumper) robot.intakeIn();
+//        else if (gamepad1.left_trigger > 0.2) robot.intakeOut();
         else robot.intakeOff();
         // Shooting
         if (!autoRPM) {
-            if (gamepad2.right_bumper) robot.shootHigh();
-            else if (gamepad2.right_trigger > 0.2) robot.shootLow();
+            if (gamepad1.right_bumper) robot.shootHigh();
+//            else if (gamepad1.right_trigger > 0.2) robot.shootLow();
             else robot.stopShooter();
         } else robot.adjustSpeedAutomatically(robot.getDistanceFromTarget());
         // Auto Aim
@@ -115,8 +116,19 @@ public class Teleop extends OpMode {
         }
 
 
-        if (gamepad2.b && !lastB) robot.gate.toggle();
-        lastB = gamepad2.b;
+//        if (gamepad1.ri > .1 && !lastB) robot.gate.toggle();
+//        lastB = gamepad1.b;
+
+
+
+// In loop:
+        if (gamepad1.right_trigger > .5 && !lastB) {
+            gateOpen = !gateOpen;
+            if (gateOpen) robot.gate.openGate();
+            else robot.gate.closeGate();
+        }
+        lastB = gamepad1.right_trigger > .5;
+
 
         if (gamepad2.y && !lastY) {
             autoRPM = !autoRPM;
