@@ -2,13 +2,16 @@ package org.firstinspires.ftc.teamcode.helper;
 
 import org.firstinspires.ftc.teamcode.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.subsystems.Outtake;
+
 public class ThreeBallShooterClose {
     private final Intake intake;
     private final Outtake outtake;
-    private static final int SPINUP_MS = 1500;    // 1.5s spinup
-    private static final int INTAKE_ON_MS = 124;  // 0.3s feed
+    private static final int SPINUP_MS = 1000;
+    private static final int INTAKE_ON_MS = 100;
+
+    private static final int SECOND_INTAKE_ON_MS = 80;
     private static final int LAST_INTAKE_ON_MS = 1000;
-    private static final int INTAKE_OFF_MS = 500; // 0.5s pause
+    private static final int INTAKE_OFF_MS = 400;
     private static final int MAX_BALLS = 3;
 
     public boolean shootingActive = false;
@@ -28,7 +31,7 @@ public class ThreeBallShooterClose {
         ballsShot = 0;
         stage = 0;
         stageStartTime = System.currentTimeMillis();
-        outtake.shootLow(); // Start flywheel
+        outtake.shootHigh(); // Start flywheel
     }
 
     public boolean isActive() { return shootingActive && !shootingDone; }
@@ -50,9 +53,15 @@ public class ThreeBallShooterClose {
             case 1: // FEED BALL
                 intake.spinIn();
 
-                long feedTime = (ballsShot == MAX_BALLS - 1)
-                        ? LAST_INTAKE_ON_MS
-                        : INTAKE_ON_MS;
+//                long feedTime = (ballsShot == MAX_BALLS - 1)
+//                        ? LAST_INTAKE_ON_MS
+//
+                long feedTime = INTAKE_ON_MS;
+                if (ballsShot == MAX_BALLS - 1) {
+                    feedTime = LAST_INTAKE_ON_MS;
+                } else if (ballsShot == MAX_BALLS - 2) {
+                    feedTime = SECOND_INTAKE_ON_MS;
+                }
 
                 if (now - stageStartTime >= feedTime) {
                     stage = 2;
@@ -68,7 +77,7 @@ public class ThreeBallShooterClose {
                         shootingActive = false;
                         shootingDone = true;
                         intake.spinOff();
-                        outtake.shootLow();
+                        outtake.shootHigh();
                     } else {
                         stage = 1;
                         stageStartTime = now;

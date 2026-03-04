@@ -13,24 +13,25 @@
 //import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 //import org.firstinspires.ftc.teamcode.helper.Alliance;
 //import org.firstinspires.ftc.teamcode.helper.Data;
+//import org.firstinspires.ftc.teamcode.helper.RapidFire;
 //import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 //import org.firstinspires.ftc.teamcode.subsystems.Robot;
 //
-//@Autonomous(name = "Blue-Auto Close 9 Artifact", group = "Autonomous")
+//@Autonomous(name = "Blue Auto Close 15 Park Artifact", group = "Autonomous")
 //@Configurable
 //@Disabled
-//public class PedroAutonomousBlueClose extends OpMode {
+//public class PedroAutoBlue15Ball extends OpMode {
 //
 //    private TelemetryManager panelsTelemetry;
 //    public Follower follower;
 //    private int pathState;
 //    private Paths paths;
-//    private ThreeBallShooterClose threeBallShooter;
+//    private RapidFire threeBallShooter;
 //    private Robot robot;
 //    private long shootStartTime = 0;
 //    private long settleStartTime = 0;
 //    private long stopCheckTime = 0;
-//    private static final long SETTLE_MS = 250;
+//    private static final long SETTLE_MS = 50;
 //
 //
 //    @Override
@@ -40,7 +41,7 @@
 //        follower.setStartingPose(new Pose(33.75, 135.5, Math.toRadians(180)));
 //        paths = new Paths(follower);
 //        robot = new Robot(hardwareMap, Alliance.BLUE);
-//        threeBallShooter = new ThreeBallShooterClose(robot.intake, robot.outtake);
+//        threeBallShooter = new RapidFire(robot.intake, robot.outtake);
 //
 //        robot.outtake.periodic();
 //        Data.setAutoPose(follower.getPose());
@@ -52,7 +53,7 @@
 //
 //    @Override
 //    public void start() {
-//        robot.hood.set(.05, .95);
+//        robot.hood.set(.05, .85);
 //        robot.outtake.periodic();
 //    }
 //
@@ -63,6 +64,8 @@
 //        robot.outtake.periodic();
 //        robot.autoPeriodic();
 //        threeBallShooter.update();
+//
+//        Data.setAutoPose(follower.getPose());
 //
 //        pathState = autonomousPathUpdate();
 //
@@ -81,9 +84,8 @@
 //        switch (pathState) {
 //
 //            case 0: // Go to First Shoot
-//                robot.turret.setTurretTarget(-120);
+//                robot.turret.setTurretTarget(-123);
 //                robot.outtake.shootLow();
-//                //robot.turret.manual(0.7);
 //                if (!follower.isBusy()) {
 //                    robot.gate.closeGate();
 //                    follower.followPath(paths.ToShoot);
@@ -171,7 +173,7 @@
 //                        stopCheckTime = System.currentTimeMillis();
 //                    }
 //
-//                    if (System.currentTimeMillis() - stopCheckTime >= 200) {
+//                    if (System.currentTimeMillis() - stopCheckTime >= 300) {
 //                        robot.intakeOff();
 //                        follower.followPath(paths.ToShoot3);
 //                        follower.setMaxPowerScaling(1);
@@ -209,29 +211,103 @@
 //                    }
 //                }
 //                break;
+//            case 6: // Go to Shoot 4
+//                if (!follower.isBusy()) {
+//                    robot.intakeOff();
+//                    robot.turret.setTurretTarget(-126);
+//                    robot.outtake.shootLow();
+//                    follower.followPath(paths.ToShoot4);
+//                    settleStartTime = 0;
+//                    pathState = 7;
+//                }
+//                break;
 //
-//            case 6: // End
+//            case 7: // Shoot 4th set
+//                if (!follower.isBusy()) {
+//                    robot.gate.openGate();
+//
+//                    if (settleStartTime == 0) {
+//                        settleStartTime = System.currentTimeMillis();
+//                    }
+//
+//                    if (System.currentTimeMillis() - settleStartTime >= SETTLE_MS) {
+//
+//                        if (shootStartTime == 0) {
+//                            threeBallShooter.start();
+//                            shootStartTime = System.currentTimeMillis();
+//                        }
+//
+//                        if (threeBallShooter.isDone()) {
+//                            shootStartTime = 0;
+//                            settleStartTime = 0;
+//                            robot.gate.closeGate();
+//                            robot.intakeIn();
+//                            follower.followPath(paths.ToParkSet);
+//                            stopCheckTime = System.currentTimeMillis();
+//                            pathState = 8;
+//                        }
+//                    }
+//                }
+//                break;
+//            case 8:
+//                if (!follower.isBusy()) {
+//                    robot.intakeOff();
+//                    robot.turret.setTurretTarget(-126);
+//                    robot.outtake.shootLow();
+//                    follower.followPath(paths.ToShoot5);
+//                    settleStartTime = 0;
+//                    pathState = 9;
+//                }
+//                break;
+//            case 9:
+//                if (!follower.isBusy()) {
+//                    robot.gate.openGate();
+//
+//                    if (settleStartTime == 0) {
+//                        settleStartTime = System.currentTimeMillis();
+//                    }
+//
+//                    if (System.currentTimeMillis() - settleStartTime >= SETTLE_MS) {
+//
+//                        if (shootStartTime == 0) {
+//                            threeBallShooter.start();
+//                            shootStartTime = System.currentTimeMillis();
+//                        }
+//
+//                        if (threeBallShooter.isDone()) {
+//                            shootStartTime = 0;
+//                            settleStartTime = 0;
+//                            robot.gate.closeGate();
+//                            robot.intakeIn();
+//                            follower.followPath(paths.LeaveLaunchPad);
+//                            stopCheckTime = System.currentTimeMillis();
+//                            pathState = 10;
+//                        }
+//                    }
+//                }
+//            case 10: // Leave launch pad
 //                if (!follower.isBusy()) {
 //                    if (stopCheckTime == 0) {
 //                        stopCheckTime = System.currentTimeMillis();
 //                    }
 //
-//                    if (System.currentTimeMillis() - stopCheckTime >= 200) {
+//                    if (System.currentTimeMillis() - stopCheckTime >= 50) {
 //                        robot.intakeOff();
-//                        robot.turret.setTurretTarget(0);
 //                        Data.setAutoPose(follower.getPose());
 //                        requestOpModeStop();
 //                        stopCheckTime = 0;
 //                    }
 //                }
 //                break;
+//
 //        }
 //
 //        return pathState;
 //    }
 //
 //    public static class Paths {
-//        public PathChain ToShoot, IntakeFirstSet, ToShoot2, IntakeSecondSet, ToShoot3, IntakeThirdSet;
+//        public PathChain ToShoot, IntakeFirstSet, ToShoot2, IntakeSecondSet, ToShoot3,
+//                IntakeThirdSet, ToShoot4, ToParkSet, ToShoot5, LeaveLaunchPad;
 //
 //        public Paths(Follower follower) {
 //            ToShoot = follower.pathBuilder()
@@ -239,7 +315,7 @@
 //                    .setConstantHeadingInterpolation(Math.toRadians(180)).build();
 //
 //            IntakeFirstSet = follower.pathBuilder()
-//                    .addPath(new BezierCurve(new Pose(53.000, 90.000), new Pose(45.500, 84.500), new Pose(25.000, 84.000)))
+//                    .addPath(new BezierCurve(new Pose(53.000, 90.000), new Pose(45.500, 84.500), new Pose(27.500, 84.000)))
 //                    .setConstantHeadingInterpolation(Math.toRadians(180)).build();
 //
 //            ToShoot2 = follower.pathBuilder()
@@ -247,7 +323,7 @@
 //                    .setConstantHeadingInterpolation(Math.toRadians(180)).build();
 //
 //            IntakeSecondSet = follower.pathBuilder()
-//                    .addPath(new BezierCurve(new Pose(53.000, 90.000), new Pose(52.000, 73.000), new Pose(60.000, 59.500), new Pose(22.000, 58.000)))
+//                    .addPath(new BezierCurve(new Pose(53.000, 90.000), new Pose(52.000, 73.000), new Pose(60.000, 59.500), new Pose(20.000, 58.000)))
 //                    .setConstantHeadingInterpolation(Math.toRadians(180)).build();
 //
 //            ToShoot3 = follower.pathBuilder()
@@ -257,6 +333,44 @@
 //            IntakeThirdSet = follower.pathBuilder()
 //                    .addPath(new BezierCurve(new Pose(53.000, 90.000), new Pose(61.500, 30.500), new Pose(44.500, 35.500), new Pose(25.00, 36.000)))
 //                    .setConstantHeadingInterpolation(Math.toRadians(180)).build();
+//
+//            ToShoot4 = follower
+//                    .pathBuilder()
+//                    .addPath(
+//                            new BezierLine(new Pose(17.500, 36.000), new Pose(53.000, 90.000))
+//                    )
+//                    .setConstantHeadingInterpolation(Math.toRadians(180))
+//                    .build();
+//            ToParkSet = follower.pathBuilder().addPath(
+//                            new BezierCurve(
+//                                    new Pose(53.000, 90.000),
+//                                    new Pose(7.805, 55.194),
+//                                    new Pose(17.064, 43.165),
+//                                    new Pose(9.000, 11.000)
+//                            )
+//                    ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(270))
+//
+//                    .build();
+//
+//            ToShoot5 = follower.pathBuilder().addPath(
+//                            new BezierLine(
+//                                    new Pose(9.000, 11.000),
+//
+//                                    new Pose(53.000, 90.000)
+//                            )
+//                    ).setLinearHeadingInterpolation(Math.toRadians(270), Math.toRadians(180))
+//
+//                    .build();
+//
+//            LeaveLaunchPad = follower
+//                    .pathBuilder()
+//                    .addPath(
+//                            new BezierLine(new Pose(53.000, 90.000), new Pose(39.000, 77.000))
+//                    )
+//                    .setConstantHeadingInterpolation(Math.toRadians(180))
+//                    .build();
+//
+//
 //        }
 //    }
 //}

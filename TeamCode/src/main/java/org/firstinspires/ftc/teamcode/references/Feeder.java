@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.subsystems;
+package org.firstinspires.ftc.teamcode.references;
 
 
 import com.bylazar.configurables.annotations.Configurable;
@@ -15,7 +15,6 @@ public class Feeder {
     public Feeder(HardwareMap hw) {
         servo = hw.get(Servo.class, "feeder");
     }
-
     public void push() {
         servo.setPosition(out);
     }

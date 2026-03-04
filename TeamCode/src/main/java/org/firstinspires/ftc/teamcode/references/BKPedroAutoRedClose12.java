@@ -16,10 +16,10 @@
 //import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 //import org.firstinspires.ftc.teamcode.subsystems.Robot;
 //
-//@Autonomous(name = "Blue-Auto Close 9 Artifact", group = "Autonomous")
+//@Autonomous(name = "Red Auto Close 12 Artifact", group = "Autonomous")
 //@Configurable
 //@Disabled
-//public class PedroAutonomousBlueClose extends OpMode {
+//public class BKPedroAutoRedClose12 extends OpMode {
 //
 //    private TelemetryManager panelsTelemetry;
 //    public Follower follower;
@@ -30,16 +30,16 @@
 //    private long shootStartTime = 0;
 //    private long settleStartTime = 0;
 //    private long stopCheckTime = 0;
-//    private static final long SETTLE_MS = 250;
+//    private static final long SETTLE_MS = 50;
 //
 //
 //    @Override
 //    public void init() {
 //        panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();
 //        follower = Constants.createFollower(hardwareMap);
-//        follower.setStartingPose(new Pose(33.75, 135.5, Math.toRadians(180)));
+//        follower.setStartingPose(new Pose(33.75, 135.5, Math.toRadians(180)).mirror());
 //        paths = new Paths(follower);
-//        robot = new Robot(hardwareMap, Alliance.BLUE);
+//        robot = new Robot(hardwareMap, Alliance.RED, false);
 //        threeBallShooter = new ThreeBallShooterClose(robot.intake, robot.outtake);
 //
 //        robot.outtake.periodic();
@@ -64,13 +64,15 @@
 //        robot.autoPeriodic();
 //        threeBallShooter.update();
 //
+//        Data.setAutoPose(follower.getPose());
+//
 //        pathState = autonomousPathUpdate();
 //
 //        panelsTelemetry.debug("Path State", pathState);
 //        panelsTelemetry.debug("Shooter Stage", threeBallShooter.stage);
 //        panelsTelemetry.debug("Outtake RPM L", robot.outtake.getRPMLeft());
 //        panelsTelemetry.debug("Outtake RPM R", robot.outtake.getRPMRight());
-//        panelsTelemetry.debug("Outtake Target", robot.outtake.targetRPM);
+////        panelsTelemetry.debug("Outtake Target", robot.outtake.targetRPM);
 ////        panelsTelemetry.debug("At Target", robot.outtake.atTarget());
 //        panelsTelemetry.debug("X", follower.getPose().getX());
 //        panelsTelemetry.debug("Y", follower.getPose().getY());
@@ -81,9 +83,8 @@
 //        switch (pathState) {
 //
 //            case 0: // Go to First Shoot
-//                robot.turret.setTurretTarget(-120);
+//                robot.turret.setTurretTarget(123);
 //                robot.outtake.shootLow();
-//                //robot.turret.manual(0.7);
 //                if (!follower.isBusy()) {
 //                    robot.gate.closeGate();
 //                    follower.followPath(paths.ToShoot);
@@ -94,6 +95,7 @@
 //                break;
 //
 //            case 1: // Shoot 3
+//                robot.turret.setTurretTarget(122);
 //                if (!follower.isBusy()) {
 //
 //                    if (settleStartTime == 0) {
@@ -121,6 +123,7 @@
 //                break;
 //
 //            case 2: // From intake to Shoot 2
+//                robot.turret.setTurretTarget(122);
 //                if (!follower.isBusy()) {
 //                    if (stopCheckTime == 0) {
 //                        stopCheckTime = System.currentTimeMillis();
@@ -138,6 +141,7 @@
 //                break;
 //
 //            case 3: // Shoot 2nd 3
+//                robot.turret.setTurretTarget(122);
 //                if (!follower.isBusy()) {
 //                    robot.gate.openGate();
 //
@@ -209,14 +213,50 @@
 //                    }
 //                }
 //                break;
+//            case 6: // Go to Shoot 4
+//                if (!follower.isBusy()) {
+//                    robot.intakeOff();
+//                    robot.turret.setTurretTarget(122);
+//                    robot.outtake.shootLow();
+//                    follower.followPath(paths.ToShoot4);
+//                    settleStartTime = 0;
+//                    pathState = 7;
+//                }
+//                break;
 //
-//            case 6: // End
+//            case 7: // Shoot 4th set
+//                if (!follower.isBusy()) {
+//                    robot.gate.openGate();
+//
+//                    if (settleStartTime == 0) {
+//                        settleStartTime = System.currentTimeMillis();
+//                    }
+//
+//                    if (System.currentTimeMillis() - settleStartTime >= SETTLE_MS) {
+//
+//                        if (shootStartTime == 0) {
+//                            threeBallShooter.start();
+//                            shootStartTime = System.currentTimeMillis();
+//                        }
+//
+//                        if (threeBallShooter.isDone()) {
+//                            shootStartTime = 0;
+//                            settleStartTime = 0;
+//                            robot.gate.closeGate();
+//                            robot.stopShooter();
+//                            follower.followPath(paths.LeaveLaunchPad);
+//                            pathState = 8;
+//                        }
+//                    }
+//                }
+//                break;
+//            case 8: // Leave launch pad
 //                if (!follower.isBusy()) {
 //                    if (stopCheckTime == 0) {
 //                        stopCheckTime = System.currentTimeMillis();
 //                    }
 //
-//                    if (System.currentTimeMillis() - stopCheckTime >= 200) {
+//                    if (System.currentTimeMillis() - stopCheckTime >= 50) {
 //                        robot.intakeOff();
 //                        robot.turret.setTurretTarget(0);
 //                        Data.setAutoPose(follower.getPose());
@@ -225,38 +265,58 @@
 //                    }
 //                }
 //                break;
+//
 //        }
 //
 //        return pathState;
 //    }
 //
 //    public static class Paths {
-//        public PathChain ToShoot, IntakeFirstSet, ToShoot2, IntakeSecondSet, ToShoot3, IntakeThirdSet;
+//        public PathChain ToShoot, IntakeFirstSet, ToShoot2, IntakeSecondSet, ToShoot3,
+//                IntakeThirdSet, ToShoot4, LeaveLaunchPad;
 //
 //        public Paths(Follower follower) {
 //            ToShoot = follower.pathBuilder()
-//                    .addPath(new BezierLine(new Pose(33.756, 135.220), new Pose(53.000, 90.000)))
-//                    .setConstantHeadingInterpolation(Math.toRadians(180)).build();
+//                    .addPath(new BezierLine(new Pose(33.756, 135.220).mirror(), new Pose(53.000, 90.000).mirror()))
+//                    .setConstantHeadingInterpolation(Math.toRadians(0)).build();
 //
 //            IntakeFirstSet = follower.pathBuilder()
-//                    .addPath(new BezierCurve(new Pose(53.000, 90.000), new Pose(45.500, 84.500), new Pose(25.000, 84.000)))
-//                    .setConstantHeadingInterpolation(Math.toRadians(180)).build();
+//                    .addPath(new BezierCurve(new Pose(53.000, 90.000).mirror(), new Pose(45.500, 84.500).mirror(), new Pose(27.500, 84.000).mirror()))
+//                    .setConstantHeadingInterpolation(Math.toRadians(0)).build();
 //
 //            ToShoot2 = follower.pathBuilder()
-//                    .addPath(new BezierLine(new Pose(25.000, 84.000), new Pose(53.000, 90.000)))
-//                    .setConstantHeadingInterpolation(Math.toRadians(180)).build();
+//                    .addPath(new BezierLine(new Pose(25.000, 84.000).mirror(), new Pose(53.000, 90.000).mirror()))
+//                    .setConstantHeadingInterpolation(Math.toRadians(0)).build();
 //
 //            IntakeSecondSet = follower.pathBuilder()
-//                    .addPath(new BezierCurve(new Pose(53.000, 90.000), new Pose(52.000, 73.000), new Pose(60.000, 59.500), new Pose(22.000, 58.000)))
-//                    .setConstantHeadingInterpolation(Math.toRadians(180)).build();
+//                    .addPath(new BezierCurve(new Pose(53.000, 90.000).mirror(), new Pose(52.000, 73.000).mirror(), new Pose(60.000, 59.500).mirror(), new Pose(22.000, 58.000).mirror()))
+//                    .setConstantHeadingInterpolation(Math.toRadians(0)).build();
 //
 //            ToShoot3 = follower.pathBuilder()
-//                    .addPath(new BezierLine(new Pose(22.000, 58.000), new Pose(53.000, 90.000)))
-//                    .setConstantHeadingInterpolation(Math.toRadians(180)).build();
+//                    .addPath(new BezierLine(new Pose(22.000, 58.000).mirror(), new Pose(53.000, 90.000).mirror()))
+//                    .setConstantHeadingInterpolation(Math.toRadians(0)).build();
 //
 //            IntakeThirdSet = follower.pathBuilder()
-//                    .addPath(new BezierCurve(new Pose(53.000, 90.000), new Pose(61.500, 30.500), new Pose(44.500, 35.500), new Pose(25.00, 36.000)))
-//                    .setConstantHeadingInterpolation(Math.toRadians(180)).build();
+//                    .addPath(new BezierCurve(new Pose(53.000, 90.000).mirror(), new Pose(61.500, 30.500).mirror(), new Pose(40.500, 35.500).mirror(), new Pose(25.00, 36.000).mirror()))
+//                    .setConstantHeadingInterpolation(Math.toRadians(0)).build();
+//
+//            ToShoot4 = follower
+//                    .pathBuilder()
+//                    .addPath(
+//                            new BezierLine(new Pose(17.500, 36.000).mirror(), new Pose(53.000, 90.000).mirror())
+//                    )
+//                    .setConstantHeadingInterpolation(Math.toRadians(0))
+//                    .build();
+//
+//            LeaveLaunchPad = follower
+//                    .pathBuilder()
+//                    .addPath(
+//                            new BezierLine(new Pose(53.000, 90.000).mirror(), new Pose(39.000, 77.000).mirror())
+//                    )
+//                    .setConstantHeadingInterpolation(Math.toRadians(0))
+//                    .build();
+//
+//
 //        }
 //    }
 //}

@@ -11,17 +11,11 @@ public class Hood {
     private final Servo left;
     private final Servo right;
 
-    // .6494 r
-    // .35 l
-
-    // .95
-    // .05
-
     public static double LOW_LEFT = 0.0;
     public static double LOW_RIGHT = 1.0;
 
-    public static double HIGH_LEFT = 0.1;
-    public static double HIGH_RIGHT = 0.9;
+    public static double HIGH_LEFT = 0.95;
+    public static double HIGH_RIGHT = 0.05;
 
     public static double upIncrement = .05;
     public static double downIncrement = .05;
@@ -29,7 +23,7 @@ public class Hood {
     public Hood(HardwareMap hw) {
         left  = hw.get(Servo.class, "hoodServoLeft");
         right = hw.get(Servo.class, "hoodServoRight");
-        low();
+//        low();
     }
 
     private double clamp(double v) {
@@ -39,11 +33,6 @@ public class Hood {
     public void set(double leftPos, double rightPos) {
         left.setPosition(clamp(leftPos));
         right.setPosition(clamp(rightPos));
-    }
-
-    public void setPos(double pos) {
-        left.setPosition(clamp(pos));
-        right.setPosition(clamp(1-pos));
     }
 
     public double getLeftPosition() {
@@ -63,7 +52,5 @@ public class Hood {
     public void moveUp() {
         set(getLeftPosition() + upIncrement, getRightPosition() - upIncrement);
     }
-    public void moveDown() {
-        set(getLeftPosition() - downIncrement, getRightPosition() + downIncrement);
-    }
+    public void moveDown() { set(getLeftPosition() - downIncrement, getRightPosition() + downIncrement); }
 }

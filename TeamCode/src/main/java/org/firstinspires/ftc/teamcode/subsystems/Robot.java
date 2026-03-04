@@ -160,7 +160,7 @@ public void adjustSpeedAutomatically(double distInches) {
     }
 
     public void setUpRapidFire() {
-        outtake.setTargetRPM(4400);
+        outtake.setTargetRPM(4250);
         hood.set(.1, .9);
 
     }

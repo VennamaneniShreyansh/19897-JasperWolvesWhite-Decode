@@ -1,5 +1,9 @@
 package org.firstinspires.ftc.teamcode.opmodes;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.canvas.Canvas;
+import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.bylazar.telemetry.TelemetryManager;
@@ -7,30 +11,66 @@ import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
+import com.pedropathing.math.Vector;
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import org.firstinspires.ftc.teamcode.helper.Alliance;
 import org.firstinspires.ftc.teamcode.helper.Data;
+import org.firstinspires.ftc.teamcode.helper.RapidFire;
 import org.firstinspires.ftc.teamcode.helper.ThreeBallShooterClose;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.subsystems.Robot;
+//import org.firstinspires.ftc.teamcode.pedroPathing.Drawing; // Path visualization
 
-@Autonomous(name = "Red Auto Close 12 Artifact", group = "Autonomous")
+
+@Autonomous(name = "Red Auto 12 Gate", group = "Autonomous")
 @Configurable
-public class PedroAutoRedClose12 extends OpMode {
+@Config
+public class RedAuto12Gate extends OpMode {
 
     private TelemetryManager panelsTelemetry;
     public Follower follower;
     private int pathState;
     private Paths paths;
-    private ThreeBallShooterClose threeBallShooter;
     private Robot robot;
+    private ThreeBallShooterClose threeBallShooter;
     private long shootStartTime = 0;
     private long settleStartTime = 0;
     private long stopCheckTime = 0;
     private static final long SETTLE_MS = 50;
 
+    public void drawRobot(Canvas canvas, Pose pose) {
+        Pose newPose = PedroToFTC(pose.getX(), pose.getY(), pose.getHeading());
+        canvas.strokeCircle(newPose.getX(), newPose.getY(), 9);
+        Vector v = newPose.getHeadingAsUnitVector().times(9);
+        double x1 = newPose.getX() + v.getXComponent() / 2, y1 = newPose.getY() + v.getYComponent() / 2;
+        double x2 = newPose.getX() + v.getXComponent(), y2 = newPose.getY() + v.getYComponent();
+        canvas.strokeLine(x1, y1, x2, y2);
+    }
+    public double angleWrap(double heading) {
+        while (heading >= Math.PI) {
+            heading -= Math.PI;
+        }
+        while (heading < -Math.PI) {
+            heading += Math.PI;
+        }
+        return heading;
+    }
+    public Pose PedroToFTC(double pedroX, double pedroY, double pedroHeading) {
+        // 1. Convert position
+        double ftcY = -72 + pedroX;   // FTC +Y → Pedro +X
+        double ftcX = 72 - pedroY;   // FTC +X (down) → Pedro -Y (up)
+
+        // 2. Convert heading
+        double ftcHeading = pedroHeading + Math.PI / 2;
+
+        // 3. Normalize to 0 → 2π
+        ftcHeading %= 2 * Math.PI;
+        ftcHeading = angleWrap(ftcHeading);
+
+        return new Pose(ftcX, ftcY, ftcHeading);
+    }
 
     @Override
     public void init() {
@@ -38,10 +78,9 @@ public class PedroAutoRedClose12 extends OpMode {
         follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(new Pose(33.75, 135.5, Math.toRadians(180)).mirror());
         paths = new Paths(follower);
-        robot = new Robot(hardwareMap, Alliance.RED);
+        robot = new Robot(hardwareMap, Alliance.RED, false);
         threeBallShooter = new ThreeBallShooterClose(robot.intake, robot.outtake);
 
-        robot.outtake.periodic();
         Data.setAutoPose(follower.getPose());
 
         panelsTelemetry.debug("Status", "Initialized");
@@ -51,28 +90,35 @@ public class PedroAutoRedClose12 extends OpMode {
 
     @Override
     public void start() {
-        robot.hood.set(.05, .95);
+        robot.hood.set(.85, .15);
         robot.outtake.periodic();
     }
 
     @Override
     public void loop() {
         follower.update();
-
-        robot.outtake.periodic();
-        robot.autoPeriodic();
+        robot.periodic();
         threeBallShooter.update();
 
         Data.setAutoPose(follower.getPose());
 
         pathState = autonomousPathUpdate();
+        robot.shootLow();
 
+//        Tuning.draw();
+//        Tuning.drawOnlyCurrent();
+        try {
+            TelemetryPacket packet = new TelemetryPacket();
+            drawRobot(packet.fieldOverlay(), follower.getPose());
+            FtcDashboard.getInstance().sendTelemetryPacket(packet);
+        } catch (RuntimeException e) {
+            e.printStackTrace();
+        }
         panelsTelemetry.debug("Path State", pathState);
         panelsTelemetry.debug("Shooter Stage", threeBallShooter.stage);
         panelsTelemetry.debug("Outtake RPM L", robot.outtake.getRPMLeft());
         panelsTelemetry.debug("Outtake RPM R", robot.outtake.getRPMRight());
-        panelsTelemetry.debug("Outtake Target", robot.outtake.targetRPM);
-        panelsTelemetry.debug("At Target", robot.outtake.atTarget());
+        panelsTelemetry.debug("Shooter enabled", robot.outtake.isEnabled());
         panelsTelemetry.debug("X", follower.getPose().getX());
         panelsTelemetry.debug("Y", follower.getPose().getY());
         panelsTelemetry.update(telemetry);
@@ -82,8 +128,8 @@ public class PedroAutoRedClose12 extends OpMode {
         switch (pathState) {
 
             case 0: // Go to First Shoot
-                robot.turret.setTurretTarget(123);
-                robot.outtake.shootLow();
+                robot.turret.setTurretTarget(125);
+                robot.shootLow();
                 if (!follower.isBusy()) {
                     robot.gate.closeGate();
                     follower.followPath(paths.ToShoot);
@@ -94,14 +140,13 @@ public class PedroAutoRedClose12 extends OpMode {
                 break;
 
             case 1: // Shoot 3
-                robot.turret.setTurretTarget(122);
                 if (!follower.isBusy()) {
 
                     if (settleStartTime == 0) {
                         settleStartTime = System.currentTimeMillis();
                     }
 
-                    if (System.currentTimeMillis() - settleStartTime >= SETTLE_MS) {
+                    if (System.currentTimeMillis() - settleStartTime >= 1000) {
 
                         if (shootStartTime == 0) {
                             threeBallShooter.start();
@@ -113,7 +158,8 @@ public class PedroAutoRedClose12 extends OpMode {
                             settleStartTime = 0;
                             robot.gate.closeGate();
                             robot.intakeIn();
-                            follower.setMaxPowerScaling(.75);
+                            follower.setMaxPower(.9);
+//                            robot.hood.set(.95, .05);
                             follower.followPath(paths.IntakeFirstSet);
                             pathState = 2;
                         }
@@ -122,7 +168,6 @@ public class PedroAutoRedClose12 extends OpMode {
                 break;
 
             case 2: // From intake to Shoot 2
-                robot.turret.setTurretTarget(122);
                 if (!follower.isBusy()) {
                     if (stopCheckTime == 0) {
                         stopCheckTime = System.currentTimeMillis();
@@ -130,8 +175,24 @@ public class PedroAutoRedClose12 extends OpMode {
 
                     if (System.currentTimeMillis() - stopCheckTime >= 300) {
                         robot.intakeOff();
+                        follower.setMaxPower(.8);
+                        follower.followPath(paths.OpenGate);
+                        pathState = 10;
+                        stopCheckTime = 0;
+                        settleStartTime = 0;
+                    }
+                }
+                break;
+
+            case 10:
+                if (!follower.isBusy()) {
+                    if (stopCheckTime == 0) {
+                        stopCheckTime = System.currentTimeMillis();
+                    }
+
+                    if (System.currentTimeMillis() - stopCheckTime >= 500) {
+                        follower.setMaxPower(1);
                         follower.followPath(paths.ToShoot2);
-                        follower.setMaxPowerScaling(1);
                         pathState = 3;
                         stopCheckTime = 0;
                         settleStartTime = 0;
@@ -140,7 +201,6 @@ public class PedroAutoRedClose12 extends OpMode {
                 break;
 
             case 3: // Shoot 2nd 3
-                robot.turret.setTurretTarget(122);
                 if (!follower.isBusy()) {
                     robot.gate.openGate();
 
@@ -160,8 +220,8 @@ public class PedroAutoRedClose12 extends OpMode {
                             settleStartTime = 0;
                             robot.gate.closeGate();
                             robot.intakeIn();
+                            follower.setMaxPower(.9);
                             follower.followPath(paths.IntakeSecondSet);
-                            stopCheckTime = System.currentTimeMillis();
                             pathState = 4;
                         }
                     }
@@ -174,10 +234,10 @@ public class PedroAutoRedClose12 extends OpMode {
                         stopCheckTime = System.currentTimeMillis();
                     }
 
-                    if (System.currentTimeMillis() - stopCheckTime >= 200) {
+                    if (System.currentTimeMillis() - stopCheckTime >= 300) {
+                        follower.setMaxPower(1);
                         robot.intakeOff();
                         follower.followPath(paths.ToShoot3);
-                        follower.setMaxPowerScaling(1);
                         pathState = 5;
                         stopCheckTime = 0;
                         settleStartTime = 0;
@@ -204,8 +264,8 @@ public class PedroAutoRedClose12 extends OpMode {
                             shootStartTime = 0;
                             settleStartTime = 0;
                             robot.gate.closeGate();
-                            robot.stopShooter();
                             robot.intakeIn();
+                            follower.setMaxPower(.9);
                             follower.followPath(paths.IntakeThirdSet);
                             pathState = 6;
                         }
@@ -214,12 +274,20 @@ public class PedroAutoRedClose12 extends OpMode {
                 break;
             case 6: // Go to Shoot 4
                 if (!follower.isBusy()) {
-                    robot.intakeOff();
-                    robot.turret.setTurretTarget(122);
-                    robot.outtake.shootLow();
-                    follower.followPath(paths.ToShoot4);
-                    settleStartTime = 0;
-                    pathState = 7;
+                    if (stopCheckTime == 0) {
+                        stopCheckTime = System.currentTimeMillis();
+                    }
+
+                    robot.hood.set(.85, .15);
+
+                    if (System.currentTimeMillis() - stopCheckTime >= 300) {
+                        robot.intakeOff();
+                        robot.turret.setTurretTarget(69);
+//                        robot.hood.set(1, 0);
+                        follower.followPath(paths.ToShoot4);
+                        settleStartTime = 0;
+                        pathState = 7;
+                    }
                 }
                 break;
 
@@ -243,7 +311,6 @@ public class PedroAutoRedClose12 extends OpMode {
                             settleStartTime = 0;
                             robot.gate.closeGate();
                             robot.stopShooter();
-                            follower.followPath(paths.LeaveLaunchPad);
                             pathState = 8;
                         }
                     }
@@ -259,7 +326,7 @@ public class PedroAutoRedClose12 extends OpMode {
                         robot.intakeOff();
                         robot.turret.setTurretTarget(0);
                         Data.setAutoPose(follower.getPose());
-                        requestOpModeStop();
+//                        requestOpModeStop();
                         stopCheckTime = 0;
                     }
                 }
@@ -270,52 +337,100 @@ public class PedroAutoRedClose12 extends OpMode {
         return pathState;
     }
 
+
     public static class Paths {
-        public PathChain ToShoot, IntakeFirstSet, ToShoot2, IntakeSecondSet, ToShoot3,
-                IntakeThirdSet, ToShoot4, LeaveLaunchPad;
+        public PathChain ToShoot;
+        public PathChain IntakeFirstSet;
+        public PathChain OpenGate;
+        public PathChain ToShoot2;
+        public PathChain IntakeSecondSet;
+        public PathChain ToShoot3;
+        public PathChain IntakeThirdSet;
+        public PathChain ToShoot4;
 
         public Paths(Follower follower) {
-            ToShoot = follower.pathBuilder()
-                    .addPath(new BezierLine(new Pose(33.756, 135.220).mirror(), new Pose(53.000, 90.000).mirror()))
-                    .setConstantHeadingInterpolation(Math.toRadians(0)).build();
+            ToShoot = follower.pathBuilder().addPath(
+                            new BezierLine(
+                                    new Pose(33.756, 135.220).mirror(),
 
-            IntakeFirstSet = follower.pathBuilder()
-                    .addPath(new BezierCurve(new Pose(53.000, 90.000).mirror(), new Pose(45.500, 84.500).mirror(), new Pose(27.500, 84.000).mirror()))
-                    .setConstantHeadingInterpolation(Math.toRadians(0)).build();
+                                    new Pose(56.000, 88.000).mirror()
+                            )
+                    ).setConstantHeadingInterpolation(Math.toRadians(0))
 
-            ToShoot2 = follower.pathBuilder()
-                    .addPath(new BezierLine(new Pose(25.000, 84.000).mirror(), new Pose(53.000, 90.000).mirror()))
-                    .setConstantHeadingInterpolation(Math.toRadians(0)).build();
-
-            IntakeSecondSet = follower.pathBuilder()
-                    .addPath(new BezierCurve(new Pose(53.000, 90.000).mirror(), new Pose(52.000, 73.000).mirror(), new Pose(60.000, 59.500).mirror(), new Pose(22.000, 58.000).mirror()))
-                    .setConstantHeadingInterpolation(Math.toRadians(0)).build();
-
-            ToShoot3 = follower.pathBuilder()
-                    .addPath(new BezierLine(new Pose(22.000, 58.000).mirror(), new Pose(53.000, 90.000).mirror()))
-                    .setConstantHeadingInterpolation(Math.toRadians(0)).build();
-
-            IntakeThirdSet = follower.pathBuilder()
-                    .addPath(new BezierCurve(new Pose(53.000, 90.000).mirror(), new Pose(61.500, 30.500).mirror(), new Pose(44.500, 35.500).mirror(), new Pose(25.00, 36.000).mirror()))
-                    .setConstantHeadingInterpolation(Math.toRadians(0)).build();
-
-            ToShoot4 = follower
-                    .pathBuilder()
-                    .addPath(
-                            new BezierLine(new Pose(17.500, 36.000).mirror(), new Pose(53.000, 90.000).mirror())
-                    )
-                    .setConstantHeadingInterpolation(Math.toRadians(0))
                     .build();
 
-            LeaveLaunchPad = follower
-                    .pathBuilder()
-                    .addPath(
-                            new BezierLine(new Pose(53.000, 90.000).mirror(), new Pose(39.000, 77.000).mirror())
-                    )
-                    .setConstantHeadingInterpolation(Math.toRadians(0))
+            IntakeFirstSet = follower.pathBuilder().addPath(
+                            new BezierCurve(
+                                    new Pose(56.000, 88.000).mirror(),
+                                    new Pose(45.600, 81.370).mirror(),
+                                    new Pose(24.000, 84.000).mirror()
+                            )
+                    ).setConstantHeadingInterpolation(Math.toRadians(0))
+
                     .build();
 
+            OpenGate = follower.pathBuilder().addPath(
+                            new BezierCurve(
+                                    new Pose(24.000, 84.000).mirror(),
+                                    new Pose(26.665, 77.659).mirror(),
+                                    new Pose(18.000, 78.000).mirror()
+                            )
+                    ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(90))
 
+                    .build();
+
+            ToShoot2 = follower.pathBuilder().addPath(
+                            new BezierLine(
+                                    new Pose(20.000, 75.000).mirror(),
+
+                                    new Pose(56.000, 88.000).mirror()
+                            )
+                    ).setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(0))
+
+                    .build();
+
+            IntakeSecondSet = follower.pathBuilder().addPath(
+                            new BezierCurve(
+                                    new Pose(56.000, 88.000).mirror(),
+                                    new Pose(48.873, 63.967).mirror(),
+                                    new Pose(43.498, 60.000).mirror(),
+                                    new Pose(17.000, 60.000).mirror()
+                            )
+                    ).setConstantHeadingInterpolation(Math.toRadians(0))
+
+                    .build();
+
+            ToShoot3 = follower.pathBuilder().addPath(
+                            new BezierCurve(
+                                    new Pose(17.000, 60.000).mirror(),
+                                    new Pose(39.000, 72.600).mirror(),
+                                    new Pose(56.000, 88.000).mirror()
+                            )
+                    ).setConstantHeadingInterpolation(Math.toRadians(0))
+
+                    .build();
+
+            IntakeThirdSet = follower.pathBuilder().addPath(
+                            new BezierCurve(
+                                    new Pose(56.000, 88.000).mirror(),
+                                    new Pose(61.500, 30.500).mirror(),
+                                    new Pose(44.500, 35.500).mirror(),
+                                    new Pose(16.000, 38.000).mirror()
+                            )
+                    ).setConstantHeadingInterpolation(Math.toRadians(0))
+
+                    .build();
+
+            ToShoot4 = follower.pathBuilder().addPath(
+                            new BezierLine(
+                                    new Pose(16.000, 38.000).mirror(),
+
+                                    new Pose(56.000, 110.000).mirror()
+                            )
+                    ).setConstantHeadingInterpolation(Math.toRadians(0))
+
+                    .build();
         }
     }
+
 }

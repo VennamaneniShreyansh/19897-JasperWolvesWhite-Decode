@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.subsystems;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierPoint;
 import com.pedropathing.geometry.Pose;
+import com.pedropathing.math.Vector;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
@@ -46,10 +47,29 @@ public class Drivetrain {
         else
             follower.setPose(new Pose(8.5, 8.5, Math.toRadians(90)));
     }
+    public void resetDrivePosBackZone() {
+        if (alliance.isBlue())
+            follower.setPose(new Pose(64, 8.5, Math.toRadians(180)));
+        else
+            follower.setPose(new Pose(64, 8.5, Math.toRadians(180)).mirror());
+    }
     public void goalReset() {
         if (alliance.isBlue()) {
             follower.setPose(new Pose(32.5, 135, Math.toRadians(180)));
         } else follower.setPose(new Pose(32.5, 135, Math.toRadians(180)).mirror());
+    }
+
+    public Vector getCurrentVelocity() {
+        return follower.getVelocity();
+    }
+
+    public boolean isOnBottomHalf() {
+        return follower.getPose().getY() < 40;
+    }
+    public boolean isInScoreZone() {
+        double yPos = follower.getPose().getY();
+        double xPos = follower.getPose().getX();
+        return (yPos > 60) || (yPos < 40 && xPos > 35 && xPos < 110);
     }
 
     public void setStart(Pose start) {

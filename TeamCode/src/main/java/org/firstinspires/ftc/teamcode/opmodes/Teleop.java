@@ -4,11 +4,16 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.subsystems.Robot;
 import org.firstinspires.ftc.teamcode.helper.Alliance;
+import org.firstinspires.ftc.teamcode.subsystems.Turret;
 
-@TeleOp(name = "Main TeleOp Blue", group = "TeleOp")
-public class TeleopB extends OpMode {
+@TeleOp(name = "Main TeleOp", group = "TeleOp")
+public class Teleop extends OpMode {
 
     private Robot robot;
+    double loopStart = System.nanoTime();
+
+    private boolean lastLT = false, lastRT = false;
+    private static final int OFFSET_TICKS = 15;
     private boolean lastA = false;
     private boolean lastB = false;
     private boolean lastX = false;
@@ -19,59 +24,96 @@ public class TeleopB extends OpMode {
 
     @Override
     public void init() {
-        robot = new Robot(hardwareMap, Alliance.BLUE);
+
+        telemetry.addLine("Select Alliance:");
+        telemetry.addLine("X = BLUE");
+        telemetry.addLine("Y = RED");
+        telemetry.update();
     }
+
+    @Override
+    public void init_loop() {
+        boolean alrDone = false;
+        if (alrDone) {
+            telemetry.addData("Status", "Robot initialized");
+            telemetry.update();
+            return;
+        }
+
+        Alliance alliance = null;
+        if (gamepad1.x) {
+            alliance = Alliance.BLUE;
+        } else if (gamepad1.y) {
+            alliance = Alliance.RED;
+        }
+
+        if (alliance != null) {
+            alrDone = true;
+            robot = new Robot(hardwareMap, alliance);
+            telemetry.addData("Selected", alliance.name());
+        } else {
+            telemetry.addData("Press", "X=Blue, Y=Red");
+        }
+
+        telemetry.addData("alrDone", alrDone);
+        telemetry.update();
+    }
+
 
     @Override
     public void start() {
         robot.gate.closeGate();
-        robot.hood.low();
+        robot.hood.high();
     }
 
     @Override
     public void loop() {
+        // ------------------ Gamepad 1 ------------------
+        // Drivetrain
         robot.drive(gamepad1);
+        robot.trackDrivetrain();
+        if (gamepad1.a) robot.resetDrivePosAtGoal();
+        if (gamepad1.x) robot.resetDrivePosBackZone();
 
-        if (gamepad1.y) {
-            robot.resetDrivePos();
+        // Manuel Turret
+        if (!autoAim && gamepad1.dpadLeftWasPressed()) {
+            robot.turret.incrementTurretRight();
+        } else if (!autoAim && gamepad1.dpadRightWasPressed()) {
+            robot.turret.incrementTurretLeft();
+        } else if (!autoAim && (gamepad1.yWasPressed())) {
+            robot.turret.resetTurret();
         }
 
-        if (gamepad1.a) {
-            robot.resetDrivePosAtGoal();
+        if (autoAim) {
+//            if (gamepad1.right_trigger > 0.5 && !lastRT) robot.turret.adjustOffsetRight(OFFSET_TICKS);
+//            if (gamepad1.left_trigger > 0.5 && !lastLT) robot.turret.adjustOffsetLeft(OFFSET_TICKS);
+            lastLT = gamepad1.left_trigger > 0.5;
+            lastRT = gamepad1.right_trigger > 0.5;
+//            if (gamepad1.startWasPressed()) robot.turret.resetOffset();
         }
 
-        if (gamepad2.left_bumper && gamepad2.right_trigger > .1 && gamepad2.right_bumper) robot.intake.slowSpinIn();
+
+        // ------------------ Gamepad 2 ------------------
+        // Intake
+        if (gamepad2.left_bumper && (gamepad2.right_trigger > .1 || gamepad2.right_bumper)) robot.slowIntakeIn();
         else if (gamepad2.left_bumper) robot.intakeIn();
         else if (gamepad2.left_trigger > 0.2) robot.intakeOut();
         else robot.intakeOff();
-
+        // Shooting
         if (!autoRPM) {
             if (gamepad2.right_bumper) robot.shootHigh();
             else if (gamepad2.right_trigger > 0.2) robot.shootLow();
             else robot.stopShooter();
         } else robot.adjustSpeedAutomatically(robot.getDistanceFromTarget());
-
-
+        // Auto Aim
         if (gamepad2.x && !lastX) autoAim = !autoAim;
         lastX = gamepad2.x;
-
-        if (gamepad2.x) robot.turret.setTurretTarget(0);
+        if (gamepad2.x) robot.stopTurretAim();
 
         if (autoAim) {
             robot.autoAim();
         }
 
-        if (Math.abs(gamepad2.left_stick_x) > 0.2) {
-            autoAim = false;
-            robot.manualTurret(gamepad2.left_stick_x * 0.2);
-        } else {
-            robot.autoTurret();
-        }
-
-//        if (gamepad2.a) {
-//            robot.setUpRapidFire();
-//        }
-//        lastA = gamepad2.a;
 
         if (gamepad2.b && !lastB) robot.gate.toggle();
         lastB = gamepad2.b;
@@ -86,32 +128,25 @@ public class TeleopB extends OpMode {
         if (gamepad2.dpadUpWasPressed()) robot.hood.moveUp();
         else if (gamepad2.dpadDownWasPressed()) robot.hood.moveDown();
 
-        robot.periodic(false);
+        robot.periodic();
 
         updateTelemetry();
     }
 
 
     public void updateTelemetry() {
-        telemetry.addData("Turret Ticks", robot.turret.getTurret());
+        telemetry.addData("Shoot Pos", robot.shootTarget.getPose());
+
+//        telemetry.addData("Turret Ticks", robot.turret.getTurret());
         telemetry.addData("Turret Target", robot.turret.getTurretTarget());
-        telemetry.addData("Turret Yaw (rad)", robot.turret.getYaw());
-        telemetry.addData("Turret Power", robot.turret.power);
-        telemetry.addData("Turret Mode", robot.turret.manual ? "Manual" : "Auto");
         telemetry.addData("Turret Degrees", Math.toDegrees(robot.turret.getYaw()));
-        telemetry.addData("Ticks to Degrees", String.format("%.0f°", robot.turret.getTurret() * 0.374)); // 1° = 2.67 ticks
         telemetry.addData("Auto Aim", autoAim);
 
-        // Shooter / Outtake
-        telemetry.addData("Shooter Ready", robot.shooterReady());
         telemetry.addData("RPM Left", robot.outtake.getRPMLeft());
         telemetry.addData("RPM Right", robot.outtake.getRPMLeft());
         telemetry.addData("Left Ticks", robot.outtake.getTickLeft());
         telemetry.addData("Right Ticks", robot.outtake.getTickRight());
         telemetry.addData("Auto RPM", autoRPM);
-
-        // Intake
-        telemetry.addData("Intake Power", (gamepad2.left_bumper ? "In" : (gamepad2.left_trigger > 0.2 ? "Out" : "Off")));
 
         // Hood
         telemetry.addData("Right Servo Position", robot.hood.getRightPosition());
