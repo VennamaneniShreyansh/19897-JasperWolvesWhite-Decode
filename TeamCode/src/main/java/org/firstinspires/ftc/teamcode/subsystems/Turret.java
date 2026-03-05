@@ -246,11 +246,15 @@ public class Turret {
 //        return (voltage / 3.3) * 360.0;  // 0-3.3V = 0-360°
 //    }
 
-    public double getTurretDegrees() {
+
+    public double getEncoderDegrees() {
         double voltage = encoder.getVoltage();
         double maxV = encoder.getMaxVoltage(); // typically 3.3V on REV, but use API
-        double motorDegrees = (voltage / maxV) * 360.0;
-        return motorDegrees / 2.5;
+        return (voltage / maxV) * 360.0;
+    }
+    public double getTurretDegrees() {
+        double encoderDegrees = getEncoderDegrees();
+        return encoderDegrees / 2.5;  // turret angle in degrees
     }
 
 
