@@ -119,9 +119,6 @@ public class SingleTeleop extends OpMode {
 //        if (gamepad1.ri > .1 && !lastB) robot.gate.toggle();
 //        lastB = gamepad1.b;
 
-
-
-// In loop:
         if (gamepad1.right_trigger > .5 && !lastB) {
             gateOpen = !gateOpen;
             if (gateOpen) robot.gate.openGate();
@@ -142,6 +139,16 @@ public class SingleTeleop extends OpMode {
 
         robot.periodic();
 
+
+
+
+
+        if (gamepad1.a) robot.rgb.setRed();
+        if (gamepad1.b) robot.rgb.setGreen();
+        if (gamepad1.x) robot.rgb.setBlue();
+        if (gamepad1.y) robot.rgb.setOff();
+
+
         updateTelemetry();
     }
 
@@ -152,6 +159,11 @@ public class SingleTeleop extends OpMode {
 //        telemetry.addData("Turret Ticks", robot.turret.getTurret());
         telemetry.addData("Turret Target", robot.turret.getTurretTarget());
         telemetry.addData("Turret Degrees", Math.toDegrees(robot.turret.getYaw()));
+        telemetry.addData("Turret Degrees", robot.turret.getTurretDegrees());
+//        telemetry.addData("TUrret: ", robot.turret.getTurret());
+        telemetry.addData("Turret Voltage", robot.turret.getFinalVoltage());
+        telemetry.addData("Turret Error", robot.turret.getError());
+
         telemetry.addData("Auto Aim", autoAim);
 
         telemetry.addData("RPM Left", robot.outtake.getRPMLeft());

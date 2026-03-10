@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.opmodes;
 
+//import static org.firstinspires.ftc.teamcode.subsystems.Turret.target;
+
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.subsystems.Robot;
@@ -20,7 +22,7 @@ public class Teleop extends OpMode {
     private boolean lastY = false;
     private boolean autoRPM = false;
 
-    private boolean autoAim = true;
+    private boolean autoAim = false;
 
     @Override
     public void init() {
@@ -141,6 +143,11 @@ public class Teleop extends OpMode {
         telemetry.addData("Turret Target", robot.turret.getTurretTarget());
         telemetry.addData("Turret Degrees", Math.toDegrees(robot.turret.getYaw()));
         telemetry.addData("Auto Aim", autoAim);
+//        telemetry.addData("targetAngle°", Math.toDegrees(targetAngle));
+//        telemetry.addData("robotHeading°", Math.toDegrees(robotPose.getHeading()));
+//        telemetry.addData("turretTarget ticks", target);
+//        telemetry.addData("turretPos ticks", getTurret());
+
 
         telemetry.addData("RPM Left", robot.outtake.getRPMLeft());
         telemetry.addData("RPM Right", robot.outtake.getRPMLeft());
