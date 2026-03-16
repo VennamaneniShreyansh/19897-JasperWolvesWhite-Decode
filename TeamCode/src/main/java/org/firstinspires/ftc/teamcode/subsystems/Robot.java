@@ -92,39 +92,33 @@ public class Robot {
     }
     public void adjustSpeedAutomatically(double distInches) {
 
-        // LEFT hood servo (quartic)
-        // y = 6.83688e-8 x^4 - 0.0000245371 x^3 + 0.00314857 x^2 - 0.16488 x + 3.00982
-        double leftPos =
-                (6.83688e-8) * Math.pow(distInches, 4)
-                        - 0.0000245371 * Math.pow(distInches, 3)
-                        + 0.00314857 * distInches * distInches
-                        - 0.16488 * distInches
-                        + 3.00982;
+        // RIGHT hood servo (cubic)
+        // y = -0.0000073169 x^3 + 0.00195206 x^2 - 0.17015 x + 5.03082
+        double rightPos =
+                -0.0000073169 * Math.pow(distInches, 3)
+                        + 0.00195206 * distInches * distInches
+                        - 0.17015    * distInches
+                        + 5.03082;
 
-        // SHOOTER RPM (quartic)
-        // y = -0.0000822196 x^4 + 0.0312467 x^3 - 4.40085 x^2 + 290.04881 x - 3290.83485
+        // SHOOTER RPM (cubic)
+        // y = 0.00238598 x^3 - 0.644182 x^2 + 69.78364 x + 951.13353
         double rpm =
-                -0.0000822196 * Math.pow(distInches, 4)
-                        + 0.0312467  * Math.pow(distInches, 3)
-                        - 4.40085    * distInches * distInches
-                        + 290.04881  * distInches
-                        - 3290.83485;
+                0.00238598 * Math.pow(distInches, 3)
+                        - 0.644182  * distInches * distInches
+                        + 69.78364  * distInches
+                        + 951.13353;
 
-        double rightPos = 1.0 - leftPos;
+        double leftPos = 1.0 - rightPos;
 
         // Safety clamps
         rpm = Math.max(0, rpm);
         leftPos  = Math.max(0.0, Math.min(1.0, leftPos));
         rightPos = Math.max(0.0, Math.min(1.0, rightPos));
 
-
-
-
-
-
         outtake.setTargetRPM(rpm);
         hood.set(leftPos, rightPos);
     }
+
 
     public void periodic() {
         if (drivetrain != null) drivetrain.periodic();
