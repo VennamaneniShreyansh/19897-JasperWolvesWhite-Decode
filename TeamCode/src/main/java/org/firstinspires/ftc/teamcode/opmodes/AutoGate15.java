@@ -24,7 +24,7 @@ import org.firstinspires.ftc.teamcode.subsystems.Robot;
 //import org.firstinspires.ftc.teamcode.pedroPathing.Drawing; // Path visualization
 
 
-@Autonomous(name = "Blue Auto RapidFire 15 Gate", group = "Autonomous")
+@Autonomous(name = "OLD - Blue Auto RapidFire 15 Gate", group = "Autonomous")
 @Configurable
 @Config
 public class AutoGate15 extends OpMode {
@@ -128,7 +128,7 @@ public class AutoGate15 extends OpMode {
         switch (pathState) {
 
             case 0: // Go to First Shoot
-                robot.turret.setTurretTarget(-130);
+                robot.turret.setTurretTarget(-45);
                 robot.shootHigh();
                 if (!follower.isBusy()) {
                     robot.gate.closeGate();
@@ -262,7 +262,7 @@ public class AutoGate15 extends OpMode {
 
                     if (System.currentTimeMillis() - stopCheckTime >= 50) {
 //                        robot.intakeOff();
-//                        robot.turret.setTurretTarget(-130);
+//                        robot.turret.0.00038(-130);
                         follower.followPath(paths.ToShoot4);
                         settleStartTime = 0;
                         pathState = 7;
@@ -305,7 +305,7 @@ public class AutoGate15 extends OpMode {
 
                     if (System.currentTimeMillis() - stopCheckTime >= 50) {
 //                        robot.intakeOff();
-                        robot.turret.setTurretTarget(-70);
+                        robot.turret.setTurretTarget(-26);
                         follower.followPath(paths.ToShoot5);
                         settleStartTime = 0;
                         pathState = 9;

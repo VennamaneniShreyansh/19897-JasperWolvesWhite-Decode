@@ -18,23 +18,20 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import org.firstinspires.ftc.teamcode.helper.Alliance;
 import org.firstinspires.ftc.teamcode.helper.Data;
 import org.firstinspires.ftc.teamcode.helper.RapidFire;
-import org.firstinspires.ftc.teamcode.helper.ThreeBallShooterClose;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.subsystems.Robot;
-//import org.firstinspires.ftc.teamcode.pedroPathing.Drawing; // Path visualization
 
-
-@Autonomous(name = "Blue Auto 12 Gate", group = "Autonomous")
+@Autonomous(name = "Blue Auto RapidFire 15 Gate", group = "Autonomous")
 @Configurable
 @Config
-public class BlueAuto12Gate extends OpMode {
+public class AutoGate15New extends OpMode {
 
     private TelemetryManager panelsTelemetry;
     public Follower follower;
     private int pathState;
     private Paths paths;
     private Robot robot;
-    private ThreeBallShooterClose threeBallShooter;
+    private RapidFire threeBallShooter;
     private long shootStartTime = 0;
     private long settleStartTime = 0;
     private long stopCheckTime = 0;
@@ -48,6 +45,7 @@ public class BlueAuto12Gate extends OpMode {
         double x2 = newPose.getX() + v.getXComponent(), y2 = newPose.getY() + v.getYComponent();
         canvas.strokeLine(x1, y1, x2, y2);
     }
+
     public double angleWrap(double heading) {
         while (heading >= Math.PI) {
             heading -= Math.PI;
@@ -57,18 +55,13 @@ public class BlueAuto12Gate extends OpMode {
         }
         return heading;
     }
+
     public Pose PedroToFTC(double pedroX, double pedroY, double pedroHeading) {
-        // 1. Convert position
-        double ftcY = -72 + pedroX;   // FTC +Y → Pedro +X
-        double ftcX = 72 - pedroY;   // FTC +X (down) → Pedro -Y (up)
-
-        // 2. Convert heading
+        double ftcY = -72 + pedroX;
+        double ftcX = 72 - pedroY;
         double ftcHeading = pedroHeading + Math.PI / 2;
-
-        // 3. Normalize to 0 → 2π
         ftcHeading %= 2 * Math.PI;
         ftcHeading = angleWrap(ftcHeading);
-
         return new Pose(ftcX, ftcY, ftcHeading);
     }
 
@@ -77,9 +70,9 @@ public class BlueAuto12Gate extends OpMode {
         panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();
         follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(new Pose(33.75, 135.5, Math.toRadians(180)));
-        paths = new Paths(follower);
         robot = new Robot(hardwareMap, Alliance.BLUE, false);
-        threeBallShooter = new ThreeBallShooterClose(robot.intake, robot.outtake);
+        paths = new Paths(follower);
+        threeBallShooter = new RapidFire(robot.intake, robot.outtake);
 
         Data.setAutoPose(follower.getPose());
 
@@ -90,7 +83,7 @@ public class BlueAuto12Gate extends OpMode {
 
     @Override
     public void start() {
-        robot.hood.set(.85, .15);
+        robot.hood.set(.9, .1);
         robot.outtake.periodic();
     }
 
@@ -103,10 +96,8 @@ public class BlueAuto12Gate extends OpMode {
         Data.setAutoPose(follower.getPose());
 
         pathState = autonomousPathUpdate();
-        robot.shootLow();
+        robot.shootHigh();
 
-//        Tuning.draw();
-//        Tuning.drawOnlyCurrent();
         try {
             TelemetryPacket packet = new TelemetryPacket();
             drawRobot(packet.fieldOverlay(), follower.getPose());
@@ -128,10 +119,9 @@ public class BlueAuto12Gate extends OpMode {
         switch (pathState) {
 
             case 0: // Go to First Shoot
-                robot.turret.setTurretTarget(-125);
-                robot.shootLow();
+                robot.turret.setTurretTarget(-45);
                 if (!follower.isBusy()) {
-                    robot.gate.closeGate();
+                    robot.gate.openGate();
                     follower.followPath(paths.ToShoot);
                     robot.gate.openGate();
                     pathState = 1;
@@ -139,59 +129,37 @@ public class BlueAuto12Gate extends OpMode {
                 }
                 break;
 
-            case 1: // Shoot 3
+            case 1: // Shoot 1 → IntakeSecondSet
                 if (!follower.isBusy()) {
-
                     if (settleStartTime == 0) {
                         settleStartTime = System.currentTimeMillis();
                     }
-
-                    if (System.currentTimeMillis() - settleStartTime >= 1000) {
-
+                    if (System.currentTimeMillis() - settleStartTime >= 50) {
                         if (shootStartTime == 0) {
                             threeBallShooter.start();
                             shootStartTime = System.currentTimeMillis();
                         }
-
                         if (threeBallShooter.isDone()) {
                             shootStartTime = 0;
                             settleStartTime = 0;
                             robot.gate.closeGate();
                             robot.intakeIn();
-                            follower.setMaxPower(.9);
-//                            robot.hood.set(.95, .05);
-                            follower.followPath(paths.IntakeFirstSet);
+                            follower.setMaxPower(1);
+                            follower.followPath(paths.IntakeSecondSet);
                             pathState = 2;
                         }
                     }
                 }
                 break;
 
-            case 2: // From intake to Shoot 2
+            case 2: // IntakeSecondSet → Shoot2
                 if (!follower.isBusy()) {
                     if (stopCheckTime == 0) {
                         stopCheckTime = System.currentTimeMillis();
                     }
-
                     if (System.currentTimeMillis() - stopCheckTime >= 300) {
                         robot.intakeOff();
-                        follower.setMaxPower(.8);
-                        follower.followPath(paths.OpenGate);
-                        pathState = 10;
-                        stopCheckTime = 0;
-                        settleStartTime = 0;
-                    }
-                }
-                break;
-
-            case 10:
-                if (!follower.isBusy()) {
-                    if (stopCheckTime == 0) {
-                        stopCheckTime = System.currentTimeMillis();
-                    }
-
-                    if (System.currentTimeMillis() - stopCheckTime >= 500) {
-                        follower.setMaxPower(1);
+                        robot.gate.openGate();
                         follower.followPath(paths.ToShoot2);
                         pathState = 3;
                         stopCheckTime = 0;
@@ -200,44 +168,38 @@ public class BlueAuto12Gate extends OpMode {
                 }
                 break;
 
-            case 3: // Shoot 2nd 3
+            case 3: // Shoot 2 → OpenGate
                 if (!follower.isBusy()) {
-                    robot.gate.openGate();
-
                     if (settleStartTime == 0) {
                         settleStartTime = System.currentTimeMillis();
                     }
-
                     if (System.currentTimeMillis() - settleStartTime >= SETTLE_MS) {
-
                         if (shootStartTime == 0) {
                             threeBallShooter.start();
                             shootStartTime = System.currentTimeMillis();
                         }
-
                         if (threeBallShooter.isDone()) {
                             shootStartTime = 0;
                             settleStartTime = 0;
                             robot.gate.closeGate();
                             robot.intakeIn();
                             follower.setMaxPower(.9);
-                            follower.followPath(paths.IntakeSecondSet);
+                            follower.followPath(paths.OpenGate);
                             pathState = 4;
                         }
                     }
                 }
                 break;
 
-            case 4: // Intake to shoot
+            case 4: // OpenGate → IntakeFromGate
                 if (!follower.isBusy()) {
                     if (stopCheckTime == 0) {
                         stopCheckTime = System.currentTimeMillis();
                     }
-
                     if (System.currentTimeMillis() - stopCheckTime >= 300) {
-                        follower.setMaxPower(1);
-                        robot.intakeOff();
-                        follower.followPath(paths.ToShoot3);
+                        robot.intakeIn();
+                        follower.setMaxPower(.7);
+                        follower.followPath(paths.IntakeFromGate);
                         pathState = 5;
                         stopCheckTime = 0;
                         settleStartTime = 0;
@@ -245,107 +207,170 @@ public class BlueAuto12Gate extends OpMode {
                 }
                 break;
 
-            case 5: // Shoot last 3
+            case 5: // IntakeFromGate → Shoot3
                 if (!follower.isBusy()) {
-                    robot.gate.openGate();
+                    if (stopCheckTime == 0) {
+                        stopCheckTime = System.currentTimeMillis();
+                    }
+                    if (System.currentTimeMillis() - stopCheckTime >= 1000) {
+                        robot.intakeOff();
+                        robot.gate.openGate();
+                        follower.setMaxPower(.9);
+                        follower.followPath(paths.ToShoot3);
+                        pathState = 6;
+                        stopCheckTime = 0;
+                        settleStartTime = 0;
+                    }
+                }
+                break;
 
+            case 6: // Shoot 3 → OpenGate2
+                if (!follower.isBusy()) {
                     if (settleStartTime == 0) {
                         settleStartTime = System.currentTimeMillis();
                     }
-
                     if (System.currentTimeMillis() - settleStartTime >= SETTLE_MS) {
-
                         if (shootStartTime == 0) {
                             threeBallShooter.start();
                             shootStartTime = System.currentTimeMillis();
                         }
-
                         if (threeBallShooter.isDone()) {
                             shootStartTime = 0;
                             settleStartTime = 0;
                             robot.gate.closeGate();
                             robot.intakeIn();
                             follower.setMaxPower(.9);
-                            follower.followPath(paths.IntakeThirdSet);
-                            pathState = 6;
+                            follower.followPath(paths.OpenGate2);
+                            pathState = 7;
                         }
                     }
                 }
                 break;
-            case 6: // Go to Shoot 4
+
+            case 7: // OpenGate2 → IntakeFromGate2
                 if (!follower.isBusy()) {
                     if (stopCheckTime == 0) {
                         stopCheckTime = System.currentTimeMillis();
                     }
-
-                    robot.hood.set(.85, .15);
-
                     if (System.currentTimeMillis() - stopCheckTime >= 300) {
-                        robot.intakeOff();
-                        robot.turret.setTurretTarget(-75);
-                        follower.followPath(paths.ToShoot4);
+                        robot.intakeIn();
+                        follower.setMaxPower(.9);
+                        follower.followPath(paths.IntakeFromGate2);
+                        pathState = 8;
+                        stopCheckTime = 0;
                         settleStartTime = 0;
-                        pathState = 7;
                     }
                 }
                 break;
 
-            case 7: // Shoot 4th set
+            case 8: // IntakeFromGate2 → Shoot4
                 if (!follower.isBusy()) {
-                    robot.gate.openGate();
+                    if (stopCheckTime == 0) {
+                        stopCheckTime = System.currentTimeMillis();
+                    }
+                    if (System.currentTimeMillis() - stopCheckTime >= 1000) {
+                        robot.intakeOff();
+                        robot.gate.openGate();
+                        follower.followPath(paths.ToShoot4);
+                        pathState = 9;
+                        stopCheckTime = 0;
+                        settleStartTime = 0;
+                    }
+                }
+                break;
 
+            case 9: // Shoot 4 → IntakeFirstSet
+                if (!follower.isBusy()) {
                     if (settleStartTime == 0) {
                         settleStartTime = System.currentTimeMillis();
                     }
-
                     if (System.currentTimeMillis() - settleStartTime >= SETTLE_MS) {
-
                         if (shootStartTime == 0) {
                             threeBallShooter.start();
                             shootStartTime = System.currentTimeMillis();
                         }
+                        if (threeBallShooter.isDone()) {
+                            robot.gate.closeGate();
+                            shootStartTime = 0;
+                            settleStartTime = 0;
+                            robot.intakeIn();
+                            follower.setMaxPower(.9);
+                            follower.followPath(paths.IntakeFirstSet);
+                            pathState = 10;
+                        }
+                    }
+                }
+                break;
 
+            case 10: // IntakeFirstSet → ToShoot5
+                if (!follower.isBusy()) {
+                    if (stopCheckTime == 0) {
+                        stopCheckTime = System.currentTimeMillis();
+                    }
+                    if (System.currentTimeMillis() - stopCheckTime >= 300) {
+                        robot.intakeOff();
+                        robot.turret.setTurretTarget(-26);
+                        robot.gate.openGate();
+                        follower.followPath(paths.ToShoot5);
+                        pathState = 11;
+                        stopCheckTime = 0;
+                        settleStartTime = 0;
+                    }
+                }
+                break;
+
+            case 11: // Final Shoot 5 → Park
+                if (!follower.isBusy()) {
+                    if (settleStartTime == 0) {
+                        settleStartTime = System.currentTimeMillis();
+                    }
+                    if (System.currentTimeMillis() - settleStartTime >= SETTLE_MS) {
+                        if (shootStartTime == 0) {
+                            threeBallShooter.start();
+                            shootStartTime = System.currentTimeMillis();
+                        }
                         if (threeBallShooter.isDone()) {
                             shootStartTime = 0;
                             settleStartTime = 0;
                             robot.gate.closeGate();
                             robot.stopShooter();
-                            pathState = 8;
+                            pathState = 12;
                         }
                     }
                 }
                 break;
-            case 8: // Leave launch pad
+
+            case 12: // Park
                 if (!follower.isBusy()) {
                     if (stopCheckTime == 0) {
                         stopCheckTime = System.currentTimeMillis();
                     }
-
                     if (System.currentTimeMillis() - stopCheckTime >= 50) {
                         robot.intakeOff();
                         robot.turret.setTurretTarget(0);
                         Data.setAutoPose(follower.getPose());
-//                        requestOpModeStop();
+                        requestOpModeStop();
                         stopCheckTime = 0;
                     }
                 }
                 break;
-
         }
-
         return pathState;
     }
 
 
     public static class Paths {
         public PathChain ToShoot;
-        public PathChain IntakeFirstSet;
-        public PathChain OpenGate;
-        public PathChain ToShoot2;
         public PathChain IntakeSecondSet;
+        public PathChain ToShoot2;
+        public PathChain OpenGate;
+        public PathChain IntakeFromGate;
         public PathChain ToShoot3;
-        public PathChain IntakeThirdSet;
+        public PathChain OpenGate2;
+        public PathChain IntakeFromGate2;
         public PathChain ToShoot4;
+        public PathChain IntakeFirstSet;
+        public PathChain ToShoot5;
 
         public Paths(Follower follower) {
             ToShoot = follower.pathBuilder().addPath(
@@ -358,71 +383,100 @@ public class BlueAuto12Gate extends OpMode {
 
                     .build();
 
-            IntakeFirstSet = follower.pathBuilder().addPath(
-                            new BezierCurve(
-                                    new Pose(56.000, 88.000),
-                                    new Pose(45.600, 81.370),
-                                    new Pose(24.000, 84.000)
-                            )
-                    ).setConstantHeadingInterpolation(Math.toRadians(180))
-
-                    .build();
-
-            OpenGate = follower.pathBuilder().addPath(
-                            new BezierCurve(
-                                    new Pose(24.000, 84.000),
-                                    new Pose(26.665, 77.659),
-                                    new Pose(18.000, 78.000)
-                            )
-                    ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(90))
-
-                    .build();
-
-            ToShoot2 = follower.pathBuilder().addPath(
-                            new BezierLine(
-                                    new Pose(20.000, 75.000),
-
-                                    new Pose(56.000, 88.000)
-                            )
-                    ).setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(180))
-
-                    .build();
-
             IntakeSecondSet = follower.pathBuilder().addPath(
                             new BezierCurve(
                                     new Pose(56.000, 88.000),
                                     new Pose(48.873, 63.967),
                                     new Pose(43.498, 58.458),
-                                    new Pose(17.000, 60.000)
+                                    new Pose(20.000, 59.848)
                             )
                     ).setConstantHeadingInterpolation(Math.toRadians(180))
+
+                    .build();
+
+            ToShoot2 = follower.pathBuilder().addPath(
+                            new BezierLine(
+                                    new Pose(20.000, 59.848),
+
+                                    new Pose(56.000, 88.000)
+                            )
+                    ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
+
+                    .build();
+
+            OpenGate = follower.pathBuilder().addPath(
+                            new BezierCurve(
+                                    new Pose(56.000, 88.000),
+                                    new Pose(38.200, 57.900),
+                                    new Pose(17.500, 65.000)
+                            )
+                    ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(157))
+                    .addParametricCallback(0.5, () -> follower.setMaxPower(0.5))
+                    .build();
+
+            IntakeFromGate = follower.pathBuilder().addPath(
+                            new BezierLine(
+                                    new Pose(17.500, 65.000),
+
+                                    new Pose(13.000, 60.000)
+                            )
+                    ).setLinearHeadingInterpolation(Math.toRadians(157), Math.toRadians(120))
 
                     .build();
 
             ToShoot3 = follower.pathBuilder().addPath(
                             new BezierCurve(
-                                    new Pose(17.000, 60.000),
+                                    new Pose(13.000, 60.000),
                                     new Pose(39.000, 72.600),
                                     new Pose(56.000, 88.000)
                             )
-                    ).setConstantHeadingInterpolation(Math.toRadians(180))
+                    ).setLinearHeadingInterpolation(Math.toRadians(120), Math.toRadians(180))
 
                     .build();
 
-            IntakeThirdSet = follower.pathBuilder().addPath(
+            OpenGate2 = follower.pathBuilder().addPath(
                             new BezierCurve(
                                     new Pose(56.000, 88.000),
-                                    new Pose(61.500, 30.500),
-                                    new Pose(44.500, 35.500),
-                                    new Pose(17.000, 38.000)
+                                    new Pose(38.200, 57.900),
+                                    new Pose(17.500, 65.000)
                             )
-                    ).setConstantHeadingInterpolation(Math.toRadians(180))
+                    ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(157))
+                    .addParametricCallback(0.5, () -> follower.setMaxPower(0.5))
+                    .build();
+
+            IntakeFromGate2 = follower.pathBuilder().addPath(
+                            new BezierLine(
+                                    new Pose(17.500, 65.000),
+
+                                    new Pose(13.000, 60.000)
+                            )
+                    ).setLinearHeadingInterpolation(Math.toRadians(157), Math.toRadians(130))
 
                     .build();
 
             ToShoot4 = follower.pathBuilder().addPath(
                             new BezierLine(
-                                    new Pose(17.000, 38.000),
+                                    new Pose(13.000, 60.000),
+
+                                    new Pose(56.000, 88.000)
+                            )
+                    ).setLinearHeadingInterpolation(Math.toRadians(130), Math.toRadians(180))
+
+                    .build();
+
+            IntakeFirstSet = follower.pathBuilder().addPath(
+                            new BezierCurve(
+                                    new Pose(56.000, 88.000),
+                                    new Pose(45.684, 83.378),
+                                    new Pose(24.000, 86.000)
+                            )
+                    ).setConstantHeadingInterpolation(Math.toRadians(180))
+
+                    .build();
+
+            ToShoot5 = follower.pathBuilder().addPath(
+                            new BezierLine(
+                                    new Pose(24.000, 86.000),
 
                                     new Pose(56.000, 110.000)
                             )

@@ -11,7 +11,7 @@ public class Intake {
     public static double OFF = 0;
     public static double IN = -1;
     public static double OUT = 1;
-    public static double SLOW_IN = -.95;
+    public static double SLOW_IN = -1;
 
     public Intake(HardwareMap hardwareMap) {
         i = hardwareMap.get(DcMotorEx.class, "intake");

@@ -21,6 +21,9 @@ public class SingleTeleop extends OpMode {
     private boolean autoRPM = false;
 
     private boolean autoAim = true;
+    private boolean shooterOn = false;
+    private boolean lastRB2 = false;  // gamepad2 right bumper last state
+
     boolean gateOpen = false;  // Add as field
 
     @Override
@@ -74,7 +77,7 @@ public class SingleTeleop extends OpMode {
         robot.drive(gamepad1);
         robot.trackDrivetrain();
         if (gamepad2.a) robot.resetDrivePosAtGoal();
-//        if (gamepad1.x) robot.resetDrivePosBackZone();
+        if (gamepad2.x) robot.resetDrivePosBackZone();
 
         // Manuel Turret
         if (!autoAim && gamepad1.dpadLeftWasPressed()) {
@@ -98,14 +101,28 @@ public class SingleTeleop extends OpMode {
         // Intake
         if (gamepad1.left_bumper && (gamepad1.right_trigger > .1 || gamepad1.right_bumper)) robot.slowIntakeIn();
         else if (gamepad1.left_bumper) robot.intakeIn();
-//        else if (gamepad1.left_trigger > 0.2) robot.intakeOut();
+        else if (gamepad1.left_trigger > 0.2) robot.intakeOut();
         else robot.intakeOff();
+
         // Shooting
         if (!autoRPM) {
-            if (gamepad1.right_bumper) robot.shootHigh();
-//            else if (gamepad1.right_trigger > 0.2) robot.shootLow();
-            else robot.stopShooter();
-        } else robot.adjustSpeedAutomatically(robot.getDistanceFromTarget());
+            if (gamepad2.right_bumper && !lastRB2) {
+                shooterOn = !shooterOn;
+            }
+            lastRB2 = gamepad2.right_bumper;
+
+            if (gamepad2.left_bumper) {
+                robot.shootHigh();
+            } else if (shooterOn) {
+                robot.shootLow();
+            } else {
+                robot.stopShooter();
+            }
+        } else {
+            robot.adjustSpeedAutomatically(robot.getDistanceFromTarget());
+        }
+
+
         // Auto Aim
         if (gamepad2.x && !lastX) autoAim = !autoAim;
         lastX = gamepad2.x;
@@ -119,12 +136,19 @@ public class SingleTeleop extends OpMode {
 //        if (gamepad1.ri > .1 && !lastB) robot.gate.toggle();
 //        lastB = gamepad1.b;
 
-        if (gamepad1.right_trigger > .5 && !lastB) {
-            gateOpen = !gateOpen;
-            if (gateOpen) robot.gate.openGate();
-            else robot.gate.closeGate();
+//        if (gamepad1.right_trigger > .5 && !lastB) {
+//            gateOpen = !gateOpen;
+//            if (gateOpen) robot.gate.openGate();
+//            else robot.gate.closeGate();
+//        }
+//        lastB = gamepad1.right_trigger > .5;
+
+
+        if (gamepad1.right_bumper) {
+            robot.gate.openGate();
+        } else {
+            robot.gate.closeGate();
         }
-        lastB = gamepad1.right_trigger > .5;
 
 
         if (gamepad2.y && !lastY) {
@@ -140,13 +164,14 @@ public class SingleTeleop extends OpMode {
         robot.periodic();
 
 
+        if (gateOpen) robot.rgb.setGreen();
+        if (!gateOpen) robot.rgb.setRed();
 
 
-
-        if (gamepad1.a) robot.rgb.setRed();
-        if (gamepad1.b) robot.rgb.setGreen();
-        if (gamepad1.x) robot.rgb.setBlue();
-        if (gamepad1.y) robot.rgb.setOff();
+//        if (gamepad1.a) robot.rgb.setRed();
+//        if (gamepad1.b) robot.rgb.setGreen();
+//        if (gamepad1.x) robot.rgb.setBlue();
+//        if (gamepad1.y) robot.rgb.setOff();
 
 
         updateTelemetry();
@@ -179,7 +204,7 @@ public class SingleTeleop extends OpMode {
         // Drivetrain Pose
         telemetry.addData("Robot X", robot.getPose().getX());
         telemetry.addData("Robot Y", robot.getPose().getY());
-        telemetry.addData("Robot Heading (rad)", robot.getPose().getHeading());
+        telemetry.addData("Robot Heading (rad)", Math.toDegrees(robot.getPose().getHeading()));
         telemetry.addData("Distance to goal", "%.1f in", robot.getDistanceFromTarget());
         telemetry.update();
     }
