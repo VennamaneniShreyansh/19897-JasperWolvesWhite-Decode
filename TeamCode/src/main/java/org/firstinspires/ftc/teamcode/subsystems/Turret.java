@@ -229,6 +229,8 @@ import com.bylazar.configurables.annotations.Configurable;
 @Config
 @Configurable
 public class Turret {
+
+    public double currentPosition = getTurretDegrees();
     public static double error = 0, power = 0, manualPower = 0;
     private final AnalogInput encoder;
     public final DcMotorEx m;
@@ -382,7 +384,6 @@ public void periodic() {
         return;
     }
 
-    double currentPosition = getTurretDegrees();
     double reference = getTurretTarget();
 
     double error = angleErrorDegrees(reference, currentPosition);

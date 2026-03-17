@@ -59,7 +59,7 @@ public class Drivetrain {
         } else follower.setPose(new Pose(32.5, 135, Math.toRadians(180)).mirror());
     }
 
-    public Vector getCurrentVelocity() {
+    public static Vector getCurrentVelocity() {
         return follower.getVelocity();
     }
 

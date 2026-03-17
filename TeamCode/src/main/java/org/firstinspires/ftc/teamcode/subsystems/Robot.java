@@ -2,18 +2,24 @@ package org.firstinspires.ftc.teamcode.subsystems;
 
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
 import org.firstinspires.ftc.teamcode.helper.Data;
 import org.firstinspires.ftc.teamcode.helper.Alliance;
 import org.firstinspires.ftc.teamcode.helper.FieldConstants;
 //import org.firstinspires.ftc.teamcode.references.Feeder;
+import org.firstinspires.ftc.teamcode.helper.TargetingUtil;
 import org.firstinspires.ftc.teamcode.subsystems.Gate;
 
 import java.lang.reflect.Field;
 
 public class Robot {
 
+    private static final double SHOOTER_DROP_ERROR = 0;
+    private static final double SHOOTER_DROP_MULTIPLIER = 0;
+    private static final double MAX_HOOD_POSITION = 0;
+    private static final double MIN_HOOD_POSITION = 0;
     public final Drivetrain drivetrain;
     public final Intake intake;
     public final Outtake outtake;
@@ -22,6 +28,13 @@ public class Robot {
     public final Gate gate;
     public final Hood hood;
     public final GobuildaRGB rgb;
+    Pose rawGoal = FieldConstants.goalPose(alliance); // blue or red, CHANGE IT!
+
+    Pose adjustedGoal = TargetingUtil.compensatedGoal(
+            rawGoal,
+            Drivetrain.getCurrentVelocity(),
+            k
+    );
 
 
     private final Alliance alliance;
@@ -171,6 +184,12 @@ public class Robot {
     public void autoAim() {
 //        turret.face(shootTarget, drivetrain.getPose(), drivetrain.getCurrentVelocity()); // SOTM
         turret.face(shootTarget, drivetrain.getPose());
+    }
+
+    public void setServoPosition(double normalized, boolean isFiring) {
+        normalized = Range.clip(normalized, 0, 1);
+        if (isFiring && (outtake.targetRPM - outtake.getTickRight() > SHOOTER_DROP_ERROR)) normalized -= Math.max(0, ((outtake.targetRPM - outtake.getTickRight() - SHOOTER_DROP_ERROR) / 1000.0) * SHOOTER_DROP_MULTIPLIER);
+        turret.currentPosition = Range.clip((normalized * (MAX_HOOD_POSITION - MIN_HOOD_POSITION)) + MIN_HOOD_POSITION, MIN_HOOD_POSITION, MAX_HOOD_POSITION);
     }
     public void stopTurretAim() {turret.setTurretTarget(0);}
 
