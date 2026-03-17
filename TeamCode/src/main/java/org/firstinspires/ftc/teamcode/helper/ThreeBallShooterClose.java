@@ -31,7 +31,6 @@ public class ThreeBallShooterClose {
         ballsShot = 0;
         stage = 0;
         stageStartTime = System.currentTimeMillis();
-        outtake.shootHigh(); // Start flywheel
     }
 
     public boolean isActive() { return shootingActive && !shootingDone; }
@@ -77,7 +76,6 @@ public class ThreeBallShooterClose {
                         shootingActive = false;
                         shootingDone = true;
                         intake.spinOff();
-                        outtake.shootHigh();
                     } else {
                         stage = 1;
                         stageStartTime = now;

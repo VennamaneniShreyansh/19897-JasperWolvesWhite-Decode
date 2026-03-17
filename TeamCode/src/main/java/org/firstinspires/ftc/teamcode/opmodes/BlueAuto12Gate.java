@@ -24,7 +24,7 @@
     //import org.firstinspires.ftc.teamcode.pedroPathing.Drawing; // Path visualization
 
 
-    @Autonomous(name = "Blue Auto 12 Gate", group = "Autonomous")
+    @Autonomous(name = "BACKUP ONLY - Blue Auto 12 Gate", group = "Autonomous")
     @Configurable
     @Config
     public class BlueAuto12Gate extends OpMode {
@@ -90,7 +90,7 @@
 
         @Override
         public void start() {
-            robot.hood.set(.85, .1);
+            robot.hood.set(.1);
             robot.outtake.periodic();
         }
 
@@ -278,7 +278,7 @@
                             stopCheckTime = System.currentTimeMillis();
                         }
 
-                        robot.hood.set(.85, .1);
+                        robot.hood.set(.1);
 
                         if (System.currentTimeMillis() - stopCheckTime >= 300) {
                             robot.intakeOff();

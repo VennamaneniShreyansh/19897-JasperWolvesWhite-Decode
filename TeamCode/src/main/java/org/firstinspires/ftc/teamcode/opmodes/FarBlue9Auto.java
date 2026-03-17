@@ -58,21 +58,25 @@ public class FarBlue9Auto extends OpMode {
 
     @Override
     public void start() {
-        robot.hood.set(1, 0);
-        robot.turret.setTurretTarget(-175);
-        robot.turret.automatic();
+        robot.hood.set(.05);
+        robot.outtake.shootHigh();
+//        robot.adjustSpeedAutomatically(follower.getPose().distanceFrom(FieldConstants.farGoalPose(Alliance.BLUE)));
+//        robot.autoTurret();
+//        robot.autoAim();
+        robot.turret.setTurretTarget(-63);
         follower.setMaxPower(.7);
-        Data.setAutoPose(follower.getPose());
+
     }
 
 
     @Override
     public void loop() {
         follower.update();
+        Data.setAutoPose(follower.getPose());
         robot.periodic();
         threeBallShooter.update();
 
-        robot.autoAimWithFollower(follower.getPose());
+//        robot.autoAimWithFollower(follower.getPose());
 
         pathState = autonomousPathUpdate();
 
@@ -139,6 +143,9 @@ public class FarBlue9Auto extends OpMode {
                     .addParametricCallback(.67, () -> {
                         robot.gate.openGate();
                     })
+                    .addParametricCallback(.8, () -> {
+                        follower.setMaxPower(.5);
+                    })
                     .build();
 
             IntakeThree = follower.pathBuilder().addPath(
@@ -164,6 +171,9 @@ public class FarBlue9Auto extends OpMode {
                     })
                     .addParametricCallback(.67, () -> {
                         robot.gate.openGate();
+                    })
+                    .addParametricCallback(.8, () -> {
+                        follower.setMaxPower(.5);
                     })
                     .build();
 
@@ -244,8 +254,7 @@ public class FarBlue9Auto extends OpMode {
 
             case 4: // Drive back to shoot
                 if (!follower.isBusy()) {
-                    follower.setMaxPower(.7);
-                    robot.hood.set(1, 0);
+                    robot.hood.set(0);
                     follower.followPath(paths.ToShootTwo);
 
                     pathState = 5;
@@ -311,7 +320,6 @@ public class FarBlue9Auto extends OpMode {
 
             case 8: // Drive back to shoot
                 if (!follower.isBusy()) {
-                    follower.setMaxPower(.7);
 //                    robot.turret.setTurretTarget(-172);
                     follower.followPath(paths.ToShootThree);
 

@@ -24,7 +24,7 @@ import org.firstinspires.ftc.teamcode.subsystems.Robot;
 //import org.firstinspires.ftc.teamcode.pedroPathing.Drawing; // Path visualization
 
 
-@Autonomous(name = "Red Auto 12 Gate", group = "Autonomous")
+@Autonomous(name = "BACKUP ONLY - Red Auto 12 Gate", group = "Autonomous")
 @Configurable
 @Config
 public class RedAuto12Gate extends OpMode {
@@ -90,7 +90,7 @@ public class RedAuto12Gate extends OpMode {
 
     @Override
     public void start() {
-        robot.hood.set(.85, .15);
+        robot.hood.set(.15);
         robot.outtake.periodic();
     }
 
@@ -128,7 +128,7 @@ public class RedAuto12Gate extends OpMode {
         switch (pathState) {
 
             case 0: // Go to First Shoot
-                robot.turret.setTurretTarget(125);
+                robot.turret.setTurretTarget(42);
                 robot.shootLow();
                 if (!follower.isBusy()) {
                     robot.gate.closeGate();
@@ -278,11 +278,11 @@ public class RedAuto12Gate extends OpMode {
                         stopCheckTime = System.currentTimeMillis();
                     }
 
-                    robot.hood.set(.85, .15);
+                    robot.hood.set(.15);
 
                     if (System.currentTimeMillis() - stopCheckTime >= 300) {
                         robot.intakeOff();
-                        robot.turret.setTurretTarget(69);
+                        robot.turret.setTurretTarget(21);
 //                        robot.hood.set(1, 0);
                         follower.followPath(paths.ToShoot4);
                         settleStartTime = 0;

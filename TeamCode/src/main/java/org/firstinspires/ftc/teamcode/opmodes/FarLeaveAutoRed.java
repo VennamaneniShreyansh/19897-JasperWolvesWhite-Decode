@@ -16,7 +16,7 @@ import org.firstinspires.ftc.teamcode.helper.Data;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.subsystems.Robot;
 
-@Autonomous(name = "Far Leave Auto Red", group = "Autonomous")
+@Autonomous(name = "BACKUP ONLY - Far Leave Auto Red", group = "Autonomous")
 @Configurable
 public class FarLeaveAutoRed extends OpMode {
 

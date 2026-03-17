@@ -217,6 +217,7 @@ package org.firstinspires.ftc.teamcode.subsystems;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.pedropathing.geometry.Pose;
+import com.pedropathing.math.Vector;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -281,54 +282,137 @@ public class Turret {
     }
     public double getTurretTarget() { return targetDegrees; }
     public void setTurretTarget(double degrees) {
-        targetDegrees = Math.max(-170, Math.min(135, degrees));
+        targetDegrees = Math.max(-145, Math.min(125, degrees));
     }
 
-    public void periodic() {
-        if (!on) {
-            m.setPower(0);
-            return;
-        }
-        if (manual) {
-            m.setPower(manualPower);
-            return;
-        }
-
-        double currentPosition = getTurretDegrees();
-        double reference = getTurretTarget();
-
-        double error = angleErrorDegrees(reference, currentPosition);
-
-        double elapsedTime = timer.seconds();
-        if (elapsedTime <= 0) elapsedTime = 1e-3;
-        double errorChange = error - lastError;
-
-// currentFilterEstimate = (a * previousFilterEstimate) + ((1 - a) * errorChange);
-// previousFilterEstimate = currentFilterEstimate;
+//    public void periodic() {
+//        if (!on) {
+//            m.setPower(0);
+//            return;
+//        }
+//        if (manual) {
+//            m.setPower(manualPower);
+//            return;
+//        }
 //
-// double derivative = currentFilterEstimate / elapsedTime;
-        double derivative = errorChange / elapsedTime;
+//        double currentPosition = getTurretDegrees();
+//        double reference = getTurretTarget();
+//
+//        double error = angleErrorDegrees(reference, currentPosition);
+//
+//        double elapsedTime = timer.seconds();
+//        if (elapsedTime <= 0) elapsedTime = 1e-3;
+//        double errorChange = error - lastError;
+//
+//// currentFilterEstimate = (a * previousFilterEstimate) + ((1 - a) * errorChange);
+//// previousFilterEstimate = currentFilterEstimate;
+////
+//// double derivative = currentFilterEstimate / elapsedTime;
+//        double derivative = errorChange / elapsedTime;
+//
+//        integralSum += error * elapsedTime;
+//        integralSum = Math.max(-maxIntegralSum, Math.min(maxIntegralSum, integralSum));
+//
+//        if (reference != lastReference) {
+//            integralSum = 0;
+//        }
+//
+//        double output = (Kp * error) + (Ki * integralSum) + (Kd * derivative);
+//
+//        if (Math.abs(error) > 1)
+//            output += Math.signum(output) * 0.05;
+//
+//        output*=1;
+//        m.setPower(Math.max(-1, Math.min(1, output)));
+//
+//        Turret.error = error;
+//        lastError = error;
+//        lastReference = reference;
+//        timer.reset();
+//    }
+//public void periodic() {
+//    if (!on) {
+//        m.setPower(0);
+//        return;
+//    }
+//    if (manual) {
+//        m.setPower(manualPower);
+//        return;
+//    }
+//
+//    double currentPosition = getTurretDegrees();
+//    double reference = getTurretTarget();
+//
+//    // Simple, non‑wrapping error
+//    double error = reference - currentPosition;
+//
+//    double elapsedTime = timer.seconds();
+//    if (elapsedTime <= 0) elapsedTime = 1e-3;
+//
+//    double errorChange = error - lastError;
+//    double derivative = errorChange / elapsedTime;
+//
+//    integralSum += error * elapsedTime;
+//    integralSum = Math.max(-maxIntegralSum, Math.min(maxIntegralSum, integralSum));
+//
+//    if (reference != lastReference) {
+//        integralSum = 0;
+//    }
+//
+//    double output = (Kp * error) + (Ki * integralSum) + (Kd * derivative);
+//
+//    if (Math.abs(error) > 1)
+//        output += Math.signum(output) * 0.05;
+//
+//    m.setPower(Math.max(-1, Math.min(1, output)));
+//
+//    Turret.error = error;
+//    lastError = error;
+//    lastReference = reference;
+//    timer.reset();
+//}
 
-        integralSum += error * elapsedTime;
-        integralSum = Math.max(-maxIntegralSum, Math.min(maxIntegralSum, integralSum));
-
-        if (reference != lastReference) {
-            integralSum = 0;
-        }
-
-        double output = (Kp * error) + (Ki * integralSum) + (Kd * derivative);
-
-        if (Math.abs(error) > 1)
-            output += Math.signum(output) * 0.05;
-
-        output*=1;
-        m.setPower(Math.max(-1, Math.min(1, output)));
-
-        Turret.error = error;
-        lastError = error;
-        lastReference = reference;
-        timer.reset();
+public void periodic() {
+    if (!on) {
+        m.setPower(0);
+        return;
     }
+    if (manual) {
+        m.setPower(manualPower);
+        return;
+    }
+
+    double currentPosition = getTurretDegrees();
+    double reference = getTurretTarget();
+
+    double error = angleErrorDegrees(reference, currentPosition);
+
+    double elapsedTime = timer.seconds();
+    if (elapsedTime <= 0) elapsedTime = 1e-3;
+
+    double errorChange = error - lastError;
+    double derivative = errorChange / elapsedTime;
+
+    integralSum += error * elapsedTime;
+    integralSum = Math.max(-maxIntegralSum, Math.min(maxIntegralSum, integralSum));
+
+    if (reference != lastReference) {
+        integralSum = 0;
+    }
+
+    double output = (Kp * error) + (Ki * integralSum) + (Kd * derivative);
+
+    if (Math.abs(error) > 1)
+        output += Math.signum(error) * 0.05;
+
+    m.setPower(Math.max(-0.9, Math.min(0.9, output)));  // Lower power for stability
+
+    Turret.error = error;
+    lastError = error;
+    lastReference = reference;
+    timer.reset();
+}
+
 
     public void automatic() { manual = false; }
     public void on() { on = true; }
@@ -364,6 +448,28 @@ public class Turret {
 
         setYaw(turretYaw);
     }
+// SOTM
+//    public void face(Pose targetPose, Pose robotPose, Vector botVelocity) {  // Add velocity
+//        double dx = targetPose.getX() - robotPose.getX();
+//        double dy = targetPose.getY() - robotPose.getY();
+//
+//        double targetAngle = Math.atan2(dy, dx);
+//        double turretYaw = normalizeAngle(targetAngle - robotPose.getHeading());
+//
+//        double leadK = 0.25;  // Tune: 0.15-0.4s (start 0.25)
+//
+//        double losAngle = targetAngle;
+//        double velPerp = -(botVelocity.getXComponent() * Math.sin(losAngle) - botVelocity.getYComponent() * Math.cos(losAngle));
+//
+//        // Lead angle (radians)
+//        double leadAngle = (velPerp * leadK) / Math.hypot(dx, dy);  // / distance scales properly
+//
+//        turretYaw += leadAngle;
+//        turretYaw = normalizeAngle(turretYaw);
+//
+//        setYaw(turretYaw);
+//    }
+
 
     public void incrementTurretRight() {
         setTurretTarget(targetDegrees -= 20);

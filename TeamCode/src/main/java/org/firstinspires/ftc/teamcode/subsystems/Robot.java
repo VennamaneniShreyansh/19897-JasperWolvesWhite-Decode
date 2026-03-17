@@ -7,7 +7,7 @@ import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
 import org.firstinspires.ftc.teamcode.helper.Data;
 import org.firstinspires.ftc.teamcode.helper.Alliance;
 import org.firstinspires.ftc.teamcode.helper.FieldConstants;
-import org.firstinspires.ftc.teamcode.references.Feeder;
+//import org.firstinspires.ftc.teamcode.references.Feeder;
 import org.firstinspires.ftc.teamcode.subsystems.Gate;
 
 import java.lang.reflect.Field;
@@ -18,7 +18,7 @@ public class Robot {
     public final Intake intake;
     public final Outtake outtake;
     public final Turret turret;
-    public final Feeder feeder;
+//    public final Feeder feeder;
     public final Gate gate;
     public final Hood hood;
     public final GobuildaRGB rgb;
@@ -36,7 +36,7 @@ public class Robot {
         intake = new Intake(hw);
         outtake = new Outtake(hw);
         turret = new Turret(hw);
-        feeder = new Feeder(hw);
+//        feeder = new Feeder(hw);
         gate = new Gate(hw);
         hood = new Hood(hw);
         rgb = new GobuildaRGB(hw);
@@ -61,7 +61,7 @@ public class Robot {
         intake = new Intake(hw);
         outtake = new Outtake(hw);
         turret = new Turret(hw);
-        feeder = new Feeder(hw);
+//        feeder = new Feeder(hw);
         gate = new Gate(hw);
         hood = new Hood(hw);
         rgb = new GobuildaRGB(hw);
@@ -92,31 +92,40 @@ public class Robot {
     }
     public void adjustSpeedAutomatically(double distInches) {
 
-        // RIGHT hood servo (cubic)
-        // y = -0.0000073169 x^3 + 0.00195206 x^2 - 0.17015 x + 5.03082
-        double rightPos =
-                -0.0000073169 * Math.pow(distInches, 3)
-                        + 0.00195206 * distInches * distInches
-                        - 0.17015    * distInches
-                        + 5.03082;
 
-        // SHOOTER RPM (cubic)
-        // y = 0.00238598 x^3 - 0.644182 x^2 + 69.78364 x + 951.13353
-        double rpm =
-                0.00238598 * Math.pow(distInches, 3)
-                        - 0.644182  * distInches * distInches
-                        + 69.78364  * distInches
-                        + 951.13353;
 
-        double leftPos = 1.0 - rightPos;
+        if (drivetrain.isOnBottomHalf()) {
+            double rpm = (13.98917*distInches)+2143.59206;
+            outtake.setTargetRPM(rpm);
+            hood.set(.05);
+        } else {
+            // RIGHT hood servo (cubic)
+            // y = -0.0000073169 x^3 + 0.00195206 x^2 - 0.17015 x + 5.03082
+            double rightPos =
+                    -0.0000073169 * Math.pow(distInches, 3)
+                            + 0.00195206 * distInches * distInches
+                            - 0.17015    * distInches
+                            + 5.03082;
 
-        // Safety clamps
-        rpm = Math.max(0, rpm);
-        leftPos  = Math.max(0.0, Math.min(1.0, leftPos));
-        rightPos = Math.max(0.0, Math.min(1.0, rightPos));
+            // SHOOTER RPM (cubic)
+            // y = 0.00238598 x^3 - 0.644182 x^2 + 69.78364 x + 951.13353
+            double rpm =
+                    0.00238598 * Math.pow(distInches, 3)
+                            - 0.644182  * distInches * distInches
+                            + 69.78364  * distInches
+                            + 951.13353;
 
-        outtake.setTargetRPM(rpm);
-        hood.set(leftPos, rightPos);
+//        double leftPos = 1.0 - rightPos;
+
+            // Safety clamps
+            rpm = Math.max(0, rpm);
+//        leftPos  = Math.max(0.0, Math.min(1.0, leftPos));
+            rightPos = Math.max(0.0, Math.min(1.0, rightPos));
+            outtake.setTargetRPM(rpm);
+            hood.set(rightPos);
+        }
+
+
     }
 
 
@@ -130,6 +139,7 @@ public class Robot {
 
     public void autoAimWithFollower(Pose robotPose) {
         if (shootTarget != null) {
+//            turret.face(shootTarget, robotPose, drivetrain.getCurrentVelocity());
             turret.face(shootTarget, robotPose);
         }
     }
@@ -159,6 +169,7 @@ public class Robot {
         turret.automatic();
     }
     public void autoAim() {
+//        turret.face(shootTarget, drivetrain.getPose(), drivetrain.getCurrentVelocity()); // SOTM
         turret.face(shootTarget, drivetrain.getPose());
     }
     public void stopTurretAim() {turret.setTurretTarget(0);}
