@@ -10,7 +10,7 @@ public class Gate {
     private final Servo servo;
 
     public static double open = 0.0;
-    public static double close = 0.36;
+    public static double close = 0.34;
 
     public Gate(HardwareMap hw) {
         servo = hw.get(Servo.class, "servoGate");

@@ -58,7 +58,7 @@ public class FarRed9Auto extends OpMode {
 
     @Override
     public void start() {
-        robot.hood.set(1, 0);
+        robot.hood.set(0);
         robot.turret.setTurretTarget(-175);
         robot.turret.automatic();
         follower.setMaxPower(.7);
@@ -245,7 +245,7 @@ public class FarRed9Auto extends OpMode {
             case 4: // Drive back to shoot
                 if (!follower.isBusy()) {
                     follower.setMaxPower(.7);
-                    robot.hood.set(1, 0);
+                    robot.hood.set(0);
                     follower.followPath(paths.ToShootTwo);
 
                     pathState = 5;

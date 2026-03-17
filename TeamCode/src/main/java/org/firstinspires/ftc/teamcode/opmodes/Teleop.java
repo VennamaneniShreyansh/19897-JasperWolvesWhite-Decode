@@ -8,7 +8,7 @@ import org.firstinspires.ftc.teamcode.subsystems.Robot;
 import org.firstinspires.ftc.teamcode.helper.Alliance;
 import org.firstinspires.ftc.teamcode.subsystems.Turret;
 
-@TeleOp(name = "Main TeleOp", group = "TeleOp")
+@TeleOp(name = "BACKUP ONLY - Main TeleOp", group = "TeleOp")
 public class Teleop extends OpMode {
 
     private Robot robot;
@@ -157,12 +157,13 @@ public class Teleop extends OpMode {
 
         // Hood
         telemetry.addData("Right Servo Position", robot.hood.getRightPosition());
-        telemetry.addData("Left Servo Position", robot.hood.getLeftPosition());
 
         // Drivetrain Pose
         telemetry.addData("Robot X", robot.getPose().getX());
         telemetry.addData("Robot Y", robot.getPose().getY());
         telemetry.addData("Robot Heading (rad)", robot.getPose().getHeading());
+        assert robot.drivetrain != null;
+        telemetry.addData("Is ON Bottom Half", robot.drivetrain.isOnBottomHalf());
         telemetry.addData("Distance to goal", "%.1f in", robot.getDistanceFromTarget());
         telemetry.update();
     }

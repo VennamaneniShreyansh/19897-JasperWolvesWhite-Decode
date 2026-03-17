@@ -133,17 +133,6 @@ public class SingleTeleop extends OpMode {
         }
 
 
-//        if (gamepad1.ri > .1 && !lastB) robot.gate.toggle();
-//        lastB = gamepad1.b;
-
-//        if (gamepad1.right_trigger > .5 && !lastB) {
-//            gateOpen = !gateOpen;
-//            if (gateOpen) robot.gate.openGate();
-//            else robot.gate.closeGate();
-//        }
-//        lastB = gamepad1.right_trigger > .5;
-
-
         if (gamepad1.right_bumper) {
             robot.gate.openGate();
         } else {
@@ -166,13 +155,6 @@ public class SingleTeleop extends OpMode {
 
         if (gateOpen) robot.rgb.setGreen();
         if (!gateOpen) robot.rgb.setRed();
-
-
-//        if (gamepad1.a) robot.rgb.setRed();
-//        if (gamepad1.b) robot.rgb.setGreen();
-//        if (gamepad1.x) robot.rgb.setBlue();
-//        if (gamepad1.y) robot.rgb.setOff();
-
 
         updateTelemetry();
     }
@@ -199,11 +181,12 @@ public class SingleTeleop extends OpMode {
 
         // Hood
         telemetry.addData("Right Servo Position", robot.hood.getRightPosition());
-        telemetry.addData("Left Servo Position", robot.hood.getLeftPosition());
 
         // Drivetrain Pose
         telemetry.addData("Robot X", robot.getPose().getX());
         telemetry.addData("Robot Y", robot.getPose().getY());
+        telemetry.addData("Is ON Bottom Half", robot.drivetrain.isOnBottomHalf());
+
         telemetry.addData("Robot Heading (rad)", Math.toDegrees(robot.getPose().getHeading()));
         telemetry.addData("Distance to goal", "%.1f in", robot.getDistanceFromTarget());
         telemetry.update();

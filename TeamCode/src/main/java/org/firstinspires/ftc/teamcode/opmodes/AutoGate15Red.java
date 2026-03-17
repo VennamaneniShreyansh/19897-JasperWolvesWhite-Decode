@@ -21,10 +21,10 @@ import org.firstinspires.ftc.teamcode.helper.RapidFire;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.subsystems.Robot;
 
-@Autonomous(name = "Blue Auto RapidFire 15 Gate", group = "Autonomous")
+@Autonomous(name = "Red Auto 15 Gate", group = "Autonomous")
 @Configurable
 @Config
-public class AutoGate15New extends OpMode {
+public class AutoGate15Red extends OpMode {
 
     private TelemetryManager panelsTelemetry;
     public Follower follower;
@@ -69,9 +69,9 @@ public class AutoGate15New extends OpMode {
     public void init() {
         panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();
         follower = Constants.createFollower(hardwareMap);
-        follower.setStartingPose(new Pose(33.75, 135.5, Math.toRadians(180)));
-        robot = new Robot(hardwareMap, Alliance.BLUE, false);
-        paths = new Paths(follower);
+        follower.setStartingPose(new Pose(110.244, 135.220, Math.toRadians(0)));
+        robot = new Robot(hardwareMap, Alliance.RED, false);
+        paths = new Paths(follower, robot);
         threeBallShooter = new RapidFire(robot.intake, robot.outtake);
 
         Data.setAutoPose(follower.getPose());
@@ -83,7 +83,7 @@ public class AutoGate15New extends OpMode {
 
     @Override
     public void start() {
-        robot.hood.set(.9, .1);
+        robot.hood.set(.15);
         robot.outtake.periodic();
     }
 
@@ -96,7 +96,7 @@ public class AutoGate15New extends OpMode {
         Data.setAutoPose(follower.getPose());
 
         pathState = autonomousPathUpdate();
-        robot.shootHigh();
+        robot.outtake.autonLow();
 
         try {
             TelemetryPacket packet = new TelemetryPacket();
@@ -119,7 +119,7 @@ public class AutoGate15New extends OpMode {
         switch (pathState) {
 
             case 0: // Go to First Shoot
-                robot.turret.setTurretTarget(-45);
+                robot.turret.setTurretTarget(42);
                 if (!follower.isBusy()) {
                     robot.gate.openGate();
                     follower.followPath(paths.ToShoot);
@@ -134,7 +134,7 @@ public class AutoGate15New extends OpMode {
                     if (settleStartTime == 0) {
                         settleStartTime = System.currentTimeMillis();
                     }
-                    if (System.currentTimeMillis() - settleStartTime >= 50) {
+                    if (System.currentTimeMillis() - settleStartTime >= 200) {
                         if (shootStartTime == 0) {
                             threeBallShooter.start();
                             shootStartTime = System.currentTimeMillis();
@@ -158,8 +158,8 @@ public class AutoGate15New extends OpMode {
                         stopCheckTime = System.currentTimeMillis();
                     }
                     if (System.currentTimeMillis() - stopCheckTime >= 300) {
-                        robot.intakeOff();
-                        robot.gate.openGate();
+//                        robot.intakeOff();
+//                        robot.gate.openGate();
                         follower.followPath(paths.ToShoot2);
                         pathState = 3;
                         stopCheckTime = 0;
@@ -196,7 +196,7 @@ public class AutoGate15New extends OpMode {
                     if (stopCheckTime == 0) {
                         stopCheckTime = System.currentTimeMillis();
                     }
-                    if (System.currentTimeMillis() - stopCheckTime >= 300) {
+                    if (System.currentTimeMillis() - stopCheckTime >= 400) {
                         robot.intakeIn();
                         follower.setMaxPower(.7);
                         follower.followPath(paths.IntakeFromGate);
@@ -212,9 +212,9 @@ public class AutoGate15New extends OpMode {
                     if (stopCheckTime == 0) {
                         stopCheckTime = System.currentTimeMillis();
                     }
-                    if (System.currentTimeMillis() - stopCheckTime >= 1000) {
-                        robot.intakeOff();
-                        robot.gate.openGate();
+                    if (System.currentTimeMillis() - stopCheckTime >= 1400) {
+//                        robot.intakeOff();
+//                        robot.gate.openGate();
                         follower.setMaxPower(.9);
                         follower.followPath(paths.ToShoot3);
                         pathState = 6;
@@ -252,7 +252,7 @@ public class AutoGate15New extends OpMode {
                     if (stopCheckTime == 0) {
                         stopCheckTime = System.currentTimeMillis();
                     }
-                    if (System.currentTimeMillis() - stopCheckTime >= 300) {
+                    if (System.currentTimeMillis() - stopCheckTime >= 400) {
                         robot.intakeIn();
                         follower.setMaxPower(.9);
                         follower.followPath(paths.IntakeFromGate2);
@@ -268,9 +268,9 @@ public class AutoGate15New extends OpMode {
                     if (stopCheckTime == 0) {
                         stopCheckTime = System.currentTimeMillis();
                     }
-                    if (System.currentTimeMillis() - stopCheckTime >= 1000) {
-                        robot.intakeOff();
-                        robot.gate.openGate();
+                    if (System.currentTimeMillis() - stopCheckTime >= 1400) {
+//                        robot.intakeOff();
+//                        robot.gate.openGate();
                         follower.followPath(paths.ToShoot4);
                         pathState = 9;
                         stopCheckTime = 0;
@@ -294,6 +294,8 @@ public class AutoGate15New extends OpMode {
                             shootStartTime = 0;
                             settleStartTime = 0;
                             robot.intakeIn();
+                            robot.hood.set(.15);
+                            robot.outtake.autonLowEnd();
                             follower.setMaxPower(.9);
                             follower.followPath(paths.IntakeFirstSet);
                             pathState = 10;
@@ -307,10 +309,10 @@ public class AutoGate15New extends OpMode {
                     if (stopCheckTime == 0) {
                         stopCheckTime = System.currentTimeMillis();
                     }
-                    if (System.currentTimeMillis() - stopCheckTime >= 300) {
-                        robot.intakeOff();
-                        robot.turret.setTurretTarget(-26);
-                        robot.gate.openGate();
+                    if (System.currentTimeMillis() - stopCheckTime >= 500) {
+//                        robot.intakeOff();
+                        robot.turret.setTurretTarget(21);
+//                        robot.gate.openGate();
                         follower.followPath(paths.ToShoot5);
                         pathState = 11;
                         stopCheckTime = 0;
@@ -372,116 +374,120 @@ public class AutoGate15New extends OpMode {
         public PathChain IntakeFirstSet;
         public PathChain ToShoot5;
 
-        public Paths(Follower follower) {
+        public Paths(Follower follower, Robot robot) {
             ToShoot = follower.pathBuilder().addPath(
                             new BezierLine(
-                                    new Pose(33.756, 135.220),
+                                    new Pose(110.244, 135.220),
 
-                                    new Pose(56.000, 88.000)
+                                    new Pose(88.000, 88.000)
                             )
-                    ).setConstantHeadingInterpolation(Math.toRadians(180))
+                    ).setConstantHeadingInterpolation(Math.toRadians(0))
 
                     .build();
 
             IntakeSecondSet = follower.pathBuilder().addPath(
                             new BezierCurve(
-                                    new Pose(56.000, 88.000),
-                                    new Pose(48.873, 63.967),
-                                    new Pose(43.498, 58.458),
-                                    new Pose(20.000, 59.848)
+                                    new Pose(88.000, 88.000),
+                                    new Pose(95.127, 63.967),
+                                    new Pose(100.502, 58.458),
+                                    new Pose(124.000, 59.848)
                             )
-                    ).setConstantHeadingInterpolation(Math.toRadians(180))
+                    ).setConstantHeadingInterpolation(Math.toRadians(0))
 
                     .build();
 
             ToShoot2 = follower.pathBuilder().addPath(
                             new BezierLine(
-                                    new Pose(20.000, 59.848),
+                                    new Pose(124.000, 59.848),
 
-                                    new Pose(56.000, 88.000)
+                                    new Pose(88.000, 88.000)
                             )
-                    ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
-
+                    ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
+                    .addParametricCallback(0.5, robot::intakeOff)
+                    .addParametricCallback(0.67, robot.gate::openGate)
                     .build();
 
             OpenGate = follower.pathBuilder().addPath(
                             new BezierCurve(
-                                    new Pose(56.000, 88.000),
-                                    new Pose(38.200, 57.900),
-                                    new Pose(17.500, 65.000)
+                                    new Pose(88.000, 88.000),
+                                    new Pose(105.800, 57.900),
+                                    new Pose(127.542, 61.873)
                             )
-                    ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(157))
+                    ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(23))
                     .addParametricCallback(0.5, () -> follower.setMaxPower(0.5))
                     .build();
 
             IntakeFromGate = follower.pathBuilder().addPath(
                             new BezierLine(
-                                    new Pose(17.500, 65.000),
+                                    new Pose(127.542, 61.873),
 
-                                    new Pose(13.000, 60.000)
+                                    new Pose(132.042, 58.000)
                             )
-                    ).setLinearHeadingInterpolation(Math.toRadians(157), Math.toRadians(120))
+                    ).setLinearHeadingInterpolation(Math.toRadians(23), Math.toRadians(50))
 
                     .build();
 
             ToShoot3 = follower.pathBuilder().addPath(
                             new BezierCurve(
-                                    new Pose(13.000, 60.000),
-                                    new Pose(39.000, 72.600),
-                                    new Pose(56.000, 88.000)
+                                    new Pose(131.000, 61.000),
+                                    new Pose(100.000, 62.500),
+                                    new Pose(88.000, 88.000)
                             )
-                    ).setLinearHeadingInterpolation(Math.toRadians(120), Math.toRadians(180))
-
+                    ).setLinearHeadingInterpolation(Math.toRadians(50), Math.toRadians(0))
+                    .addParametricCallback(0.1, robot::intakeOff)
+                    .addParametricCallback(0.67, robot.gate::openGate)
                     .build();
 
             OpenGate2 = follower.pathBuilder().addPath(
                             new BezierCurve(
-                                    new Pose(56.000, 88.000),
-                                    new Pose(38.200, 57.900),
-                                    new Pose(17.500, 65.000)
+                                    new Pose(88.000, 88.000),
+                                    new Pose(105.800, 57.900),
+                                    new Pose(127.542, 61.873)
                             )
-                    ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(157))
+                    ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(23))
                     .addParametricCallback(0.5, () -> follower.setMaxPower(0.5))
                     .build();
 
             IntakeFromGate2 = follower.pathBuilder().addPath(
                             new BezierLine(
-                                    new Pose(17.500, 65.000),
+                                    new Pose(127.542, 61.873),
 
-                                    new Pose(13.000, 60.000)
+                                    new Pose(132.042, 58.000)
                             )
-                    ).setLinearHeadingInterpolation(Math.toRadians(157), Math.toRadians(130))
+                    ).setLinearHeadingInterpolation(Math.toRadians(23), Math.toRadians(50))
 
                     .build();
 
             ToShoot4 = follower.pathBuilder().addPath(
-                            new BezierLine(
-                                    new Pose(13.000, 60.000),
-
-                                    new Pose(56.000, 88.000)
+                            new BezierCurve(
+                                    new Pose(131.000, 61.000),
+                                    new Pose(100.000, 62.500),
+                                    new Pose(88.000, 88.000)
                             )
-                    ).setLinearHeadingInterpolation(Math.toRadians(130), Math.toRadians(180))
-
+                    ).setLinearHeadingInterpolation(Math.toRadians(50), Math.toRadians(0))
+                    .addParametricCallback(0.5, robot::intakeOff)
+                    .addParametricCallback(0.67, robot.gate::openGate)
                     .build();
 
             IntakeFirstSet = follower.pathBuilder().addPath(
                             new BezierCurve(
-                                    new Pose(56.000, 88.000),
-                                    new Pose(45.684, 83.378),
-                                    new Pose(24.000, 86.000)
+                                    new Pose(88.000, 88.000),
+                                    new Pose(98.316, 83.378),
+                                    new Pose(121.000, 86.000)
                             )
-                    ).setConstantHeadingInterpolation(Math.toRadians(180))
+                    ).setConstantHeadingInterpolation(Math.toRadians(0))
 
                     .build();
 
             ToShoot5 = follower.pathBuilder().addPath(
                             new BezierLine(
-                                    new Pose(24.000, 86.000),
+                                    new Pose(121.000, 86.000),
 
-                                    new Pose(56.000, 110.000)
+                                    new Pose(88.000, 110.000)
                             )
-                    ).setConstantHeadingInterpolation(Math.toRadians(180))
-
+                    ).setConstantHeadingInterpolation(Math.toRadians(0))
+                    .addParametricCallback(0.5, robot::intakeOff)
+                    .addParametricCallback(0.67, robot.gate::openGate)
                     .build();
         }
     }

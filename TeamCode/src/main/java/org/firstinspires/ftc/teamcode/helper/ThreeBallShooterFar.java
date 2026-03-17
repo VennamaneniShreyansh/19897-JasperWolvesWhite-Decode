@@ -32,7 +32,6 @@ public class ThreeBallShooterFar {
         ballsShot = 0;
         stage = 0;
         stageStartTime = System.currentTimeMillis();
-        outtake.shootDoubleHigh(); // Start flywheel
         cycleBool = condition;
     }
 
@@ -80,7 +79,6 @@ public class ThreeBallShooterFar {
                         shootingDone = true;
                         intake.spinOff();
                     } else {
-                        outtake.shootHigh();
                         stage = 1;
                         stageStartTime = now;
                     }
